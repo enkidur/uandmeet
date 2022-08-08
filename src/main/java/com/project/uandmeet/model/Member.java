@@ -55,4 +55,5 @@ public class Member {
     private List<Board> boardList = new ArrayList<>();
 
 
+    //
 }
