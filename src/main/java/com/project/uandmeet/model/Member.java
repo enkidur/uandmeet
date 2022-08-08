@@ -24,6 +24,9 @@ public class Member {
     @Column(nullable = false)
     private String realname;
 
+    @Column(nullable = false)
+    private String socialId;
+
     @Column(nullable = false, unique = true)
     private String nickname;
 
@@ -51,9 +54,11 @@ public class Member {
     @Column
     private Double star;
 
-    @OneToMany(fetch = FetchType.LAZY,mappedBy = "member",cascade = CascadeType.REMOVE)
+    @OneToMany(fetch = FetchType.LAZY,mappedBy = "member",cascade = CascadeType.ALL)
     private List<Board> boardList = new ArrayList<>();
 
+    @OneToMany(fetch = FetchType.LAZY,mappedBy = "member",cascade = CascadeType.ALL)
+    private List<Like> likes = new ArrayList<>();
 
     //
 }

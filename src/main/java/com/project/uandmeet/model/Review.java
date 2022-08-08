@@ -6,6 +6,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
+import java.sql.Timestamp;
 
 @Getter
 @Builder
@@ -33,8 +34,8 @@ public class Review {
     @Column(nullable = false)
     private String message;
 
-    /*
-    * 여기에 별점을 추가할것인지?
-    */
-    //
-}
+    //단일 평가점수
+    private Long evaluation_items;
+
+    private Timestamp created_at;
+ }
