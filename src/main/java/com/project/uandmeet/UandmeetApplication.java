@@ -10,5 +10,4 @@ public class UandmeetApplication {
         SpringApplication.run(UandmeetApplication.class, args);
     }
 
-    String test="테스트";
 }
