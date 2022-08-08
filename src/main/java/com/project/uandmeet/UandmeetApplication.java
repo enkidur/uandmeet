@@ -9,7 +9,4 @@ public class UandmeetApplication {
     public static void main(String[] args) {
         SpringApplication.run(UandmeetApplication.class, args);
     }
-
-    String test="테스트";
-    String test2="테스트2";
 }
