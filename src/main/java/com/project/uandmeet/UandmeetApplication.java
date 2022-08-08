@@ -11,4 +11,5 @@ public class UandmeetApplication {
     }
 
     String test="테스트";
+    String test2="테스트2";
 }
