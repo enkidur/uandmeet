@@ -18,9 +18,11 @@ public class Member {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    //유저 아이디
     @Column(nullable = false, unique = true)
     private String username;
 
+    //실제이름
     @Column(nullable = false)
     private String realname;
 

@@ -46,13 +46,13 @@ public class Board {
     @JoinColumn(name = "category_id")
     private Category category;
 
+    private int viewCount;
+
+    private int likeCount;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "member_id")
     private Member member;
 
-    @OneToMany(mappedBy = "board",fetch = FetchType.LAZY,cascade = CascadeType.ALL)//mappedBy 연관관계의 주인이 아니다(나는 FK가 아니에요) DB에 컬럼 만들지 마세요.
-    private List<Like> likes = new ArrayList<>();
-
-
+    //
 }
