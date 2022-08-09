@@ -1,13 +1,13 @@
 package com.project.uandmeet.model;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import javax.persistence.*;
 import java.util.ArrayList;
 import java.util.List;
 
+@Getter
+@Setter
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
@@ -48,7 +48,7 @@ public class Member {
     private String email;
 
     @Column
-    private String profileImgUrl;
+    private String profile;
 
     @Column
     private String concern;
@@ -60,7 +60,10 @@ public class Member {
     private List<Board> boardList = new ArrayList<>();
 
     @OneToMany(fetch = FetchType.LAZY,mappedBy = "member",cascade = CascadeType.ALL)
-    private List<Like> likes = new ArrayList<>();
+    private List<Like> likeList = new ArrayList<>();
+
+    @OneToMany(fetch = FetchType.LAZY,mappedBy = "member",cascade = CascadeType.ALL)
+    private List<Entry> entryList = new ArrayList<>();
 
     //
 }
