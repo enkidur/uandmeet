@@ -23,4 +23,5 @@ public class FileController {
     //파일 업로드 할때 api 통신을 통해 받아올 객체의 타입은 MultipartFile 입니다.
     //upload 메소드의 두번째 파라미터(static)의 이름에 따라 S3 bucket 내부에 이미지를 담을 해당 이름의 폴더가 생성됩니다
     // 이를 이용해 프로필 이미지는 "profileImg" , 게시물의 이미지는 "boardImg" 라고 명명해도 될것같습니다.
+    //보드 컨트롤러에 내용 포함하면 됩니당 멤버 컨트롤러도!
 }
