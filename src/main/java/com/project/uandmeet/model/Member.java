@@ -1,8 +1,6 @@
 package com.project.uandmeet.model;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import javax.persistence.*;
 import java.util.ArrayList;
@@ -12,6 +10,8 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
+@Getter
+@Setter
 public class Member {
 
     @Id
@@ -54,6 +54,25 @@ public class Member {
     @OneToMany(fetch = FetchType.LAZY,mappedBy = "member",cascade = CascadeType.REMOVE)
     private List<Board> boardList = new ArrayList<>();
 
+    @Column
+    @Enumerated(value = EnumType.STRING) // Enum type을 STring 으로 변화하여 저장
+    private MemberRoleEnum role;
 
-    //
+    private String refreshToken;
+
+    public Member(String nickname, String encodedPassword, String email, String username) {
+        this.nickname = nickname;
+        this.password = encodedPassword;
+        this.email = email;
+        this.username = username;
+    }
+
+    public void updateRefreshToken(String newToken) {
+        this.refreshToken = newToken;
+    }
+
+    public Member(String username, String password){
+        this.username = username;
+        this.password = password;
+    }
 }

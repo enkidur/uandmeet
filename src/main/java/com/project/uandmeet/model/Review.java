@@ -37,4 +37,5 @@ public class Review {
     * 여기에 별점을 추가할것인지?
     */
     //
+
 }
