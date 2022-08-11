@@ -28,7 +28,6 @@ public class ChatMessageRequestDto {
         private String memberNickname;
         private String messageModifiedDate;
         private String messageModifiedTime;
-
         private Long chatRoomId;
         private String message;
     }

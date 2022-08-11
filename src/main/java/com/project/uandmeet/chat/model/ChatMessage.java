@@ -1,6 +1,7 @@
 package com.project.uandmeet.chat.model;
 
 
+import com.project.uandmeet.model.Member;
 import com.project.uandmeet.model.Timestamped;
 import lombok.*;
 

@@ -10,6 +10,10 @@ import com.project.uandmeet.chat.model.Notice;
 import com.project.uandmeet.chat.repository.ChatMessageRepository;
 import com.project.uandmeet.chat.repository.ChatRoomRepository;
 import com.project.uandmeet.chat.repository.NoticeRepository;
+import com.project.uandmeet.exception.CustomException;
+import com.project.uandmeet.exception.ErrorCode;
+import com.project.uandmeet.model.Member;
+import com.project.uandmeet.repository.MemberRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -63,8 +67,8 @@ public class ChatRoomService {
         if(chatRoomExistCheck!=null){
             return ChatRoomResponseDto.ChatRoomData.builder().receiverNickName(chatRoomExistCheck.getReceiver().getNickname())
                     .senderNickName(chatRoomExistCheck.getSender().getNickname())
-                    .receiverProfileImg(chatRoomExistCheck.getReceiver().getProfile_img())
-                    .senderProfileImg(chatRoomExistCheck.getSender().getProfile_img())
+                    .receiverProfileImg(chatRoomExistCheck.getReceiver().getProfileImgUrl())
+                    .senderProfileImg(chatRoomExistCheck.getSender().getProfileImgUrl())
                     .chatRoomId(chatRoomExistCheck.getId())
                     .senderId(create.getSenderId())
                     .build();
@@ -78,16 +82,14 @@ public class ChatRoomService {
         Long chatRoomId = chatRoomRepository.save(chatRoom).getId();
         System.out.println("채팅방 id : " + chatRoomId);
 
-        ChatRoomResponseDto.ChatRoomData chatRoomData = ChatRoomResponseDto.ChatRoomData.builder()
+        return ChatRoomResponseDto.ChatRoomData.builder()
                 .receiverNickName(chatRoom.getReceiver().getNickname())
                 .senderNickName(chatRoom.getSender().getNickname())
-                .receiverProfileImg(chatRoom.getReceiver().getProfile_img())
-                .senderProfileImg(chatRoom.getSender().getProfile_img())
+                .receiverProfileImg(chatRoom.getReceiver().getProfileImgUrl())
+                .senderProfileImg(chatRoom.getSender().getProfileImgUrl())
                 .chatRoomId(chatRoomId)
                 .senderId(create.getSenderId())
                 .build();
-
-        return chatRoomData;
 
     }
 
@@ -114,7 +116,7 @@ public class ChatRoomService {
                     lastChat = chatRoom.getChatMessageList().get(chatRoom.getChatMessageList().size()-1).getMessage();
                     ChatRoomResponseDto.ChatRoomList chatRoomListBuilder = ChatRoomResponseDto.ChatRoomList.builder()
                             .chatRoomId(chatRoom.getId())
-                            .otherProfileImg(chatRoom.getReceiver().getProfile_img())
+                            .otherProfileImg(chatRoom.getReceiver().getProfileImgUrl())
                             .otherNickName(chatRoom.getReceiver().getNickname())
                             .modifiedAt(chatRoom.getModifiedAt())
                             .lastChat(lastChat)
@@ -136,7 +138,7 @@ public class ChatRoomService {
                     lastChat = chatRoom.getChatMessageList().get(chatRoom.getChatMessageList().size()-1).getMessage();
                     ChatRoomResponseDto.ChatRoomList chatRoomListBuilder = ChatRoomResponseDto.ChatRoomList.builder()
                             .chatRoomId(chatRoom.getId())
-                            .otherProfileImg(chatRoom.getSender().getProfile_img())
+                            .otherProfileImg(chatRoom.getSender().getProfileImgUrl())
                             .otherNickName(chatRoom.getSender().getNickname())
                             .modifiedAt(chatRoom.getModifiedAt())
                             .lastChat(lastChat)
@@ -149,7 +151,7 @@ public class ChatRoomService {
         return ChatRoomResponseDto.ChatRoomListData.builder()
                 .result("success")
                 .msg("전체 채팅 리스트 조회 성공")
-                .myImg(member.getProfile_img())
+                .myImg(member.getProfileImgUrl())
                 .myNickname(member.getNickname())
                 .chatRoomList(chatRoomListList)
                 .build();
@@ -208,10 +210,10 @@ public class ChatRoomService {
                 .msg("해당 채팅방 채팅 내용 반환 성공")
                 .resultCount(resultCount)
                 .lastDatetime(lastDateTime)
-                .myProfileImg(me.getProfile_img())
+                .myProfileImg(me.getProfileImgUrl())
                 .myNickname(me.getNickname())
                 .myId(me.getId())
-                .otherProfileImg(another.getProfile_img())
+                .otherProfileImg(another.getProfileImgUrl())
                 .otherNickName(another.getNickname())
                 .otherId(another.getId())
                 .chatMessageDataList(chatMessageDataList)

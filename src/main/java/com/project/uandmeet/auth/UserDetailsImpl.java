@@ -30,6 +30,9 @@ public class UserDetailsImpl implements UserDetails {
 //    public UserDetailsImpl(KakaoMember kakaoMember) {
 //        this.kakaoMember = kakaoMember;
 //    }
+    public Member getMember() {
+        return member;
+    }
 
     // 해당 User 의 권한의 리턴
     @Override

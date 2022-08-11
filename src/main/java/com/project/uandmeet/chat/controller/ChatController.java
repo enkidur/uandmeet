@@ -1,7 +1,5 @@
 package com.project.uandmeet.chat.controller;
 
-
-
 import com.project.uandmeet.chat.dto.ChatMessageRequestDto;
 import com.project.uandmeet.chat.model.ChatMessage;
 import com.project.uandmeet.chat.model.ChatRoom;
@@ -9,11 +7,14 @@ import com.project.uandmeet.chat.model.Notice;
 import com.project.uandmeet.chat.repository.ChatMessageRepository;
 import com.project.uandmeet.chat.repository.ChatRoomRepository;
 import com.project.uandmeet.chat.repository.NoticeRepository;
+import com.project.uandmeet.exception.CustomException;
+import com.project.uandmeet.exception.ErrorCode;
+import com.project.uandmeet.model.Member;
+import com.project.uandmeet.repository.MemberRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.listener.ChannelTopic;
 import org.springframework.messaging.handler.annotation.MessageMapping;
-import org.springframework.messaging.simp.SimpMessageSendingOperations;
 import org.springframework.stereotype.Controller;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -31,7 +32,6 @@ public class ChatController {
     private final ChatMessageRepository chatMessageRepository;
     private final ChatRoomRepository chatRoomRepository;
     private final MemberRepository memberRepository;
-    private final SimpMessageSendingOperations sendingOperations;
     private final NoticeRepository noticeRepository;
 
     // 웹소켓으로 들어오는 메시지 발행 처리 -> 클라이언트에서는 /pub/templates/chat/message로 발행 요청
@@ -129,7 +129,7 @@ public class ChatController {
             noticeRepository.save(notice);
         }
 
-        return "킹준호";
+        return "성공";
     }
 
 }

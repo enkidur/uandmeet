@@ -2,6 +2,7 @@ package com.project.uandmeet.chat.repository;
 
 
 import com.project.uandmeet.chat.model.ChatRoom;
+import com.project.uandmeet.model.Member;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
