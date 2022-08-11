@@ -21,25 +21,25 @@ public class Member {
     @Column(nullable = false, unique = true)
     private String username;
 
-    @Column(nullable = false)
+    @Column
     private String realname;
 
-    @Column(nullable = false, unique = true)
+    @Column(nullable = true, unique = true)
     private String nickname;
 
     @Column(nullable = false)
     private String password;
 
-    @Column(nullable = false)
+    @Column
     private String phone;
 
-    @Column(nullable = false)
+    @Column
     private String birth;
 
-    @Column(nullable = false)
+    @Column
     private String gender;
 
-    @Column(nullable = false, unique = true)
+    @Column(nullable = true, unique = true)
     private String email;
 
     @Column

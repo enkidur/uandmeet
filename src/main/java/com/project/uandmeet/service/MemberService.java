@@ -63,7 +63,7 @@ public class MemberService {
 //            users.setUserProfileImage(profileUrl);
 //        }
 //
-//        userRepository.save(users);
+        memberRepository.save(member);
     }
 
     public void checkDuplicateUsername(String username) {

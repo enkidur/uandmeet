@@ -39,12 +39,12 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter{
                     .addFilter(new JwtAuthorizationFilter(authenticationManager(), memberRepository))// AuthenticatonManager 파라미터 필요
                     // token을 사용하는 형식은 Bearer -> 노출되도 특정 시간 뒤 파기되기 때문에 인증 정보를 그대로 노출하는 것보단 높은 안정성
                     .authorizeRequests()
-//                    .antMatchers("/api/user/**")
-//                    .access("hasRole('ROLE_USER') or hasRole('ROLE_MANAGER') or hasRole('ROLE_ADMIN')")
-//                    .antMatchers("/api/manager/**")
-//                    .access("hasRole('ROLE_MANAGER') or hasRole('ROLE_ADMIN')")
-//                    .antMatchers("/api/admin/**")
-//                    .access("hasRole('ROLE_ADMIN')")
+                    .antMatchers("/api/user/**")
+                    .access("hasRole('ROLE_USER') or hasRole('ROLE_MANAGER') or hasRole('ROLE_ADMIN')")
+                    .antMatchers("/api/manager/**")
+                    .access("hasRole('ROLE_MANAGER') or hasRole('ROLE_ADMIN')")
+                    .antMatchers("/api/admin/**")
+                    .access("hasRole('ROLE_ADMIN')")
                     .anyRequest().permitAll();
         }
 }
