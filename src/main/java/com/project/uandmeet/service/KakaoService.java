@@ -6,6 +6,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.project.uandmeet.auth.UserDetailsImpl;
 import com.project.uandmeet.dto.KakaoUserInfoDto;
 import com.project.uandmeet.model.Member;
+import com.project.uandmeet.model.MemberRoleEnum;
 import com.project.uandmeet.repository.MemberRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpEntity;
@@ -39,63 +40,15 @@ public class KakaoService {
         // 2. 토큰으로 카카오 API 호출
         KakaoUserInfoDto kakaoUserInfo = getKaKaoUserInfo(kakaoToken);
 
-        // DB 에 중복된 Kakao Id 가 있는지 확인
-        String username = kakaoUserInfo.getUsername(); // id = username
-         Member member = memberRepository.findByUsername(username)
-                .orElse(null);
-        if (member == null) {
-            // 회원가입
-            // username: kakao nickname
-            String nickname = kakaoUserInfo.getNickname();
-
-            // password: random UUID
-            String password = UUID.randomUUID().toString();
-            String encodedPassword = passwordEncoder.encode(password);
-
-            // email: kakao email
-            String email = kakaoUserInfo.getEmail();
-            // role: 일반 사용자
-//            MemberRoleEnum role = MemberRoleEnum.USER;
-
-            member = new Member(nickname, encodedPassword, email, username);
-            memberRepository.save(member);
-        }
+        // 필요 시 회원가입
+        Member member = registerKakaoIfNeeded(kakaoUserInfo);
 
         // 4. 강제 로그인 처리
-        UserDetailsImpl userDetails = new UserDetailsImpl(member);
-        Authentication authentication = new UsernamePasswordAuthenticationToken(userDetails, null,userDetails.getAuthorities());
-        SecurityContextHolder.getContext().setAuthentication(authentication);
+        froceLogin(member);
 
     }
-    private KakaoUserInfoDto getKaKaoUserInfo(String kakaoToken) throws JsonProcessingException {
-        // HTTP Header 생성
-        HttpHeaders headers = new HttpHeaders();
-        headers.add("Authorization", "Bearer " + kakaoToken);
-        headers.add("Content-type", "application/x-www-form-urlencoded;charset=utf-8");
 
-        // HTTP 요청 보내기
-        HttpEntity<MultiValueMap<String, String>> kakaoUserInfoRequest = new HttpEntity<>(headers);
-        RestTemplate rt = new RestTemplate(); // RestTemplate 서버 대 서버 요청
-        ResponseEntity<String> response = rt.exchange(
-                "https://kapi.kakao.com/v2/user/me",
-                HttpMethod.POST,
-                kakaoUserInfoRequest,
-                String.class
-        );
 
-        String responseBody = response.getBody();
-        ObjectMapper objectMapper = new ObjectMapper();
-        JsonNode jsonNode = objectMapper.readTree(responseBody);
-        String username = jsonNode.get("username").asText();
-        String nickname = jsonNode.get("properties")
-                .get("nickname").asText();
-        String email = jsonNode.get("kakao_account")
-                .get("email").asText();
-
-        System.out.println("카카오 사용자 정보: " + username + ", " + nickname + ", " + email);
-        KakaoUserInfoDto kakaoUserInfoDto = new KakaoUserInfoDto(username, nickname, email);
-        return kakaoUserInfoDto;
-    }
 
     private String getKakoToken(String code) throws JsonProcessingException {
         // HTTP Header 생성
@@ -105,7 +58,8 @@ public class KakaoService {
         // HTTP Body 생성
         MultiValueMap<String, String> body = new LinkedMultiValueMap<>();
         body.add("grant_type", "authorization_code");
-        body.add("client_id", "본인의 REST API키");
+        // rest Api key
+        body.add("client_id", "5d309e8e3962145e21700ba232a4d3bc");
         body.add("redirect_uri", "http://localhost:8080/user/kakao/callback");
         body.add("code", code);
 
@@ -125,5 +79,67 @@ public class KakaoService {
         ObjectMapper objectMapper = new ObjectMapper();
         JsonNode jsonNode = objectMapper.readTree(responseBody);
         return jsonNode.get("access_token").asText();
+    }
+
+    private KakaoUserInfoDto getKaKaoUserInfo(String kakaoToken) throws JsonProcessingException {
+        // HTTP Header 생성
+        HttpHeaders headers = new HttpHeaders();
+        headers.add("Authorization", "Bearer " + kakaoToken);
+        headers.add("Content-type", "application/x-www-form-urlencoded;charset=utf-8");
+
+        // HTTP 요청 보내기
+        HttpEntity<MultiValueMap<String, String>> kakaoUserInfoRequest = new HttpEntity<>(headers);
+        RestTemplate rt = new RestTemplate(); // RestTemplate 서버 대 서버 요청
+        ResponseEntity<String> response = rt.exchange(
+                // 해당 주소로 token 보내면 사용자 정보 호출
+                "https://kapi.kakao.com/v2/user/me",
+                HttpMethod.POST,
+                kakaoUserInfoRequest,
+                String.class
+        );
+
+        String responseBody = response.getBody();
+        ObjectMapper objectMapper = new ObjectMapper();
+        JsonNode jsonNode = objectMapper.readTree(responseBody);
+        String id = jsonNode.get("username").asText();
+        String nickname = jsonNode.get("properties")
+                .get("nickname").asText();
+        String email = jsonNode.get("kakao_account")
+                .get("email").asText();
+
+        System.out.println("카카오 사용자 정보: " + id + ", " + nickname + ", " + email);
+        KakaoUserInfoDto kakaoUserInfoDto = new KakaoUserInfoDto(id, nickname, email);
+        return kakaoUserInfoDto;
+    }
+
+
+    private Member registerKakaoIfNeeded(KakaoUserInfoDto kakaoUserInfo) {
+        // DB 에 중복된 Kakao Id 가 있는지 확인
+        String id = kakaoUserInfo.getId();
+        Member member = memberRepository.findByUsername(id)
+                .orElse(null);
+        if (member == null) {
+            // 회원가입
+            String nickname = kakaoUserInfo.getNickname();
+
+            // password: random UUID
+            String password = UUID.randomUUID().toString();
+            String encodedPassword = passwordEncoder.encode(password);
+
+            // email: kakao email
+            String email = kakaoUserInfo.getEmail();
+            // role: 일반 사용자
+            MemberRoleEnum role = MemberRoleEnum.USER;
+
+            member = new Member(nickname, encodedPassword, email, id);
+            memberRepository.save(member);
+        }
+        return member;
+    }
+
+    private void froceLogin(Member member) {
+        UserDetailsImpl userDetails = new UserDetailsImpl(member);
+        Authentication authentication = new UsernamePasswordAuthenticationToken(userDetails, null,userDetails.getAuthorities());
+        SecurityContextHolder.getContext().setAuthentication(authentication);
     }
 }

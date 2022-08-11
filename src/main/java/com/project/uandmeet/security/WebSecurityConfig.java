@@ -3,6 +3,7 @@ package com.project.uandmeet.security;
 import com.project.uandmeet.jwt.JwtAuthenticationFilter;
 import com.project.uandmeet.jwt.JwtAuthorizationFilter;
 import com.project.uandmeet.repository.MemberRepository;
+import com.project.uandmeet.service.MemberService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -20,6 +21,9 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter{
     @Autowired
     private CorsConfig corsConfig;
 
+    @Autowired
+    private MemberService memberService;
+
     @Override
     protected void configure(HttpSecurity http) throws Exception {
         // Security Filter에 필터 등록해야한다면 Security Filter만 등록 가능하기 때문에 Security Filter 시작 전 or 후에 등록
@@ -35,16 +39,16 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter{
                     // Header 의 Authorization key value 에 인증 정보(id, pw)를 담아서 요청하는 방식 -> cookie, session 필요 X
                     .httpBasic().disable() // 확장성은 좋지만 암호화가 안되서 보안 취약하기 때문에 https 서버 사용하여 암호화
 
-                    .addFilter(new JwtAuthenticationFilter(authenticationManager())) // AuthenticatonManager 파라미터 필요
+                    .addFilter(new JwtAuthenticationFilter(authenticationManager(),memberService)) // AuthenticatonManager 파라미터 필요
                     .addFilter(new JwtAuthorizationFilter(authenticationManager(), memberRepository))// AuthenticatonManager 파라미터 필요
                     // token을 사용하는 형식은 Bearer -> 노출되도 특정 시간 뒤 파기되기 때문에 인증 정보를 그대로 노출하는 것보단 높은 안정성
                     .authorizeRequests()
-                    .antMatchers("/api/user/**")
-                    .access("hasRole('ROLE_USER') or hasRole('ROLE_MANAGER') or hasRole('ROLE_ADMIN')")
-                    .antMatchers("/api/manager/**")
-                    .access("hasRole('ROLE_MANAGER') or hasRole('ROLE_ADMIN')")
-                    .antMatchers("/api/admin/**")
-                    .access("hasRole('ROLE_ADMIN')")
+//                    .antMatchers("/api/user/**")
+//                    .access("hasRole('ROLE_USER') or hasRole('ROLE_MANAGER') or hasRole('ROLE_ADMIN')")
+//                    .antMatchers("/api/manager/**")
+//                    .access("hasRole('ROLE_MANAGER') or hasRole('ROLE_ADMIN')")
+//                    .antMatchers("/api/admin/**")
+//                    .access("hasRole('ROLE_ADMIN')")
                     .anyRequest().permitAll();
         }
 }

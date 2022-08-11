@@ -21,7 +21,6 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 import java.util.regex.Pattern;
-import java.util.stream.Collectors;
 
 @Transactional
 @RequiredArgsConstructor
@@ -54,7 +53,7 @@ public class MemberService {
         // 비밀번호, 비밀번호 재입력 확인
         checkPassword(password, passwordCheck);
 
-        Member member = requestDto.toEntity();
+        Member member = requestDto.register();
         member.setPassword(passwordEncoder.encode(requestDto.getPassword()));
 
         // 프로필 이미지 추가
@@ -93,7 +92,7 @@ public class MemberService {
 
 
         // 토큰 해독 객체 생성
-        JWTVerifier verifier = JWT.require(Algorithm.HMAC512(JwtProperties.SECRET)).build();
+        JWTVerifier verifier = JWT.require(Algorithm.HMAC512(JwtProperties.SECRET2)).build();
         // 토큰 검증
         DecodedJWT decodedJWT = verifier.verify(refreshToken);
 
@@ -144,11 +143,12 @@ public class MemberService {
                     .withExpiresAt(new Date(now + JwtProperties.REFRESH_EXPIRATION_TIME))
                     .withIssuedAt(new Date(now))
                     .sign(Algorithm.HMAC512(JwtProperties.SECRET2));
-            accessTokenResponseMap.put(JwtProperties.HEADER_REFRESH, newRefreshToken);
+            accessTokenResponseMap.put(JwtProperties.HEADER_REFRESH, JwtProperties.TOKEN_PREFIX+newRefreshToken);
+            // db 에 new refreshToken 저장
             member.updateRefreshToken(newRefreshToken);
         }
 
-        accessTokenResponseMap.put(JwtProperties.HEADER_ACCESS, accessToken);
+        accessTokenResponseMap.put(JwtProperties.HEADER_ACCESS, JwtProperties.TOKEN_PREFIX+accessToken);
         return accessTokenResponseMap;
     }
 

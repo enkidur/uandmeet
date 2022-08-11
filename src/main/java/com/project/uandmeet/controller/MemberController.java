@@ -5,22 +5,29 @@ import com.project.uandmeet.dto.MemberRequestDto;
 import com.project.uandmeet.service.KakaoService;
 import com.project.uandmeet.service.MemberService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
 import java.io.IOException;
 
-@RestController
-@RequestMapping("api/")
+//@RestController
+@Controller
+@RequestMapping
 @RequiredArgsConstructor
 public class MemberController {
 
     private final MemberService memberService;
     private final KakaoService kakaoService;
 
-    @PostMapping("join")
+    @GetMapping("api/join")
+    public String joinpage() {
+        return "join";
+    }
+
+    @PostMapping("api/join")
     public String join(@RequestBody MemberRequestDto requestDto) throws IOException {
         memberService.join(requestDto);
-        return "회원가입완료";
+        return "redirect:/login";
     }
 
     // kakao
@@ -29,7 +36,7 @@ public class MemberController {
     public String kakaoLogin(@RequestParam String code) throws JsonProcessingException {
         // authorizedCode: 카카오 서버로부터 받은 인가 코드
         kakaoService.kakaoLogin(code);
-        return "redirect:/";
+        return "redirect:/login";
     }
 
 }

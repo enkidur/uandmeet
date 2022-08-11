@@ -5,7 +5,6 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import org.springframework.web.multipart.MultipartFile;
 
 @Setter
 @Getter
@@ -17,7 +16,7 @@ public class MemberRequestDto {
     private String passwordCheck;
 //    private MultipartFile userProfileImage;
 
-    public Member toEntity() {
+    public Member register() {
         return new Member(username, password);
     }
 }

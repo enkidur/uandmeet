@@ -10,6 +10,8 @@ import com.auth0.jwt.JWT;
 import com.auth0.jwt.algorithms.Algorithm;
 import com.project.uandmeet.auth.UserDetailsImpl;
 import com.project.uandmeet.dto.LoginRequestDto;
+import com.project.uandmeet.service.MemberService;
+import lombok.AllArgsConstructor;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -25,9 +27,11 @@ import lombok.RequiredArgsConstructor;
 // UsernamePasswordAuthenticationFilter 는 AuthenticationManager 를 통해 login 진행 하기 때문에 AuthenticationManager 파라미터 필요
 
 @RequiredArgsConstructor // final 생성자 자동 생성
+//@AllArgsConstructor
 public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilter{
 
     private final AuthenticationManager authenticationManager;
+    private final MemberService memberService;
 
     // Authentication 객체 만들어서 리턴 => 의존 : AuthenticationManager
     // 인증 요청시에 실행되는 함수 => /login
@@ -118,6 +122,9 @@ public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilte
                 .withExpiresAt(new Date(System.currentTimeMillis() + JwtProperties.REFRESH_EXPIRATION_TIME)) // token 만료 시간 : 현재시간 + 유효시간
                 .withIssuedAt(new Date(System.currentTimeMillis())) // 발급 시간
                 .sign(Algorithm.HMAC512(JwtProperties.SECRET2)); // secret key
+
+        // Refresh Token DB에 저장
+        memberService.updateRefreshToken(userDetailsImpl.getUsername(), refreshToken);
 
         // token 을 Header 에 발급
         // 재발급떼문에 setHeader 사용

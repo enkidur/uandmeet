@@ -33,6 +33,11 @@ dependencies {
 
     implementation group: 'com.auth0', name: 'java-jwt', version: '3.10.2'
 
+    // Thymeleaf (뷰 템플릿 엔진)
+    implementation 'org.springframework.boot:spring-boot-starter-thymeleaf'
+
+    implementation 'org.springframework.boot:spring-boot-starter-oauth2-client'
+
 }
 
 tasks.named('test') {
