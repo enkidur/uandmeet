@@ -28,6 +28,7 @@ public class MemberController {
         return ResponseEntity.ok(memberService.join(requestDto));
     }
 
+
     // 1. 클라이언트에서 로그인한다.
     // 2. 서버는 클라이언트에게 Access Token 과 Refresh Token 을 발급한다. 동시에 Refresh Token 은 서버에 저장된다.
     // 3. 클라이언트는 local 저장소에 두 Token 을 저장한다.
