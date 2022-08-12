@@ -10,11 +10,13 @@ import com.project.uandmeet.jwt.JwtProperties;
 import com.project.uandmeet.model.Member;
 import com.project.uandmeet.repository.MemberRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpHeaders;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.util.Date;
 import java.util.HashMap;
@@ -30,7 +32,7 @@ public class MemberService {
     private final BCryptPasswordEncoder passwordEncoder;
 
     // 회원 가입
-    public void join(MemberRequestDto requestDto) throws IOException {
+    public String join(MemberRequestDto requestDto) throws IOException {
         String username = requestDto.getUsername();
         String password = requestDto.getPassword();
         String passwordCheck = requestDto.getPasswordCheck();
@@ -63,6 +65,7 @@ public class MemberService {
 //        }
 //
         memberRepository.save(member);
+        return "회원가입 완료";
     }
 
     public void checkDuplicateUsername(String username) {
@@ -86,11 +89,17 @@ public class MemberService {
     }
 
 
-    public Map<String, String> refresh(String refreshToken) {
+    public Map<String, String> refresh(HttpServletRequest request, HttpServletResponse response) {
+
+        // refreshToken
+        String authorizationHeader = request.getHeader(HttpHeaders.AUTHORIZATION);
+
+        if (authorizationHeader == null || !authorizationHeader.startsWith(JwtProperties.TOKEN_PREFIX)) {
+            throw new RuntimeException("JWT Token이 존재하지 않습니다.");
+        }
+        String refreshToken = authorizationHeader.substring(JwtProperties.TOKEN_PREFIX.length());
 
         // Refresh Token 유효성 검사
-
-
         // 토큰 해독 객체 생성
         JWTVerifier verifier = JWT.require(Algorithm.HMAC512(JwtProperties.SECRET2)).build();
         // 토큰 검증
@@ -149,7 +158,13 @@ public class MemberService {
         }
 
         accessTokenResponseMap.put(JwtProperties.HEADER_ACCESS, JwtProperties.TOKEN_PREFIX+accessToken);
-        return accessTokenResponseMap;
+        Map<String, String> tokens = accessTokenResponseMap;
+        String test = tokens.get(JwtProperties.HEADER_REFRESH);
+        response.setHeader(JwtProperties.HEADER_ACCESS, tokens.get(JwtProperties.HEADER_ACCESS));
+        if (tokens.get(JwtProperties.HEADER_REFRESH) != null) {
+            response.setHeader(JwtProperties.HEADER_REFRESH, tokens.get(JwtProperties.HEADER_REFRESH));
+        }
+        return tokens;
     }
 
 }

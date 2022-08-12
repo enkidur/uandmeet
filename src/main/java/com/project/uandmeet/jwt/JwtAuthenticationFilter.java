@@ -11,7 +11,6 @@ import com.auth0.jwt.algorithms.Algorithm;
 import com.project.uandmeet.auth.UserDetailsImpl;
 import com.project.uandmeet.dto.LoginRequestDto;
 import com.project.uandmeet.service.MemberService;
-import lombok.AllArgsConstructor;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
