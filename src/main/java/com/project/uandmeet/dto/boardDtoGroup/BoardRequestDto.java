@@ -13,7 +13,7 @@ public class BoardRequestDto {
     private String boardType;
     private String category;
     private String title;
-    private String centent;
+    private String content;
     private String boardimage;
     private String city;
     private String gu;

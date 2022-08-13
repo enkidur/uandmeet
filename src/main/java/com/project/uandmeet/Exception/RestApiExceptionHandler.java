@@ -1,4 +1,4 @@
-package com.project.uandmeet.Exception;
+package com.project.uandmeet.exception;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;

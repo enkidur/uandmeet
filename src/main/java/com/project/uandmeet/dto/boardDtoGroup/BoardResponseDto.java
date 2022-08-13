@@ -34,7 +34,7 @@ public class BoardResponseDto {
         this.gu = board.getGu();
         this.id = board.getId();
         this.createdAt = board.getCreatedAt();
-        this.category = board.getCentent();
+        this.category = board.getContent();
         this.title = board.getTitle();
         this.boardimage = board.getBoardimage();
         this.likeCount = board.getLikeCount();
