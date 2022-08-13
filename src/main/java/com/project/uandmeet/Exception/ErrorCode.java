@@ -1,4 +1,4 @@
-package com.project.uandmeet.Exception;
+package com.project.uandmeet.exception;
 
 import lombok.Getter;
 import org.springframework.http.HttpStatus;
@@ -20,9 +20,8 @@ public enum ErrorCode {
     /* 403 FORBIDDEN : 권한이 없는 사용자 */
     INVALID_AUTHORITY(HttpStatus.FORBIDDEN,"권한이 없는 사용자 입니다"),
     /* 404 NOT_FOUND : Resource 를 찾을 수 없음 */
-    USER_NOT_FOUND(HttpStatus.NOT_FOUND, "해당 유저 정보를 찾을 수 없습니다"),
+    MEMBER_NOT_FOUND(HttpStatus.NOT_FOUND, "해당 유저 정보를 찾을 수 없습니다"),
 
-    ROOM_NOT_FOUND(HttpStatus.NOT_FOUND, "해당 채팅방을 찾을 수 없습니다"),
     AUTH_TOKEN_NOT_FOUND(HttpStatus.UNAUTHORIZED, "로그인이 필요한 서비스입니다"),
     /* 409 CONFLICT : Resource 의 현재 상태와 충돌. 보통 중복된 데이터 존재 */
     DUPLICATE_USERNAME(HttpStatus.CONFLICT, "중복된 사용자명이 존재합니다"),
@@ -36,6 +35,8 @@ public enum ErrorCode {
 
     // 채팅 방에 관한 로직
     CAN_NOT_CREATE_ROOM(HttpStatus.BAD_REQUEST, "채팅 방을 생성할 수 없습니다"),
+    CHATROOM_NOT_FOUND(HttpStatus.NOT_FOUND,"해당 채팅방을 찾을수 없습니다."),
+    CHATMESSAGE_NOT_FOUND(HttpStatus.NOT_FOUND,"해당 채팅 정보를 찾을 수 없습니다."),
     DUPLICATE_CHAT_ROOM(HttpStatus.BAD_REQUEST, "채팅 방이 이미 존재합니다");
 
     private final HttpStatus httpStatus;

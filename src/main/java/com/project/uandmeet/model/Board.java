@@ -22,7 +22,7 @@ public class Board {
     //정보공유 : information,  매칭:matching 둘중 하나.
     private String boardType;
     private String title;
-    private String centent;
+    private String content;
     //좋아요 수
     private Long likeCount;
     //조회 수
@@ -55,9 +55,11 @@ public class Board {
     @JoinColumn(name = "member_id")
     private Member member;
 
+    @Builder.Default
     @OneToMany(fetch = FetchType.LAZY,mappedBy = "board",cascade = CascadeType.ALL)
     private List<Entry> entryList = new ArrayList<>();
 
+    @Builder.Default
     @OneToMany(fetch = FetchType.LAZY,mappedBy = "board",cascade = CascadeType.ALL)
     private List<Like> likeList = new ArrayList<>();
 
@@ -67,7 +69,7 @@ public class Board {
         this.category = category;
         this.boardType = boardRequestDto.getBoardType();
         this.title = boardRequestDto.getTitle();
-        this.centent = boardRequestDto.getCentent();
+        this.content = boardRequestDto.getContent();
         this.boardimage = boardRequestDto.getBoardimage();
         this.city = boardRequestDto.getCity();
         this.gu = boardRequestDto.getGu();

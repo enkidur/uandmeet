@@ -1,18 +1,27 @@
 package com.project.uandmeet.service;
 
-import com.project.uandmeet.Exception.CustomException;
-import com.project.uandmeet.Exception.ErrorCode;
+import com.project.uandmeet.auth.UserDetailsImpl;
 import com.project.uandmeet.dto.MemberDtoGroup.MemberSimpleDto;
+import com.project.uandmeet.dto.SearchResponseDto;
 import com.project.uandmeet.dto.boardDtoGroup.BoardRequestDto;
 import com.project.uandmeet.dto.boardDtoGroup.BoardResponseDto;
+import com.project.uandmeet.exception.CustomException;
+import com.project.uandmeet.exception.ErrorCode;
 import com.project.uandmeet.model.Board;
+import com.project.uandmeet.model.QBoard;
 import com.project.uandmeet.model.Category;
 import com.project.uandmeet.model.Member;
 import com.project.uandmeet.repository.BoardRepository;
 import com.project.uandmeet.repository.CategoryRepository;
 import com.project.uandmeet.repository.EntryRepository;
-import com.project.uandmeet.repository.MemberRepostiory;
+import com.project.uandmeet.repository.MemberRepository;
+import com.querydsl.core.BooleanBuilder;
+import com.querydsl.core.types.dsl.BooleanExpression;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -24,7 +33,7 @@ import java.util.List;
 public class BoardService {
 
     private final BoardRepository boardRepository;
-    private final MemberRepostiory memberRepostiory;
+    private final MemberRepository memberRepostiory;
     private final CategoryRepository categoryRepository;
 
     private final EntryRepository entryRepository;
@@ -58,7 +67,7 @@ public class BoardService {
             for (Board boardTemp : boards) {
                 //작성자 간이 닉네임 생성.
                 MemberSimpleDto memberSimpleDto = new MemberSimpleDto(boardTemp.getMember().getNickname(),
-                        boardTemp.getMember().getUsername(), boardTemp.getMember().getProfile());
+                        boardTemp.getMember().getUsername(), boardTemp.getMember().getProfileImgUrl());
 
                 BoardResponseDto boardResponseDto = new BoardResponseDto(memberSimpleDto,boardTemp);
                 boardResponseDtos.add(boardResponseDto);
@@ -83,7 +92,7 @@ public class BoardService {
         if (boards != null) {
             //작성자 간이 닉네임 생성.
             MemberSimpleDto memberSimpleDto = new MemberSimpleDto(boards.getMember().getNickname(),
-                    boards.getMember().getUsername(), boards.getMember().getProfile());
+                    boards.getMember().getUsername(), boards.getMember().getProfileImgUrl());
 
             boardResponseDto = new BoardResponseDto(memberSimpleDto, boards);
             return boardResponseDto;
@@ -106,6 +115,72 @@ public class BoardService {
         return new CustomException(ErrorCode.COMPLETED_OK);
     }
 
-    //게시물 삭제.
+    //검색
+    public List<SearchResponseDto> queryDslSearch(String sort, String keyword, String city, String gu) {
+
+        if(sort.equals("title")){
+
+            Pageable pageable = PageRequest.of(0, 10, Sort.by("id").descending());
+
+            QBoard qBoard = QBoard.board;
+
+            BooleanBuilder builder = new BooleanBuilder();
+
+            BooleanExpression exTitle = qBoard.title.contains(keyword);
+
+            builder.and(exTitle);
+
+            Page<Board> result = boardRepository.findAll(builder, pageable);
+
+            List<SearchResponseDto> boardList = new ArrayList<>();
+
+            result.stream().forEach(board -> {
+                if(board.getCity().equals(city) && board.getGu().equals(gu)){
+                    String title = board.getTitle();
+                    String content = board.getContent();
+                    SearchResponseDto responseDto = new SearchResponseDto(title, content);
+
+                    boardList.add(responseDto);
+                }
+            });
+            return boardList;
+        }
+
+
+        if (sort.equals("title_Content")) {
+
+            Pageable pageable = PageRequest.of(0, 10, Sort.by("id").descending());
+
+            QBoard qBoard = QBoard.board;
+
+            BooleanBuilder builder = new BooleanBuilder();
+
+            BooleanExpression exTitle = qBoard.title.contains(keyword);
+
+            BooleanExpression exContent = qBoard.content.contains(keyword);
+
+            BooleanExpression exAll = exTitle.or(exContent);
+
+            builder.and(exAll);
+
+            Page<Board> result = boardRepository.findAll(builder, pageable);
+
+            List<SearchResponseDto> boardList = new ArrayList<>();
+
+            result.stream().forEach(board -> {
+                if(board.getCity().equals(city) && board.getGu().equals(gu)) {
+                    String title = board.getTitle();
+                    String content = board.getContent();
+                    SearchResponseDto responseDto = new SearchResponseDto(title, content);
+
+                    boardList.add(responseDto);
+                }
+            });
+
+            return boardList;
+        }
+
+        return null;
+    }
 
 }
