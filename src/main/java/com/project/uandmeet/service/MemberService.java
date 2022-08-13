@@ -10,18 +10,19 @@ import com.project.uandmeet.jwt.JwtProperties;
 import com.project.uandmeet.model.Member;
 import com.project.uandmeet.repository.MemberRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpHeaders;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 import java.util.regex.Pattern;
-import java.util.stream.Collectors;
 
 @Transactional
 @RequiredArgsConstructor
@@ -31,7 +32,7 @@ public class MemberService {
     private final BCryptPasswordEncoder passwordEncoder;
 
     // 회원 가입
-    public void join(MemberRequestDto requestDto) throws IOException {
+    public String join(MemberRequestDto requestDto) throws IOException {
         String username = requestDto.getUsername();
         String password = requestDto.getPassword();
         String passwordCheck = requestDto.getPasswordCheck();
@@ -54,7 +55,7 @@ public class MemberService {
         // 비밀번호, 비밀번호 재입력 확인
         checkPassword(password, passwordCheck);
 
-        Member member = requestDto.toEntity();
+        Member member = requestDto.register();
         member.setPassword(passwordEncoder.encode(requestDto.getPassword()));
 
         // 프로필 이미지 추가
@@ -63,7 +64,8 @@ public class MemberService {
 //            users.setUserProfileImage(profileUrl);
 //        }
 //
-//        userRepository.save(users);
+        memberRepository.save(member);
+        return "회원가입 완료";
     }
 
     public void checkDuplicateUsername(String username) {
@@ -87,13 +89,19 @@ public class MemberService {
     }
 
 
-    public Map<String, String> refresh(String refreshToken) {
+    public Map<String, String> refresh(HttpServletRequest request, HttpServletResponse response) {
+
+        // refreshToken
+        String authorizationHeader = request.getHeader(HttpHeaders.AUTHORIZATION);
+
+        if (authorizationHeader == null || !authorizationHeader.startsWith(JwtProperties.TOKEN_PREFIX)) {
+            throw new RuntimeException("JWT Token이 존재하지 않습니다.");
+        }
+        String refreshToken = authorizationHeader.substring(JwtProperties.TOKEN_PREFIX.length());
 
         // Refresh Token 유효성 검사
-
-
         // 토큰 해독 객체 생성
-        JWTVerifier verifier = JWT.require(Algorithm.HMAC512(JwtProperties.SECRET)).build();
+        JWTVerifier verifier = JWT.require(Algorithm.HMAC512(JwtProperties.SECRET2)).build();
         // 토큰 검증
         DecodedJWT decodedJWT = verifier.verify(refreshToken);
 
@@ -144,12 +152,19 @@ public class MemberService {
                     .withExpiresAt(new Date(now + JwtProperties.REFRESH_EXPIRATION_TIME))
                     .withIssuedAt(new Date(now))
                     .sign(Algorithm.HMAC512(JwtProperties.SECRET2));
-            accessTokenResponseMap.put(JwtProperties.HEADER_REFRESH, newRefreshToken);
+            accessTokenResponseMap.put(JwtProperties.HEADER_REFRESH, JwtProperties.TOKEN_PREFIX+newRefreshToken);
+            // db 에 new refreshToken 저장
             member.updateRefreshToken(newRefreshToken);
         }
 
-        accessTokenResponseMap.put(JwtProperties.HEADER_ACCESS, accessToken);
-        return accessTokenResponseMap;
+        accessTokenResponseMap.put(JwtProperties.HEADER_ACCESS, JwtProperties.TOKEN_PREFIX+accessToken);
+        Map<String, String> tokens = accessTokenResponseMap;
+        String test = tokens.get(JwtProperties.HEADER_REFRESH);
+        response.setHeader(JwtProperties.HEADER_ACCESS, tokens.get(JwtProperties.HEADER_ACCESS));
+        if (tokens.get(JwtProperties.HEADER_REFRESH) != null) {
+            response.setHeader(JwtProperties.HEADER_REFRESH, tokens.get(JwtProperties.HEADER_REFRESH));
+        }
+        return tokens;
     }
 
 }

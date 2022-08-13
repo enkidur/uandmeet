@@ -2,11 +2,11 @@ package com.project.uandmeet.auth;
 
 import com.project.uandmeet.model.Member;
 import com.project.uandmeet.repository.MemberRepository;
-import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
+import lombok.RequiredArgsConstructor;
 
 // security 설정에서 loginProcessingUrl("/login") 때문에
 // login 요청이 오면 자동으로 UserDetailsService 타입으로 IoC 되어 있는 PrincipalDetailsService 의 loadUserByUsername 함수가 실행
@@ -14,7 +14,7 @@ import org.springframework.stereotype.Service;
 // => 이럴 경우 JwtAuthenticationFilter 를 만들어 직접 구동
 @Service // @Service 를 통해 PrincipalDetailsService 가 Ioc 에 등록
 @RequiredArgsConstructor // final 생성자 자동 생성
-public class UserDetailsServiceImpl implements UserDetailsService {
+public class UserDetailsServiceImpl implements UserDetailsService{
 
     private final MemberRepository memberRepository;
 

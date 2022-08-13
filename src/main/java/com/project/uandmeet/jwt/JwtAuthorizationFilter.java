@@ -35,7 +35,7 @@ public class JwtAuthorizationFilter extends BasicAuthenticationFilter{
             throws IOException, ServletException {
         String header = request.getHeader(JwtProperties.HEADER_ACCESS);
         // 로그인, 리프레시 요청이라면 토큰 검사하지 않음
-        if (request.getServletPath().equals("/api/login") || request.getServletPath().equals("/api/refresh")) {
+        if (request.getServletPath().equals("/login") || request.getServletPath().equals("/refresh")) {
             chain.doFilter(request, response);
         }
 

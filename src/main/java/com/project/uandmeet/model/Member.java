@@ -22,25 +22,25 @@ public class Member {
     @Column(nullable = false, unique = true)
     private String username;
 
-    @Column(nullable = false)
+    @Column
     private String realname;
 
-    @Column(nullable = false, unique = true)
+    @Column(nullable = true, unique = true)
     private String nickname;
 
     @Column(nullable = false)
     private String password;
 
-    @Column(nullable = false)
+    @Column
     private String phone;
 
-    @Column(nullable = false)
+    @Column
     private String birth;
 
-    @Column(nullable = false)
+    @Column
     private String gender;
 
-    @Column(nullable = false, unique = true)
+    @Column(nullable = true, unique = true)
     private String email;
 
     @Column(nullable = false)
@@ -65,12 +65,29 @@ public class Member {
 
     private String refreshToken;
 
+    // kakaoUser
+    // 일반 사용자가 로그인할 때 비워두기 위해 nullable = true,해당 아이디로 중복 가입이 되지않게 unique = true
+    @Column(nullable = true, unique = true)
+    private String kakoId;
+
+    // 일반 사용자
     public Member(String nickname, String encodedPassword, String email, String username) {
         this.nickname = nickname;
         this.password = encodedPassword;
         this.email = email;
         this.username = username;
+        this.kakoId = null;
     }
+
+    // kakaoUser
+    public Member(String nickname, String encodedPassword, String email, String username, String KakaoId) {
+        this.nickname = nickname;
+        this.password = encodedPassword;
+        this.email = email;
+        this.username = username;
+        this.kakoId = KakaoId;
+    }
+
 
     public void updateRefreshToken(String newToken) {
         this.refreshToken = newToken;

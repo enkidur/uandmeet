@@ -13,6 +13,8 @@ public class UandmeetApplication {
         return new BCryptPasswordEncoder();
     }
 
+
+
     public static void main(String[] args) {
         SpringApplication.run(UandmeetApplication.class, args);
     }
