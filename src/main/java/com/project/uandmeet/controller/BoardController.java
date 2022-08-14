@@ -50,7 +50,6 @@ public class BoardController {
             throw new CustomException(ErrorCode.CAN_NOT_CREATE_ROOM);
         } else
             return boardChoiceInquiry;
-
     }
 
     //게시물 삭제.
@@ -59,7 +58,9 @@ public class BoardController {
                                      @AuthenticationPrincipal UserDetailsImpl userDetails){
 
         return  boardService.boardDel(id,userDetails);
+
     }
+
 
     //게시물 검색
     @GetMapping("/board/search")

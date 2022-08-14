@@ -6,7 +6,7 @@ import com.auth0.jwt.algorithms.Algorithm;
 import com.auth0.jwt.exceptions.JWTVerificationException;
 import com.auth0.jwt.interfaces.DecodedJWT;
 import com.project.uandmeet.dto.MemberRequestDto;
-import com.project.uandmeet.jwt.JwtProperties;
+import com.project.uandmeet.chat.jwt.JwtProperties;
 import com.project.uandmeet.model.Member;
 import com.project.uandmeet.repository.MemberRepository;
 import lombok.RequiredArgsConstructor;

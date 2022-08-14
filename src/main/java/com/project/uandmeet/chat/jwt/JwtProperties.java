@@ -1,4 +1,4 @@
-package com.project.uandmeet.jwt;
+package com.project.uandmeet.chat.jwt;
 
 public interface JwtProperties {
     // 편의상

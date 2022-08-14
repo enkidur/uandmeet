@@ -29,18 +29,14 @@ public class Board {
     private Long viewCount;
     //댓글 수
     private Long commentCount;
-
     private LocalDateTime createdAt;
-
     private LocalDateTime modifiedAt;
-
     private String city;
     private String gu;
     //경도
     private double lat;
     //위도
     private double lng;
-
     private String boardimage;
 
     private Long maxEntry;
@@ -76,6 +72,5 @@ public class Board {
         this.lat = boardRequestDto.getLat();
         this.lng = boardRequestDto.getLng();
     }
-
 
 }

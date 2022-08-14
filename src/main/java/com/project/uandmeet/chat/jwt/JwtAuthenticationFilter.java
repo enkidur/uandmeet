@@ -1,4 +1,4 @@
-package com.project.uandmeet.jwt;
+package com.project.uandmeet.chat.jwt;
 
 import java.io.IOException;
 import java.util.Date;

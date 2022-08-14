@@ -42,11 +42,13 @@ public class BoardService {
     @Transactional
     public CustomException boardNew(BoardRequestDto boardRequestDto, UserDetailsImpl userDetails) {
         //로그인 유저 정보.
+        System.out.println(userDetails.getMember().getId());
         Member memberTemp = memberRepostiory.findById(userDetails.getMember().getId())
                 .orElseThrow(()->new CustomException(ErrorCode.EMPTY_CONTENT));
 
         Category category = categoryRepository.findByCategory(boardRequestDto.getCategory())
-              .orElseThrow(()->new CustomException(ErrorCode.EMPTY_CONTENT));
+                .orElseThrow(()->new CustomException(ErrorCode.EMPTY_CONTENT));
+
 
         Board board = new Board(memberTemp,category, boardRequestDto);
         boardRepository.save(board);
@@ -106,14 +108,18 @@ public class BoardService {
         Member MemberTemp = memberRepostiory.findById(userDetails.getMember().getId())
                 .orElseThrow(()->new CustomException(ErrorCode.EMPTY_CONTENT));
 
+        boardRepository.deleteById(id);
         //1. Entry 지우기
-        entryRepository.deleteAllByidQuery(id);
         //like 지우기
 
 
 
         return new CustomException(ErrorCode.COMPLETED_OK);
     }
+
+    //게시물 삭제.
+
+
 
     //검색
     public List<SearchResponseDto> queryDslSearch(String sort, String keyword, String city, String gu) {
