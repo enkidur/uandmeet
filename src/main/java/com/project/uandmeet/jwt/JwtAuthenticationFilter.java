@@ -63,7 +63,7 @@ public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilte
         // 해당 token 은 db 내용과 일치하는지 확인을 위한 인증 token
         UsernamePasswordAuthenticationToken authenticationToken =
                 new UsernamePasswordAuthenticationToken(
-                        loginRequestDto.getUsername(),
+                        loginRequestDto.getEmail(),
                         loginRequestDto.getPassword());
 
         System.out.println("JwtAuthenticationFilter : 토큰생성완료");
@@ -87,7 +87,7 @@ public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilte
                 authenticationManager.authenticate(authenticationToken);
 
         UserDetailsImpl userDetailsImpl = (UserDetailsImpl) authentication.getPrincipal();
-        System.out.println("Authentication : "+userDetailsImpl.getMember().getUsername());
+        System.out.println("Authentication : "+userDetailsImpl.getMember().getEmail());
 
         // 3. PrincipalDetails 에 session 을 담음 (권한 관리를 위해 Session에 담음)
         // 굳이 Jwt 를 사용하면서 session 을 만들 필요 없지만, 권한 처리를 위해
@@ -110,20 +110,21 @@ public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilte
 
         // Hash 방식
         String accessToken = JWT.create()
-                .withSubject(userDetailsImpl.getUsername())
+                .withSubject(userDetailsImpl.getEmail())
                 .withExpiresAt(new Date(System.currentTimeMillis()+JwtProperties.ACCESS_EXPIRATION_TIME))
                 .withClaim("id", userDetailsImpl.getMember().getId())
                 .withClaim("username", userDetailsImpl.getMember().getUsername())
+                .withClaim("email", userDetailsImpl.getMember().getEmail())
                 .sign(Algorithm.HMAC512(JwtProperties.SECRET));
 
         String refreshToken = JWT.create()
-                .withSubject(userDetailsImpl.getUsername()) // token 이름
+                .withSubject(userDetailsImpl.getEmail()) // token 이름
                 .withExpiresAt(new Date(System.currentTimeMillis() + JwtProperties.REFRESH_EXPIRATION_TIME)) // token 만료 시간 : 현재시간 + 유효시간
                 .withIssuedAt(new Date(System.currentTimeMillis())) // 발급 시간
                 .sign(Algorithm.HMAC512(JwtProperties.SECRET2)); // secret key
 
         // Refresh Token DB에 저장
-        memberService.updateRefreshToken(userDetailsImpl.getUsername(), refreshToken);
+        memberService.updateRefreshToken(userDetailsImpl.getEmail(), refreshToken);
 
         // token 을 Header 에 발급
         // 재발급떼문에 setHeader 사용

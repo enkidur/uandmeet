@@ -33,24 +33,39 @@ public class MemberService {
 
     // 회원 가입
     public String join(MemberRequestDto requestDto) throws IOException {
-        String username = requestDto.getUsername();
+        String email = requestDto.getEmail();
+        String[] emailadress = email.split("@");
+        String id = emailadress[0];
+        String host = emailadress[1];
         String password = requestDto.getPassword();
         String passwordCheck = requestDto.getPasswordCheck();
-        String pattern = "^[a-zA-Z0-9]*$";
+//        String pattern = "^[a-zA-Z0-9]*$";
+        String pattern = "^[a-zA-Z0-9_!#$%&'\\*+/=?{|}~^.-]+@[a-zA-Z0-9.-]+.[a-zA-Z0-9.-]*$";
+        String idpattern = "^[a-zA-Z0-9_!#$%&'\\*+/=?{|}~^.-]*$";
+        String hostpattern ="^[a-zA-Z0-9.-]*$";
+        // email 조건
+        // ID 영문 대소문자, 숫자, _!#$%&'\*+/=?{|}~^.- 특문허용
+        // Host 시작전 @, 영문 대소문자, 숫자, .-특문허용
+
+
 
         // 회원가입 조건
-        if (username.length() < 3) {
-            throw new IllegalArgumentException("닉네임을 3자 이상 입력하세요");
-        } else if (!Pattern.matches(pattern, username)) {
-            throw new IllegalArgumentException("알파벳 대소문자와 숫자로만 입력하세요");
+        if (email.length() < 10) {
+            throw new IllegalArgumentException("이메일을 10자 이상 입력하세요");
+        } else if (!Pattern.matches(pattern, email)) {
+            throw new IllegalArgumentException("이메일 규격에 맞게 입력하세요");
+        } else if (!Pattern.matches(idpattern, id)) {
+            throw new IllegalArgumentException("id에 알파벳 대소문자와 숫자, , 특수기호( _!#$%&'\\*+/=?{|}~^.-)로만 입력하세요");
+        } else if (!Pattern.matches(hostpattern, host)) {
+            throw new IllegalArgumentException("host에 알파벳 대소문자와 숫자, 특수기호(.-)로만 입력하세요");
         } else if (password.length() < 3) {
             throw new IllegalArgumentException("비밀번호를 3자 이상 입력하세요");
-        } else if (password.contains(username)) {
-            throw new IllegalArgumentException("비밀번호에 닉네임을 포함할 수 없습니다.");
+        } else if (password.contains(id)) {
+            throw new IllegalArgumentException("비밀번호에 id를 포함할 수 없습니다.");
         }
 
-        // username 중복 확인
-        checkDuplicateUsername(username);
+        // email 중복 확인
+        checkDuplicateUseremail(email);
 
         // 비밀번호, 비밀번호 재입력 확인
         checkPassword(password, passwordCheck);
@@ -68,8 +83,8 @@ public class MemberService {
         return "회원가입 완료";
     }
 
-    public void checkDuplicateUsername(String username) {
-        Optional<Member> users = memberRepository.findByUsername(username);
+    public void checkDuplicateUseremail(String email) {
+        Optional<Member> users = memberRepository.findByEmail(email);
         if (users.isPresent()) {
             throw new IllegalArgumentException("이미 존재하는 계정입니다.");
         }
@@ -81,10 +96,16 @@ public class MemberService {
         }
     }
 
+//    @Transactional(readOnly = true)
+//    public Member findMember(String username) {
+//        Member member = memberRepository.findByUsername(username).get();
+//        return member;
+//    }
+
     // TOKEN
 
-    public void updateRefreshToken(String username, String refreshToken) {
-        Member member = memberRepository.findByUsername(username).orElseThrow(() -> new RuntimeException("사용자를 찾을 수 없습니다."));
+    public void updateRefreshToken(String email, String refreshToken) {
+        Member member = memberRepository.findByEmail(email).orElseThrow(() -> new RuntimeException("사용자를 찾을 수 없습니다."));
         member.updateRefreshToken(refreshToken);
     }
 
@@ -120,8 +141,10 @@ public class MemberService {
 
         // Access Token 재발급
         long now = System.currentTimeMillis();
-        String username = decodedJWT.getSubject();
-        Member member = memberRepository.findByUsername(username)
+//        String username = decodedJWT.getSubject();
+        String email = decodedJWT.getClaim("email").asString();
+        System.out.println(email);
+        Member member = memberRepository.findByEmail(email)
                 .orElseThrow(() -> new UsernameNotFoundException("사용자를 찾을 수 없습니다."));
         if (!member.getRefreshToken().equals(refreshToken)) {
             throw new JWTVerificationException("유효하지 않은 Refresh Token 입니다.");
@@ -131,6 +154,7 @@ public class MemberService {
                 .withExpiresAt(new Date(now + JwtProperties.ACCESS_EXPIRATION_TIME))
                 .withClaim("id", member.getId())
                 .withClaim("username", member.getUsername())
+                .withClaim("email", member.getEmail())
                 // map 은 스트림 내 요소들을 하나씩 특정 값으로 변환
                 // Role 을 name 으로 매핑 (Role 의 name 을 꺼내옴)
 //                .withClaim("roles", member.getRoles().stream().map(Role::getName)
@@ -146,7 +170,7 @@ public class MemberService {
         long refreshExpireTime = decodedJWT.getClaim("exp").asLong() * 1000;
         long diffDays = (refreshExpireTime - now) / 1000 / (24 * 3600);
         long diffMin = (refreshExpireTime - now) / 1000 / 60;
-        if (diffMin < 5) { // refresh token 만료시간이 5분 보다 작으면 재발급
+        if (diffDays < 1) { // refresh token 만료시간이 n분, 일 보다 작으면 재발급
             String newRefreshToken = JWT.create()
                     .withSubject(member.getUsername())
                     .withExpiresAt(new Date(now + JwtProperties.REFRESH_EXPIRATION_TIME))

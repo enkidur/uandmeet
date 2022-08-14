@@ -59,10 +59,9 @@ public class KakaoService {
         MultiValueMap<String, String> body = new LinkedMultiValueMap<>();
         body.add("grant_type", "authorization_code");
         // rest Api key
-        body.add("client_id", "5d309e8e3962145e21700ba232a4d3bc");
-        body.add("redirect_uri", "http://localhost:8080/user/kakao/callback");
+        body.add("client_id", "77c5975ead488c768a11d49f9320425c");
+        body.add("redirect_uri", "http://localhost:3000/api/kakaoLogin");
         body.add("code", code);
-
         // HTTP 요청 보내기
         HttpEntity<MultiValueMap<String, String>> kakaoTokenRequest =
                 new HttpEntity<>(body, headers);
@@ -98,48 +97,58 @@ public class KakaoService {
                 String.class
         );
 
+
         String responseBody = response.getBody();
         ObjectMapper objectMapper = new ObjectMapper();
         JsonNode jsonNode = objectMapper.readTree(responseBody);
-        String id = jsonNode.get("username").asText();
+//        String id = jsonNode.get("username").asText();
         String nickname = jsonNode.get("properties")
                 .get("nickname").asText();
         String email = jsonNode.get("kakao_account")
                 .get("email").asText();
 
-        System.out.println("카카오 사용자 정보: " + id + ", " + nickname + ", " + email);
-        KakaoUserInfoDto kakaoUserInfoDto = new KakaoUserInfoDto(id, nickname, email);
+        System.out.println("카카오 사용자 정보: "  + nickname + ", " + email);
+        KakaoUserInfoDto kakaoUserInfoDto = new KakaoUserInfoDto(nickname, email);
         return kakaoUserInfoDto;
     }
 
 
     private Member registerKakaoIfNeeded(KakaoUserInfoDto kakaoUserInfo) {
         // DB 에 중복된 Kakao Id 가 있는지 확인
-        String id = kakaoUserInfo.getId();
-        Member member = memberRepository.findByUsername(id)
+//        String id = kakaoUserInfo.getId();
+        String username = kakaoUserInfo.getNickname();
+        String email = kakaoUserInfo.getEmail();
+        System.out.println("email 확인 :"+email);
+        Member member = memberRepository.findByEmail(email)
                 .orElse(null);
         if (member == null) {
             // 회원가입
-            String nickname = kakaoUserInfo.getNickname();
+//            String nickname = kakaoUserInfo.getNickname();
 
             // password: random UUID
             String password = UUID.randomUUID().toString();
             String encodedPassword = passwordEncoder.encode(password);
 
             // email: kakao email
-            String email = kakaoUserInfo.getEmail();
+//            String email = kakaoUserInfo.getEmail();
             // role: 일반 사용자
             MemberRoleEnum role = MemberRoleEnum.USER;
 
-            member = new Member(nickname, encodedPassword, email, id);
+            member = new Member(username, encodedPassword, email);
             memberRepository.save(member);
+            System.out.println(member);
+            System.out.println("kakaojoin 완료");
         }
         return member;
     }
 
     private void froceLogin(Member member) {
+        System.out.println("login 중");
         UserDetailsImpl userDetails = new UserDetailsImpl(member);
-        Authentication authentication = new UsernamePasswordAuthenticationToken(userDetails, null,userDetails.getAuthorities());
+        Authentication authentication = new UsernamePasswordAuthenticationToken(userDetails, null
+//                ,userDetails.getAuthorities()
+        );
         SecurityContextHolder.getContext().setAuthentication(authentication);
+        System.out.println("login 완료");
     }
 }

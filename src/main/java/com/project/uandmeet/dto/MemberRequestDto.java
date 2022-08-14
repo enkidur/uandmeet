@@ -11,12 +11,12 @@ import lombok.Setter;
 @NoArgsConstructor
 @AllArgsConstructor
 public class MemberRequestDto {
-    private String username;
+    private String email;
     private String password;
     private String passwordCheck;
 //    private MultipartFile userProfileImage;
 
     public Member register() {
-        return new Member(username, password);
+        return new Member(email, password);
     }
 }

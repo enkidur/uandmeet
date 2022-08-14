@@ -8,8 +8,8 @@ import lombok.Getter;
         private String nickname;
         private String email;
 
-        public KakaoUserInfoDto(String  id, String nickname, String email) {
-            this.id = id;
+        public KakaoUserInfoDto( String nickname, String email) {
+
             this.nickname = nickname;
             this.email =email;
         }

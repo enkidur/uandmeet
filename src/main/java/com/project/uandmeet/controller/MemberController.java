@@ -1,13 +1,24 @@
 package com.project.uandmeet.controller;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.project.uandmeet.dto.KakaoUserInfoDto;
 import com.project.uandmeet.dto.MemberRequestDto;
 import com.project.uandmeet.service.KakaoService;
 import com.project.uandmeet.service.MemberService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.MultiValueMap;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.client.RestTemplate;
+
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
@@ -27,6 +38,12 @@ public class MemberController {
     public ResponseEntity<String> join(@RequestBody MemberRequestDto requestDto) throws IOException {
         return ResponseEntity.ok(memberService.join(requestDto));
     }
+
+    @GetMapping("/api/loginFrom")
+    public String loginFrom() {
+        return "index.html";
+    }
+
 
 
     // 1. 클라이언트에서 로그인한다.
@@ -57,11 +74,11 @@ public class MemberController {
 
     // kakao
 
-    @GetMapping("/user/kakao/callback")
+    @GetMapping("/api/kakaoLogin")
     public ResponseEntity<String> kakaoLogin(@RequestParam String code) throws JsonProcessingException {
         // authorizedCode: 카카오 서버로부터 받은 인가 코드
         kakaoService.kakaoLogin(code);
-        return  ResponseEntity.ok("redirect:/login");
+        return  ResponseEntity.ok("login");
     }
 
 }

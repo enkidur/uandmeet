@@ -61,6 +61,8 @@ public class UserDetailsImpl implements UserDetails {
         return member.getUsername();
     }
 
+    public String getEmail() { return member.getEmail();}
+
     // 계정이 만료되었는지 않았는지(ture : 만료 X, false : 만료)
     @Override
     public boolean isAccountNonExpired() {

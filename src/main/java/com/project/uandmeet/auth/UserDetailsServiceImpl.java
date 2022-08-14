@@ -21,11 +21,11 @@ public class UserDetailsServiceImpl implements UserDetailsService{
     // Security Session => Authentication type => UserDetails type
     // 함수가 실행되면서 fornt 에서 username 파마미터를 가지고 옴
     @Override
-    public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
+    public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
         // front 에서 받아온 username 파라미터와 String username 의 이름 동일
         // 다를 시, 이름을 통일 시켜 주거나 fornt 파마미터를 securityConfig 의  configure에 .usernameParameter("")로 등록
         System.out.println("PrincipalDetailsService : 진입");
-        Member member = memberRepository.findByUsername(username).orElseThrow(
+        Member member = memberRepository.findByEmail(email).orElseThrow(
                 ()-> new RuntimeException("해당 사용자 없음")
         );
 

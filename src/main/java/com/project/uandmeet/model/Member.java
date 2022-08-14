@@ -66,8 +66,7 @@ public class Member {
     private String kakoId;
 
     // 일반 사용자
-    public Member(String nickname, String encodedPassword, String email, String username) {
-        this.nickname = nickname;
+    public Member(String username, String encodedPassword, String email) {
         this.password = encodedPassword;
         this.email = email;
         this.username = username;
@@ -75,12 +74,19 @@ public class Member {
     }
 
     // kakaoUser
-    public Member(String nickname, String encodedPassword, String email, String username, String KakaoId) {
+//    public Member(String nickname, String encodedPassword, String email, String username, String KakaoId) {
+//        this.nickname = nickname;
+//        this.password = encodedPassword;
+//        this.email = email;
+//        this.username = username;
+//        this.kakoId = KakaoId;
+//    }
+    public Member(String nickname, String encodedPassword, String email, String username) {
         this.nickname = nickname;
         this.password = encodedPassword;
         this.email = email;
         this.username = username;
-        this.kakoId = KakaoId;
+
     }
 
 
