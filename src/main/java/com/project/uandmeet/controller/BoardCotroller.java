@@ -4,10 +4,12 @@ import com.project.uandmeet.Exception.CustomException;
 import com.project.uandmeet.Exception.ErrorCode;
 import com.project.uandmeet.dto.boardDtoGroup.BoardRequestDto;
 import com.project.uandmeet.dto.boardDtoGroup.BoardResponseDto;
+import com.project.uandmeet.dto.boardDtoGroup.LikeDto;
 import com.project.uandmeet.security.UserDetailsImpl;
 import com.project.uandmeet.service.BoardService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.parameters.P;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
@@ -20,7 +22,7 @@ public class BoardCotroller {
 
     //게시물 작성
     @PostMapping("/api/board/create")
-    private CustomException boardNew(@RequestBody BoardRequestDto boardRequestDto,
+    private CustomException boardNew(@RequestBody BoardRequestDto.createAndCheck boardRequestDto,
                                      @AuthenticationPrincipal UserDetailsImpl userDetails) {
         return boardService.boardNew(boardRequestDto, userDetails);
     }
@@ -49,18 +51,27 @@ public class BoardCotroller {
 
     }
 
+    //개시물 수정
+    @PutMapping("/api/board/{id}")
+    private CustomException boardUpdate(@PathVariable("id") Long id,
+                                        @RequestBody BoardRequestDto.createAndCheck boardRequestDto,
+                                        @AuthenticationPrincipal UserDetailsImpl userDetails) {
+        return boardService.boardUpdate(id, boardRequestDto, userDetails);
+    }
+
     //게시물 삭제.
     @DeleteMapping ("/api/board/{id}")
     private CustomException boardDel(@PathVariable("id") Long id,
                                      @AuthenticationPrincipal UserDetailsImpl userDetails){
 
         return  boardService.boardDel(id,userDetails);
-
-
-
-
-
     }
 
+    //좋아요 유무
+    @PostMapping("/board/likes")
+    private CustomException likeClick(LikeDto likeDto,
+                                      @AuthenticationPrincipal UserDetailsImpl userDetails){
+        return boardService.likeClick(likeDto,userDetails);
 
+    }
 }

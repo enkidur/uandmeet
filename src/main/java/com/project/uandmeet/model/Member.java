@@ -20,14 +20,11 @@ public class Member {
 
     //유저 아이디
     @Column(nullable = false, unique = true)
-    private String username;
+    private String email;
 
     //실제이름
     @Column(nullable = false)
     private String realname;
-
-    @Column(nullable = false)
-    private String socialId;
 
     @Column(nullable = false, unique = true)
     private String nickname;
@@ -43,9 +40,6 @@ public class Member {
 
     @Column(nullable = false)
     private String gender;
-
-    @Column(nullable = false, unique = true)
-    private String email;
 
     @Column
     private String profile;

@@ -24,6 +24,8 @@ public class BoardResponseDto {
     private String city;
     private String gu;
 
+    private Long maxEntry;
+    private Long currentEntry;
     private double lat;
     private double lng;
 
@@ -39,6 +41,8 @@ public class BoardResponseDto {
         this.boardimage = board.getBoardimage();
         this.likeCount = board.getLikeCount();
         this.commentCount = board.getCommentCount();
+        this.maxEntry = board.getMaxEntry();
+        this.currentEntry = board.getCurrentEntry();
     }
 
 }

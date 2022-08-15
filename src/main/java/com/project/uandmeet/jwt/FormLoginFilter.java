@@ -42,7 +42,7 @@ public class FormLoginFilter extends UsernamePasswordAuthenticationFilter {
             System.out.println("==============================================================");
 
             UsernamePasswordAuthenticationToken authenticationToken =
-                    new UsernamePasswordAuthenticationToken(user.getUsername(), user.getPassword());
+                    new UsernamePasswordAuthenticationToken(user.getEmail(), user.getPassword());
 
             // 2. 정상인지 로그인 시도를 해보는 것. authenticationManager로 로그인 시도를 하면!!
             // PrincipalDetailsService가 호출 loadUserByUsername() 함수 실행됨.
@@ -71,7 +71,7 @@ public class FormLoginFilter extends UsernamePasswordAuthenticationFilter {
         String jwtToken = JWT.create()
                 .withSubject("cos토큰")
                 .withExpiresAt(new Date(System.currentTimeMillis()+(60000*10)))
-                .withClaim("username", userDetails.getMember().getUsername())
+                .withClaim("username", userDetails.getMember().getEmail())
                 .sign(Algorithm.HMAC512("cos"));
 
         response.addHeader("Authorization", jwtToken);

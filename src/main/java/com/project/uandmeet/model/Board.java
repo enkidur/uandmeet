@@ -61,7 +61,7 @@ public class Board {
     @OneToMany(fetch = FetchType.LAZY,mappedBy = "board",cascade = CascadeType.ALL)
     private List<Like> likeList = new ArrayList<>();
 
-    public Board(Member member, Category category, BoardRequestDto boardRequestDto)
+    public Board(Member member, Category category, BoardRequestDto.createAndCheck boardRequestDto)
     {
         this.member = member;
         this.category = category;
@@ -74,6 +74,21 @@ public class Board {
         this.lat = boardRequestDto.getLat();
         this.lng = boardRequestDto.getLng();
     }
+
+    public Board(Board board, BoardRequestDto.createAndCheck boardRequestUpdateDto)
+    {
+        this.member = board.getMember();
+        this.category = board.getCategory();
+        this.boardType = board.getBoardType();
+        this.title = boardRequestUpdateDto.getTitle();
+        this.centent = boardRequestUpdateDto.getCentent();
+        this.boardimage = boardRequestUpdateDto.getBoardimage();
+        this.city = boardRequestUpdateDto.getCity();
+        this.gu = boardRequestUpdateDto.getGu();
+        this.lat = boardRequestUpdateDto.getLat();
+        this.lng = boardRequestUpdateDto.getLng();
+    }
+
 
 
 }
