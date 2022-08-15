@@ -1,7 +1,9 @@
 package com.project.uandmeet.controller;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.project.uandmeet.dto.EmailDto;
 import com.project.uandmeet.dto.MemberRequestDto;
+import com.project.uandmeet.service.EmailService;
 import com.project.uandmeet.service.KakaoService;
 import com.project.uandmeet.service.MemberService;
 import lombok.RequiredArgsConstructor;
@@ -21,6 +23,7 @@ public class MemberController {
 
     private final MemberService memberService;
     private final KakaoService kakaoService;
+    private final EmailService emailService;
 
 
     @PostMapping("/api/join")
@@ -54,6 +57,13 @@ public class MemberController {
         return ResponseEntity.ok(tokens);
     }
 
+    // EmailDto 인증
+    @PostMapping("/mailCheck")
+    public String mailCheck(@RequestBody EmailDto requestDto) {
+        System.out.println("이메일 인증 요청이 들어옴!");
+        System.out.println("이메일 인증 이메일 : " + requestDto.getEmail());
+        return emailService.joinEmail(requestDto.getEmail());
+    }
 
     // kakao
 
