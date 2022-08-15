@@ -1,10 +1,13 @@
 package com.project.uandmeet.service;
 
+import com.auth0.jwt.JWT;
+import com.auth0.jwt.algorithms.Algorithm;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.project.uandmeet.auth.UserDetailsImpl;
 import com.project.uandmeet.dto.KakaoUserInfoDto;
+import com.project.uandmeet.jwt.JwtProperties;
 import com.project.uandmeet.model.Member;
 import com.project.uandmeet.model.MemberRoleEnum;
 import com.project.uandmeet.repository.MemberRepository;
@@ -22,6 +25,8 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestTemplate;
+
+import java.util.Date;
 import java.util.UUID;
 
 @Transactional
@@ -31,6 +36,7 @@ public class KakaoService {
 
     private final MemberRepository memberRepository;
     private final BCryptPasswordEncoder passwordEncoder;
+    private final MemberService memberService;
 
 
     public void kakaoLogin(String code) throws JsonProcessingException {
@@ -44,7 +50,10 @@ public class KakaoService {
         Member member = registerKakaoIfNeeded(kakaoUserInfo);
 
         // 4. 강제 로그인 처리
-        froceLogin(member);
+//        froceLogin(member);
+
+        // 4. accessToken, refreshToken 발급
+        createToken(member);
 
     }
 
@@ -101,14 +110,14 @@ public class KakaoService {
         String responseBody = response.getBody();
         ObjectMapper objectMapper = new ObjectMapper();
         JsonNode jsonNode = objectMapper.readTree(responseBody);
-        String id = jsonNode.get("username").asText();
+//        String id = jsonNode.get("username").asText();
         String nickname = jsonNode.get("properties")
                 .get("nickname").asText();
         String email = jsonNode.get("kakao_account")
                 .get("email").asText();
 
-        System.out.println("카카오 사용자 정보: " + id + ", " + nickname + ", " + email);
-        KakaoUserInfoDto kakaoUserInfoDto = new KakaoUserInfoDto(id, nickname, email);
+        System.out.println("카카오 사용자 정보: " + nickname + ", " + email);
+        KakaoUserInfoDto kakaoUserInfoDto = new KakaoUserInfoDto(nickname, email);
         return kakaoUserInfoDto;
     }
 
@@ -116,7 +125,10 @@ public class KakaoService {
     private Member registerKakaoIfNeeded(KakaoUserInfoDto kakaoUserInfo) {
         // DB 에 중복된 Kakao Id 가 있는지 확인
         String id = kakaoUserInfo.getId();
-        Member member = memberRepository.findByUsername(id)
+        System.out.println(id);
+        // email: kakao email
+        String email = kakaoUserInfo.getEmail();
+        Member member = memberRepository.findByEmail(email)
                 .orElse(null);
         if (member == null) {
             // 회원가입
@@ -126,8 +138,6 @@ public class KakaoService {
             String password = UUID.randomUUID().toString();
             String encodedPassword = passwordEncoder.encode(password);
 
-            // email: kakao email
-            String email = kakaoUserInfo.getEmail();
             // role: 일반 사용자
             MemberRoleEnum role = MemberRoleEnum.USER;
 
@@ -135,6 +145,32 @@ public class KakaoService {
             memberRepository.save(member);
         }
         return member;
+    }
+
+    private void createToken(Member member) {
+
+        String accessToken = JWT.create()
+                .withSubject(member.getEmail())
+                .withExpiresAt(new Date(System.currentTimeMillis() + JwtProperties.ACCESS_EXPIRATION_TIME))
+                .withClaim("id", member.getId())
+                .withClaim("email", member.getEmail())
+                .withIssuedAt(new Date(System.currentTimeMillis()))
+                .sign(Algorithm.HMAC512(JwtProperties.SECRET));
+
+        String refreshToken = JWT.create()
+                .withSubject(member.getEmail())
+                .withExpiresAt(new Date(System.currentTimeMillis() + JwtProperties.REFRESH_EXPIRATION_TIME))
+                .withIssuedAt(new Date(System.currentTimeMillis()))
+                .sign(Algorithm.HMAC512(JwtProperties.SECRET2));
+
+        // Refresh Token DB에 저장
+        memberService.updateKakaoRefreshToken(member.getEmail(), refreshToken);
+
+        // token 을 Header 에 발급
+        // 재발급떼문에 set 사용
+        HttpHeaders headers = new HttpHeaders();
+        headers.set(JwtProperties.HEADER_ACCESS, JwtProperties.TOKEN_PREFIX + accessToken);
+        headers.set(JwtProperties.HEADER_REFRESH, JwtProperties.TOKEN_PREFIX + refreshToken);
     }
 
     private void froceLogin(Member member) {

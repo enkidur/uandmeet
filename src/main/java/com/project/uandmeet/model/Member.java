@@ -18,7 +18,7 @@ public class Member {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false, unique = true)
+    @Column
     private String username;
 
     @Column
@@ -66,20 +66,20 @@ public class Member {
     private String kakoId;
 
     // 일반 사용자
-    public Member(String nickname, String encodedPassword, String email, String username) {
-        this.nickname = nickname;
-        this.password = encodedPassword;
-        this.email = email;
-        this.username = username;
-        this.kakoId = null;
-    }
+//    public Member(String nickname, String encodedPassword, String email, String username) {
+//        this.nickname = nickname;
+//        this.password = encodedPassword;
+//        this.email = email;
+//        this.username = username;
+//        this.kakoId = null;
+//    }
 
     // kakaoUser
-    public Member(String nickname, String encodedPassword, String email, String username, String KakaoId) {
+    @Builder
+    public Member(String nickname, String encodedPassword, String email, String KakaoId) {
         this.nickname = nickname;
         this.password = encodedPassword;
         this.email = email;
-        this.username = username;
         this.kakoId = KakaoId;
     }
 

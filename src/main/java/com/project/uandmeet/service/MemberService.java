@@ -88,6 +88,11 @@ public class MemberService {
         member.updateRefreshToken(refreshToken);
     }
 
+    public void updateKakaoRefreshToken(String email, String refreshToken) {
+        Member member = memberRepository.findByEmail(email).orElseThrow(() -> new RuntimeException("사용자를 찾을 수 없습니다."));
+        member.updateRefreshToken(refreshToken);
+    }
+
 
     public Map<String, String> refresh(HttpServletRequest request, HttpServletResponse response) {
 
@@ -146,7 +151,7 @@ public class MemberService {
         long refreshExpireTime = decodedJWT.getClaim("exp").asLong() * 1000;
         long diffDays = (refreshExpireTime - now) / 1000 / (24 * 3600);
         long diffMin = (refreshExpireTime - now) / 1000 / 60;
-        if (diffMin < 5) { // refresh token 만료시간이 5분 보다 작으면 재발급
+        if (diffDays < 2) { // refresh token 만료시간이 특정시간보다 작으면 재발급
             String newRefreshToken = JWT.create()
                     .withSubject(member.getUsername())
                     .withExpiresAt(new Date(now + JwtProperties.REFRESH_EXPIRATION_TIME))

@@ -57,12 +57,17 @@ public class MemberController {
         return ResponseEntity.ok(tokens);
     }
 
-    // EmailDto 인증
+    // Email 인증
     @PostMapping("/mailCheck")
     public String mailCheck(@RequestBody EmailDto requestDto) {
         System.out.println("이메일 인증 요청이 들어옴!");
         System.out.println("이메일 인증 이메일 : " + requestDto.getEmail());
         return emailService.joinEmail(requestDto.getEmail());
+    }
+
+    @GetMapping("/api/loginForm")
+    public String loginFrom() {
+        return "login.html";
     }
 
     // kakao
