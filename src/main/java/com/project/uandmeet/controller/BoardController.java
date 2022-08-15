@@ -14,6 +14,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
@@ -28,6 +29,16 @@ public class BoardController {
                                      @AuthenticationPrincipal UserDetailsImpl userDetails) {
         return boardService.boardNew(boardRequestDto, userDetails);
     }
+
+    //게시물 작성 이미지추가 버전 (임시)
+//    @PostMapping("/api/boards")
+//    public ResponseEntity<FinalResponseDto<?>> createPost(
+//            @Valid @RequestPart(value = "postDto") BoardRequestDto requestDto,
+//            @RequestPart(value = "postImg",required = false) List<MultipartFile> files,
+//            @AuthenticationPrincipal UserDetailsImpl userDetails) throws Exception {
+//
+//        return boardService.createBoard(getUserId(userDetails), requestDto, files);
+//    }
 
     //게시물 전체 조회
     @GetMapping("/api/boards/{board_type}/{category_name}")

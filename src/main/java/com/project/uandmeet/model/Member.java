@@ -5,7 +5,6 @@ import com.project.uandmeet.dto.MemberRequestDto;
 import lombok.*;
 
 import javax.persistence.*;
-import java.util.ArrayList;
 import java.util.List;
 
 @Builder
@@ -25,7 +24,7 @@ public class Member {
     @Column
     private String realname;
 
-    @Column(nullable = true, unique = true)
+    @Column(nullable = false, unique = true)
     private String nickname;
 
     @Column(nullable = false)
@@ -40,7 +39,7 @@ public class Member {
     @Column
     private String gender;
 
-    @Column(nullable = true, unique = true)
+    @Column(nullable = false, unique = true)
     private String email;
 
     @Column(nullable = false)
@@ -67,7 +66,7 @@ public class Member {
 
     // kakaoUser
     // 일반 사용자가 로그인할 때 비워두기 위해 nullable = true,해당 아이디로 중복 가입이 되지않게 unique = true
-    @Column(nullable = true, unique = true)
+    @Column(nullable = false, unique = true)
     private String kakoId;
 
     // 일반 사용자

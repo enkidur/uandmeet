@@ -1,45 +1,34 @@
 package com.project.uandmeet.chat.model;
 
-
-
-import com.project.uandmeet.model.Member;
-import com.project.uandmeet.model.Timestamped;
-import lombok.*;
+import com.project.uandmeet.chat.dto.MemberDto;
+import com.project.uandmeet.model.Board;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 import javax.persistence.*;
 import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.List;
 
 @Getter
 @Setter
-@Builder
-@AllArgsConstructor
 @NoArgsConstructor
 @Entity
-public class ChatRoom extends Timestamped implements Serializable {
+public class ChatRoom implements Serializable {
+    private static final long serialVersionUID = 6494678977089006639L;
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    private Long Id;
+    @Column(nullable = false)
+    private String roomId;
+    @Column(nullable = false)
+    private String username;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name="RECEIVERID")
-    private Member receiver;
-
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name="SENDERID")
-    private Member sender;
-
-    @Builder.Default
-    @OneToMany(mappedBy = "chatRoom", cascade = CascadeType.REMOVE)
-    private List<ChatMessage> chatMessageList = new ArrayList<>();
-
-    public static ChatRoom create(ChatRoom create){
+    //채팅방 생성
+    public static ChatRoom create(Board board, MemberDto memberDto) {
         ChatRoom chatRoom = new ChatRoom();
-        chatRoom.receiver = create.getReceiver();
-        chatRoom.sender = create.getSender();
+        chatRoom.roomId = String.valueOf(board.getId());
+        chatRoom.username= memberDto.getUsername();
         return chatRoom;
     }
-
 }

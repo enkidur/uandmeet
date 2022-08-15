@@ -8,7 +8,7 @@ import org.springframework.data.querydsl.QuerydslPredicateExecutor;
 import java.util.List;
 
 @Repository
-public  interface BoardRepository extends JpaRepository<Board, Long> ,QuerydslPredicateExecutor<Board>{
+public  interface BoardRepository extends JpaRepository<Board, Long> ,QuerydslPredicateExecutor<Board> {
     List<Board> findAllByBoardTypeAndCategory(String boardType,String categoryName);
 
     List<Board> findByTitleContaining(String keyword); // Contiaining = Like
