@@ -1,4 +1,4 @@
-package com.project.uandmeet.chat.config;
+package com.project.uandmeet.chat.service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.project.uandmeet.chat.dto.ChatMessageRequestDto;

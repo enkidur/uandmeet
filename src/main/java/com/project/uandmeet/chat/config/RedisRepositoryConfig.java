@@ -1,5 +1,6 @@
 package com.project.uandmeet.chat.config;
 
+import com.project.uandmeet.chat.service.RedisSubscriber;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
