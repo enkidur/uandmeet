@@ -1,7 +1,6 @@
 package com.project.uandmeet.controller;
 
 import com.project.uandmeet.dto.SearchResponseDto;
-import com.project.uandmeet.model.Board;
 import com.project.uandmeet.repository.BoardRepository;
 import com.project.uandmeet.service.BoardService;
 import lombok.RequiredArgsConstructor;
