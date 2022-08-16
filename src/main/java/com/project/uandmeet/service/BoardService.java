@@ -1,7 +1,5 @@
 package com.project.uandmeet.service;
 
-import com.project.uandmeet.dto.BoardResponseDto;
-import com.project.uandmeet.dto.PageRequestDto;
 import com.project.uandmeet.dto.SearchResponseDto;
 import com.project.uandmeet.model.Board;
 import com.project.uandmeet.model.QBoard;
@@ -17,7 +15,6 @@ import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 
 @Service
 @RequiredArgsConstructor
