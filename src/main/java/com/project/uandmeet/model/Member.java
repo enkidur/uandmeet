@@ -55,7 +55,10 @@ public class Member {
     @Enumerated(value = EnumType.STRING) // Enum type을 STring 으로 변화하여 저장
     private MemberRoleEnum role;
 
-    private String refreshToken;
+    @Column
+    private String loginto;
+
+//    private String refreshToken;
 
 
 
@@ -77,12 +80,16 @@ public class Member {
     }
 
 
-    public void updateRefreshToken(String newToken) {
-        this.refreshToken = newToken;
-    }
+//    public void updateRefreshToken(String newToken) {
+//        this.refreshToken = newToken;
+//    }
 
     public Member(String email, String password){
         this.username = email;
         this.password = password;
+    }
+
+    public Member(String loginto) {
+        this.loginto = loginto;
     }
 }

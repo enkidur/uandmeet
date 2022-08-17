@@ -13,8 +13,8 @@ public class UandmeetApplication {
     public BCryptPasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
     }
-//    @Bean
-//    public JavaMailSenderImpl mailSender() {return new JavaMailSenderImpl();}
+    @Bean
+    public JavaMailSenderImpl mailSender() {return new JavaMailSenderImpl();}
 
 
 

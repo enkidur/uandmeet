@@ -34,7 +34,7 @@ public class MemberController {
 
 
     // 1. 클라이언트에서 로그인한다.
-    // 2. 서버는 클라이언트에게 Access Token 과 Refresh Token 을 발급한다. 동시에 Refresh Token 은 서버에 저장된다.
+    // 2. 서버는 클라이언트에게 Access Token 과 Refresh Token 을 발급한다. 동시에 Refresh Token 은 redeis 에 저장된다.
     // 3. 클라이언트는 local 저장소에 두 Token 을 저장한다.
     // 4. 매 요청마다 Access Token 을 헤더에 담아서 요청한다.
     // 5 .이 때, Access Token 이 만료가 되면 서버는 만료되었다는 Response 를 하게 된다.
@@ -58,13 +58,6 @@ public class MemberController {
         return ResponseEntity.ok(tokens);
     }
 
-    // Email 인증 test
-    @PostMapping("/api/mailCheck")
-    public @ResponseBody String mailCheck(@RequestBody EmailDto requestDto) {
-        System.out.println("이메일 인증 요청이 들어옴!");
-        System.out.println("이메일 인증 이메일 : " + requestDto.getEmail());
-        return emailService.joinEmail(requestDto.getEmail());
-    }
 
     // Email 인증번호 확인
     @PostMapping("/api/checkAuthNum")
@@ -72,10 +65,25 @@ public class MemberController {
         return ResponseEntity.ok(emailService.checkAuthNum(checkAuthNumDto));
     }
 
+    // password 찾기
+    @PostMapping("/api/findpassword")
+    public ResponseEntity<String> findpassword(@RequestBody EmailDto requestDto) {
+        memberService.findpassword(requestDto.getUsername());
+        return ResponseEntity.ok("password 찾기 완료");
+    }
+
     // login test
     @GetMapping("/api/loginForm")
     public String loginFrom() {
         return "login.html";
+    }
+
+    // Email 인증 test
+    @PostMapping("/api/mailCheck")
+    public @ResponseBody String mailCheck(@RequestBody EmailDto requestDto) {
+        System.out.println("이메일 인증 요청이 들어옴!");
+        System.out.println("이메일 인증 이메일 : " + requestDto.getUsername());
+        return emailService.joinEmail(requestDto.getUsername());
     }
 
     // kakao

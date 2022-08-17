@@ -14,7 +14,7 @@ import java.util.UUID;
 @Service
 public class EmailService {
     @Autowired
-    private JavaMailSenderImpl mailSender; //EmailConfig 에서 빈 등록했기 때문에 주입받을 수 있다. Spring에서 제공하는 MailSender.
+    private JavaMailSenderImpl mailSender; //Application 에서 빈 등록했기 때문에 주입받을 수 있다.
     @Autowired
     private RedisUtil redisUtil;
     private String authNumber; // 난수 번호
@@ -52,7 +52,8 @@ public class EmailService {
                             "해당 인증번호를 인증번호 확인란에 기입하여 주세요."; //이메일 내용 삽입
             mailSend(setFrom, toMail, title, content);
             emailCnt += 1;
-            return authNumber;
+            int restCnt = 3 - emailCnt;
+            return "인증 번호 :" + authNumber + "남은 횟수 :"+ restCnt;
         }
         return "인증 횟수를 초과하였습니다. 1시간 뒤에 다시 시도해 주세요.";
     }
@@ -75,6 +76,8 @@ public class EmailService {
 
             // 유효 시간(3분)동안 {fromEmail, authKey} 저장
             redisUtil.setDataExpire(authNumber, setFrom, 60 * 3L);
+            // 횟수
+            redisUtil.setDataExpire(authNumber + emailCnt, String.valueOf(emailCnt),60 * 60L);
             // 유효 시간(1시간)동안 {toEmail, emailCnt} 저장
             redisUtil.setDataExpire(toMail, String.valueOf(emailCnt),60 * 60L);
         }

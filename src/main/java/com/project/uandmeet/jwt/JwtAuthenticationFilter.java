@@ -10,6 +10,7 @@ import com.auth0.jwt.JWT;
 import com.auth0.jwt.algorithms.Algorithm;
 import com.project.uandmeet.auth.UserDetailsImpl;
 import com.project.uandmeet.dto.LoginRequestDto;
+import com.project.uandmeet.redis.RedisUtil;
 import com.project.uandmeet.service.MemberService;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -30,7 +31,8 @@ import lombok.RequiredArgsConstructor;
 public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilter{
 
     private final AuthenticationManager authenticationManager;
-    private final MemberService memberService;
+//    private final MemberService memberService;
+    private final RedisUtil redisUtil;
 
     // Authentication 객체 만들어서 리턴 => 의존 : AuthenticationManager
     // 인증 요청시에 실행되는 함수 => /login
@@ -123,7 +125,9 @@ public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilte
                 .sign(Algorithm.HMAC512(JwtProperties.SECRET2)); // secret key
 
         // Refresh Token DB에 저장
-        memberService.updateRefreshToken(userDetailsImpl.getUsername(), refreshToken);
+//        memberService.updateRefreshToken(userDetailsImpl.getUsername(), refreshToken);
+        // Refresh Token Redis 에 저장
+        redisUtil.setDataExpire(userDetailsImpl.getUsername(), refreshToken, JwtProperties.REFRESH_EXPIRATION_TIME);
 
         // token 을 Header 에 발급
         // 재발급떼문에 setHeader 사용

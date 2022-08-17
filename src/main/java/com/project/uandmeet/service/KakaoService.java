@@ -38,7 +38,7 @@ public class KakaoService {
     private final MemberRepository memberRepository;
     private final BCryptPasswordEncoder passwordEncoder;
     private final MemberService memberService;
-//    private final RedisUtil redisUtil;
+    private final RedisUtil redisUtil;
 
 
     public void kakaoLogin(String code) throws JsonProcessingException {
@@ -128,7 +128,7 @@ public class KakaoService {
         // DB 에 중복된 Kakao Id 가 있는지 확인
 //        String id = kakaoUserInfo.getId();
 //        System.out.println(id);
-        // email: kakao email
+        // username: kakao email
         String username = kakaoUserInfo.getEmail();
         Member member = memberRepository.findByUsername(username)
                 .orElse(null);
@@ -143,8 +143,12 @@ public class KakaoService {
             // role: 일반 사용자
             MemberRoleEnum role = MemberRoleEnum.USER;
 
+
             member = new Member(nickname, encodedPassword, username);
+            member.setLoginto("kakao");
             memberRepository.save(member);
+        } else {
+            throw new RuntimeException("이미 존재하는 계정입니다.");
         }
         return member;
     }
@@ -166,9 +170,9 @@ public class KakaoService {
                 .sign(Algorithm.HMAC512(JwtProperties.SECRET2));
 
         // Refresh Token DB에 저장
-        memberService.updateRefreshToken(member.getUsername(), refreshToken);
+//        memberService.updateRefreshToken(member.getUsername(), refreshToken);
         // redis 에 token 저장
-//        redisUtil.setDataExpire(JwtProperties.HEADER_REFRESH,refreshToken,JwtProperties.REFRESH_EXPIRATION_TIME);
+        redisUtil.setDataExpire(member.getUsername(),refreshToken,JwtProperties.REFRESH_EXPIRATION_TIME);
 
 
         // token 을 Header 에 발급
@@ -178,9 +182,9 @@ public class KakaoService {
         headers.set(JwtProperties.HEADER_REFRESH, JwtProperties.TOKEN_PREFIX + refreshToken);
     }
 
-    private void froceLogin(Member member) {
-        UserDetailsImpl userDetails = new UserDetailsImpl(member);
-        Authentication authentication = new UsernamePasswordAuthenticationToken(userDetails, null,userDetails.getAuthorities());
-        SecurityContextHolder.getContext().setAuthentication(authentication);
-    }
+//    private void froceLogin(Member member) {
+//        UserDetailsImpl userDetails = new UserDetailsImpl(member);
+//        Authentication authentication = new UsernamePasswordAuthenticationToken(userDetails, null,userDetails.getAuthorities());
+//        SecurityContextHolder.getContext().setAuthentication(authentication);
+//    }
 }
