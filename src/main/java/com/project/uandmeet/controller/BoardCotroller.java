@@ -74,4 +74,6 @@ public class BoardCotroller {
         return boardService.likeClick(likeDto,userDetails);
 
     }
+
+
 }

@@ -2,6 +2,8 @@ package com.project.uandmeet.dto.boardDtoGroup;
 
 import lombok.*;
 
+import java.time.LocalDateTime;
+
 
 public class BoardRequestDto {
 
@@ -16,6 +18,7 @@ public class BoardRequestDto {
         private String title;
         private String centent;
         private String boardimage;
+        private LocalDateTime endDateAt;
         private String city;
         private String gu;
 
