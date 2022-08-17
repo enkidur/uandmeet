@@ -1,39 +1,57 @@
 package com.project.uandmeet.chat.model;
 
-
-import com.project.uandmeet.model.Member;
-import com.project.uandmeet.model.Timestamped;
-import lombok.*;
+import com.project.uandmeet.chat.dto.ChatMessageDto;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 import javax.persistence.*;
+import java.time.LocalDateTime;
 
-@Getter
 @Setter
-@Builder
-@AllArgsConstructor
-@NoArgsConstructor
+@Getter
 @Entity
-public class ChatMessage extends Timestamped {
-
+@NoArgsConstructor
+public class ChatMessage {
+    // 메시지 타입 : 입장, 채팅, 나가기
+    public enum MessageType {
+        ENTER, TALK, QUIT
+    }
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue(strategy =GenerationType.IDENTITY)
     private Long id;
-
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "WRITERID")
-    private Member writer;
-
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "CHATROOMID")
-    private ChatRoom chatRoom;
-
+    @Column(nullable = false)
+    private String roomId;
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private MessageType type;
+    @Column(nullable = false)
+    private String sender;
     @Column(nullable = false)
     private String message;
-
+    @Column(nullable = false)
+    private String profileUrl;
     @Column
-    private String messageModifiedDate;
-
+    private Long enterUserCnt;
+    @Column(nullable = false)
+    private Long userId ;
+    @Column(nullable = false)
+    private LocalDateTime createdAt;
     @Column
-    private String messageModifiedTime;
+    private String fileUrl;
+    @Column
+    private Boolean quitOwner = false;
 
+
+    public ChatMessage(ChatMessageDto chatMessageDto, LocalDateTime createdAt) {
+        this.type = chatMessageDto.getType();
+        this.roomId = chatMessageDto.getRoomId();
+        this.message = chatMessageDto.getMessage();
+        this.sender = chatMessageDto.getSender();
+        this.profileUrl = chatMessageDto.getProfileUrl();
+        this.enterUserCnt = chatMessageDto.getEnterUserCnt();
+        this.userId = chatMessageDto.getUserId();
+        this.createdAt = createdAt;
+        this.fileUrl = chatMessageDto.getFileUrl();
+    }
 }

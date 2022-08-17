@@ -1,39 +1,55 @@
 package com.project.uandmeet.chat.config;
 
-
+import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.messaging.simp.config.ChannelRegistration;
 import org.springframework.messaging.simp.config.MessageBrokerRegistry;
 import org.springframework.web.socket.config.annotation.EnableWebSocketMessageBroker;
 import org.springframework.web.socket.config.annotation.StompEndpointRegistry;
 import org.springframework.web.socket.config.annotation.WebSocketMessageBrokerConfigurer;
-import org.springframework.web.socket.config.annotation.WebSocketTransportRegistration;
 
+/*
+ * Websocket 관련 설정들을 모아놓은 Class
+ * */
 @Configuration
 @EnableWebSocketMessageBroker
-public class WebSocketConfig implements WebSocketMessageBrokerConfigurer{
+@RequiredArgsConstructor
+public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
+    private final StompHandler stompHandler;
 
-    @Override
-    public void configureMessageBroker(MessageBrokerRegistry registry) {
-        //메시지 구독하는 요청은 /sub
-        registry.enableSimpleBroker("/sub");
-        //prefix 시작하는 /pub
-        registry.setApplicationDestinationPrefixes("/pub");
-    }
-
+    /*
+     * Websocket HandShake 를 위한 EndPoint를 지정하고 CORS 설정 및 SockJS 사용 설정
+     */
     @Override
     public void registerStompEndpoints(StompEndpointRegistry registry) {
-        //endpoint, 개발 서버 접속 주소 : 토큰을 가지고 http://localhost:8080/ws-sotmp로 접속하면
-        // Handshake 일어나면서 HTTP->WS 프로토콜 변경. "Welcom to SockJs!"가 출력됨
-
-        registry.addEndpoint("/ws-stomp").setAllowedOriginPatterns("*")
-                .withSockJS(); //sock.js를 통하여 낮은 버전의 브라우저에서도 websocket이 동작할 수 있게
+        registry
+                .addEndpoint("/wss/chat")
+                .setAllowedOriginPatterns("https://localhost:3000", "https://bungle.life")
+                .withSockJS();
     }
 
+    /*
+     * Stomp 사용을 위한 Message Broker 설정을 해주는 메소드이다.
+     * 1.enableSimpleBroker
+     * 메세지를 받을때, 경로를 설정해준다
+     * "/sub"이 api에 prefix로 붙은경우, messagebroker가 해당 경로를 가로챈다
+     * 2.setApplicationDestinationPrefixes
+     * - 메세지를 보낼때 관련 경로를 설정해주는 함수.
+     * - 클라이언트가 메세지를 보낼때, api에 prefix로 "/pub"이 붙어있으면 broker로 메세지가 보내진다.
+     *  */
     @Override
-    public void configureWebSocketTransport(WebSocketTransportRegistration registration) {
-        registration.setSendTimeLimit(25 * 1000).setSendBufferSizeLimit(512 * 1024);
-        registration.setMessageSizeLimit(512 * 1024);
-        registration.setTimeToFirstMessage(99999);
+    public void configureMessageBroker(MessageBrokerRegistry registry) {
+        registry
+                .setApplicationDestinationPrefixes("/pub")
+                .enableSimpleBroker("/sub");
     }
 
+    /*
+     * interceptors 설정
+     */
+    @Override
+    public void configureClientInboundChannel(ChannelRegistration registration) {
+        registration
+                .interceptors(stompHandler);
+    }
 }
