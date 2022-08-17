@@ -30,27 +30,53 @@ import java.util.regex.Pattern;
 public class MemberService {
     private final MemberRepository memberRepository;
     private final BCryptPasswordEncoder passwordEncoder;
+    private final EmailService emailService;
 
     // 회원 가입
     public String join(MemberRequestDto requestDto) throws IOException {
-        String username = requestDto.getUsername();
+        String email = requestDto.getUsername();
+        String[] emailadress = email.split("@");
+        String id = emailadress[0];
+        String host = emailadress[1];
         String password = requestDto.getPassword();
         String passwordCheck = requestDto.getPasswordCheck();
-        String pattern = "^[a-zA-Z0-9]*$";
+//        String pattern = "^[a-zA-Z0-9]*$";
+        String pattern = "^[a-zA-Z0-9_!#$%&'\\*+/=?{|}~^.-]+@[a-zA-Z0-9.-]+.[a-zA-Z0-9.-]*$";
+        String idpattern = "^[a-zA-Z0-9_!#$%&'\\*+/=?{|}~^.-]*$";
+        String hostpattern ="^[a-zA-Z0-9.-]*$";
+        // email 조건
+        // ID 영문 대소문자, 숫자, _!#$%&'\*+/=?{|}~^.- 특문허용
+        // Host 시작전 @, 영문 대소문자, 숫자, .-특문허용
 
         // 회원가입 조건
-        if (username.length() < 3) {
-            throw new IllegalArgumentException("닉네임을 3자 이상 입력하세요");
-        } else if (!Pattern.matches(pattern, username)) {
-            throw new IllegalArgumentException("알파벳 대소문자와 숫자로만 입력하세요");
+        if (email.length() < 10) {
+            throw new IllegalArgumentException("이메일을 10자 이상 입력하세요");
+        } else if (!Pattern.matches(idpattern, id)) {
+            throw new IllegalArgumentException("id에 알파벳 대소문자와 숫자, 특수기호( _!#$%&'\\*+/=?{|}~^.-)로만 입력하세요");
+        } else if (!Pattern.matches(hostpattern, host)) {
+            throw new IllegalArgumentException("host에 알파벳 대소문자와 숫자, 특수기호(.-)로만 입력하세요");
+        } else if (!Pattern.matches(pattern, email)) {
+            throw new IllegalArgumentException("이메일 규격에 맞게 입력하세요");
         } else if (password.length() < 3) {
             throw new IllegalArgumentException("비밀번호를 3자 이상 입력하세요");
-        } else if (password.contains(username)) {
-            throw new IllegalArgumentException("비밀번호에 닉네임을 포함할 수 없습니다.");
+        } else if (password.length() > 13) {
+            throw new IllegalArgumentException("비밀번호를 12자 이하 입력하세요");
+        } else if (password.contains(id)) {
+            throw new IllegalArgumentException(" 비밀번호에 id를 포함할 수없습니다.");
+        }else if (email.contains("script") || email.contains("<") || email.contains(">")) {
+            throw new IllegalArgumentException("xss공격 멈춰주세요.");
+        }else if (password.contains("script") || password.contains("<") || password.contains(">")) {
+            throw new IllegalArgumentException("xss공격 멈춰주세요.");
+        }else if (passwordCheck.contains("script") || passwordCheck.contains("<") || passwordCheck.contains(">")) {
+            throw new IllegalArgumentException("xss공격 멈춰주세요.");
         }
 
-        // username 중복 확인
-        checkDuplicateUsername(username);
+        // email 중복 확인
+        checkDuplicateEmail(email);
+
+        // email 인증 번호 발송
+        emailService.joinEmail(email);
+        // 인증 번호 확인 절차는 controller 에서 실행
 
         // 비밀번호, 비밀번호 재입력 확인
         checkPassword(password, passwordCheck);
@@ -68,7 +94,7 @@ public class MemberService {
         return "회원가입 완료";
     }
 
-    public void checkDuplicateUsername(String username) {
+    public void checkDuplicateEmail(String username) {
         Optional<Member> users = memberRepository.findByUsername(username);
         if (users.isPresent()) {
             throw new IllegalArgumentException("이미 존재하는 계정입니다.");
@@ -85,11 +111,6 @@ public class MemberService {
 
     public void updateRefreshToken(String username, String refreshToken) {
         Member member = memberRepository.findByUsername(username).orElseThrow(() -> new RuntimeException("사용자를 찾을 수 없습니다."));
-        member.updateRefreshToken(refreshToken);
-    }
-
-    public void updateKakaoRefreshToken(String email, String refreshToken) {
-        Member member = memberRepository.findByEmail(email).orElseThrow(() -> new RuntimeException("사용자를 찾을 수 없습니다."));
         member.updateRefreshToken(refreshToken);
     }
 
@@ -125,6 +146,7 @@ public class MemberService {
 
         // Access Token 재발급
         long now = System.currentTimeMillis();
+//        String username = decodedJWT.getSubject();
         String username = decodedJWT.getSubject();
         Member member = memberRepository.findByUsername(username)
                 .orElseThrow(() -> new UsernameNotFoundException("사용자를 찾을 수 없습니다."));
@@ -135,7 +157,7 @@ public class MemberService {
                 .withSubject(member.getUsername()) // PrincipalDetails 에서 가져오는 방법 찾는 중
                 .withExpiresAt(new Date(now + JwtProperties.ACCESS_EXPIRATION_TIME))
                 .withClaim("id", member.getId())
-                .withClaim("username", member.getUsername())
+//                .withClaim("email", member.getUsername())
                 // map 은 스트림 내 요소들을 하나씩 특정 값으로 변환
                 // Role 을 name 으로 매핑 (Role 의 name 을 꺼내옴)
 //                .withClaim("roles", member.getRoles().stream().map(Role::getName)
@@ -164,7 +186,6 @@ public class MemberService {
 
         accessTokenResponseMap.put(JwtProperties.HEADER_ACCESS, JwtProperties.TOKEN_PREFIX+accessToken);
         Map<String, String> tokens = accessTokenResponseMap;
-        String test = tokens.get(JwtProperties.HEADER_REFRESH);
         response.setHeader(JwtProperties.HEADER_ACCESS, tokens.get(JwtProperties.HEADER_ACCESS));
         if (tokens.get(JwtProperties.HEADER_REFRESH) != null) {
             response.setHeader(JwtProperties.HEADER_REFRESH, tokens.get(JwtProperties.HEADER_REFRESH));

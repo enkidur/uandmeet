@@ -27,9 +27,7 @@ public class UserDetailsImpl implements UserDetails {
     public UserDetailsImpl(Member member) {
         this.member = member;
     }
-//    public UserDetailsImpl(KakaoMember kakaoMember) {
-//        this.kakaoMember = kakaoMember;
-//    }
+
 
     // 해당 User 의 권한의 리턴
     @Override
@@ -60,6 +58,8 @@ public class UserDetailsImpl implements UserDetails {
     public String getUsername() {
         return member.getUsername();
     }
+
+//    public String getEmail() {return member.getEmail();}
 
     // 계정이 만료되었는지 않았는지(ture : 만료 X, false : 만료)
     @Override

@@ -1,6 +1,7 @@
 package com.project.uandmeet.controller;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.project.uandmeet.dto.CheckAuthNumDto;
 import com.project.uandmeet.dto.EmailDto;
 import com.project.uandmeet.dto.MemberRequestDto;
 import com.project.uandmeet.service.EmailService;
@@ -57,14 +58,21 @@ public class MemberController {
         return ResponseEntity.ok(tokens);
     }
 
-    // Email 인증
-    @PostMapping("/mailCheck")
-    public String mailCheck(@RequestBody EmailDto requestDto) {
+    // Email 인증 test
+    @PostMapping("/api/mailCheck")
+    public @ResponseBody String mailCheck(@RequestBody EmailDto requestDto) {
         System.out.println("이메일 인증 요청이 들어옴!");
         System.out.println("이메일 인증 이메일 : " + requestDto.getEmail());
         return emailService.joinEmail(requestDto.getEmail());
     }
 
+    // Email 인증번호 확인
+    @PostMapping("/api/checkAuthNum")
+    public @ResponseBody ResponseEntity<Boolean> checkAuthNum(@RequestBody CheckAuthNumDto checkAuthNumDto) {
+        return ResponseEntity.ok(emailService.checkAuthNum(checkAuthNumDto));
+    }
+
+    // login test
     @GetMapping("/api/loginForm")
     public String loginFrom() {
         return "login.html";

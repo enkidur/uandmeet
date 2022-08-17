@@ -10,6 +10,7 @@ import com.project.uandmeet.dto.KakaoUserInfoDto;
 import com.project.uandmeet.jwt.JwtProperties;
 import com.project.uandmeet.model.Member;
 import com.project.uandmeet.model.MemberRoleEnum;
+import com.project.uandmeet.redis.RedisUtil;
 import com.project.uandmeet.repository.MemberRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpEntity;
@@ -37,6 +38,7 @@ public class KakaoService {
     private final MemberRepository memberRepository;
     private final BCryptPasswordEncoder passwordEncoder;
     private final MemberService memberService;
+//    private final RedisUtil redisUtil;
 
 
     public void kakaoLogin(String code) throws JsonProcessingException {
@@ -124,11 +126,11 @@ public class KakaoService {
 
     private Member registerKakaoIfNeeded(KakaoUserInfoDto kakaoUserInfo) {
         // DB 에 중복된 Kakao Id 가 있는지 확인
-        String id = kakaoUserInfo.getId();
-        System.out.println(id);
+//        String id = kakaoUserInfo.getId();
+//        System.out.println(id);
         // email: kakao email
-        String email = kakaoUserInfo.getEmail();
-        Member member = memberRepository.findByEmail(email)
+        String username = kakaoUserInfo.getEmail();
+        Member member = memberRepository.findByUsername(username)
                 .orElse(null);
         if (member == null) {
             // 회원가입
@@ -141,7 +143,7 @@ public class KakaoService {
             // role: 일반 사용자
             MemberRoleEnum role = MemberRoleEnum.USER;
 
-            member = new Member(nickname, encodedPassword, email, id);
+            member = new Member(nickname, encodedPassword, username);
             memberRepository.save(member);
         }
         return member;
@@ -150,21 +152,24 @@ public class KakaoService {
     private void createToken(Member member) {
 
         String accessToken = JWT.create()
-                .withSubject(member.getEmail())
+                .withSubject(member.getUsername())
                 .withExpiresAt(new Date(System.currentTimeMillis() + JwtProperties.ACCESS_EXPIRATION_TIME))
                 .withClaim("id", member.getId())
-                .withClaim("email", member.getEmail())
+//                .withClaim("email", member.getUsername())
                 .withIssuedAt(new Date(System.currentTimeMillis()))
                 .sign(Algorithm.HMAC512(JwtProperties.SECRET));
 
         String refreshToken = JWT.create()
-                .withSubject(member.getEmail())
+                .withSubject(member.getUsername())
                 .withExpiresAt(new Date(System.currentTimeMillis() + JwtProperties.REFRESH_EXPIRATION_TIME))
                 .withIssuedAt(new Date(System.currentTimeMillis()))
                 .sign(Algorithm.HMAC512(JwtProperties.SECRET2));
 
         // Refresh Token DB에 저장
-        memberService.updateKakaoRefreshToken(member.getEmail(), refreshToken);
+        memberService.updateRefreshToken(member.getUsername(), refreshToken);
+        // redis 에 token 저장
+//        redisUtil.setDataExpire(JwtProperties.HEADER_REFRESH,refreshToken,JwtProperties.REFRESH_EXPIRATION_TIME);
+
 
         // token 을 Header 에 발급
         // 재발급떼문에 set 사용

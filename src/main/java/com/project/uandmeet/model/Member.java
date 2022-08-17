@@ -21,9 +21,6 @@ public class Member {
     @Column
     private String username;
 
-    @Column
-    private String realname;
-
     @Column(nullable = true, unique = true)
     private String nickname;
 
@@ -60,10 +57,7 @@ public class Member {
 
     private String refreshToken;
 
-    // kakaoUser
-    // 일반 사용자가 로그인할 때 비워두기 위해 nullable = true,해당 아이디로 중복 가입이 되지않게 unique = true
-    @Column(nullable = true, unique = true)
-    private String kakoId;
+
 
     // 일반 사용자
 //    public Member(String nickname, String encodedPassword, String email, String username) {
@@ -76,11 +70,10 @@ public class Member {
 
     // kakaoUser
     @Builder
-    public Member(String nickname, String encodedPassword, String email, String KakaoId) {
+    public Member(String nickname, String encodedPassword, String email) {
         this.nickname = nickname;
         this.password = encodedPassword;
-        this.email = email;
-        this.kakoId = KakaoId;
+        this.username = email;
     }
 
 
@@ -88,8 +81,8 @@ public class Member {
         this.refreshToken = newToken;
     }
 
-    public Member(String username, String password){
-        this.username = username;
+    public Member(String email, String password){
+        this.username = email;
         this.password = password;
     }
 }
