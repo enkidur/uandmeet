@@ -22,7 +22,7 @@ public class BoardCotroller {
 
     //게시물 작성
     @PostMapping("/api/board/create")
-    private CustomException boardNew(@RequestBody BoardRequestDto.createAndCheck boardRequestDto,
+    private CustomException boardNew(@RequestBody BoardRequestDto boardRequestDto,
                                      @AuthenticationPrincipal UserDetailsImpl userDetails) {
         return boardService.boardNew(boardRequestDto, userDetails);
     }
