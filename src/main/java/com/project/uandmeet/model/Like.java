@@ -1,13 +1,12 @@
 package com.project.uandmeet.model;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import com.project.uandmeet.dto.LikeDto;
+import lombok.*;
 
 import javax.persistence.*;
 
 @Getter
+@Setter
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
@@ -26,5 +25,11 @@ public class Like {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "board")
     private Board board;
-    ////
+
+
+    public Like(Member memberid, Board boardid) {
+        this.member = memberid;
+        this.board = boardid;
+    }
+
 }
