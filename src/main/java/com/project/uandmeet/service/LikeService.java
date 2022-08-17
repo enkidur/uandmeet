@@ -29,9 +29,12 @@ public class LikeService {
         Like like = new Like(memberid, boardid);
         boolean exists = lIkeRepository.existsByBoardAndMember(likeDto.getPostid(), likeDto.getUserid());
         if (exists) {
-            lIkeRepository.deleteByPostidAndUserid(likeDto.getPostid(), likeDto.getUserid());
+            boardService.minuslikecnt(likeDto.getPostid()); // commentcount 처럼 size나 count 를 쓴다면 필요없음
+            lIkeRepository.deleteByBoardAndMember(likeDto.getPostid(), likeDto.getUserid());
         } else {
+            boardService.pluslikecnt(likeDto.getPostid());
             lIkeRepository.save(like);
+
         }
     }
 }

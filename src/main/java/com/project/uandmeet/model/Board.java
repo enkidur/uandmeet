@@ -31,5 +31,11 @@ public class Board {
     @JoinColumn(name = "member_id")
     private Member member;
 
-    //
+    public void minuslikecnt() {
+        this.likeCount -= 1;
+    }
+
+    public void pluslikecnt() {
+        this.likeCount += 1;
+    }
 }
