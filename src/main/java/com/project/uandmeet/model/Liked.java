@@ -1,5 +1,6 @@
 package com.project.uandmeet.model;
 
+import com.project.uandmeet.dto.boardDtoGroup.LikeDto;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -12,7 +13,7 @@ import javax.persistence.*;
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
-public class Like {
+public class Liked {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -27,4 +28,10 @@ public class Like {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "board_id")
     private Board board;
+
+    public Liked(LikeDto likeDto, Member memberTemp, Board board) {
+        this.member = memberTemp;
+        this.board = board;
+        this.isLike = likeDto.getIsLike();
+    }
 }

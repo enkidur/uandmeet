@@ -8,8 +8,8 @@ import com.project.uandmeet.dto.boardDtoGroup.LikeDto;
 import com.project.uandmeet.security.UserDetailsImpl;
 import com.project.uandmeet.service.BoardService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.security.core.parameters.P;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
@@ -22,7 +22,7 @@ public class BoardCotroller {
 
     //게시물 작성
     @PostMapping("/api/board/create")
-    private CustomException boardNew(@RequestBody BoardRequestDto boardRequestDto,
+    private CustomException boardNew(@RequestBody BoardRequestDto.createAndCheck boardRequestDto,
                                      @AuthenticationPrincipal UserDetailsImpl userDetails) {
         return boardService.boardNew(boardRequestDto, userDetails);
     }
@@ -41,8 +41,8 @@ public class BoardCotroller {
 
     //게시물 상세 조회
     @GetMapping("/api/boards/{id}")
-    private BoardResponseDto boardChoiceInquiry(@PathVariable("id") Long id)
-    {   BoardResponseDto boardChoiceInquiry = null;
+    private BoardResponseDto boardChoiceInquiry(@PathVariable("id") Long id) {
+        BoardResponseDto boardChoiceInquiry = null;
         boardChoiceInquiry = boardService.boardChoiceInquiry(id);
         if (boardChoiceInquiry == null) {
             throw new CustomException(ErrorCode.CAN_NOT_CREATE_ROOM);
@@ -60,20 +60,26 @@ public class BoardCotroller {
     }
 
     //게시물 삭제.
-    @DeleteMapping ("/api/board/{id}")
+    @DeleteMapping("/api/board/{id}")
     private CustomException boardDel(@PathVariable("id") Long id,
-                                     @AuthenticationPrincipal UserDetailsImpl userDetails){
+                                     @AuthenticationPrincipal UserDetailsImpl userDetails) {
 
-        return  boardService.boardDel(id,userDetails);
+        return boardService.boardDel(id, userDetails);
     }
 
     //좋아요 유무
     @PostMapping("/board/likes")
-    private CustomException likeClick(LikeDto likeDto,
-                                      @AuthenticationPrincipal UserDetailsImpl userDetails){
-        return boardService.likeClick(likeDto,userDetails);
+    private ResponseEntity<Long> likeClick(LikeDto likeDto,
+                                           @AuthenticationPrincipal UserDetailsImpl userDetails) {
+        return boardService.likeClick(likeDto, userDetails);
 
     }
-
-
 }
+
+/*
+    @PostMapping("/board/{id}/matchingentry")
+    private ResponseEntity<Long> matchingJoin(@PathVariable("id") Long id,
+                                              @AuthenticationPrincipal UserDetailsImpl userDetails){
+        return boardService.matchingJoin(id,userDetails);
+
+    }*/

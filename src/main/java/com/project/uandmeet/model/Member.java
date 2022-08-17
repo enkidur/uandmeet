@@ -54,7 +54,7 @@ public class Member {
     private List<Board> boardList = new ArrayList<>();
 
     @OneToMany(fetch = FetchType.LAZY,mappedBy = "member",cascade = CascadeType.ALL)
-    private List<Like> likeList = new ArrayList<>();
+    private List<Liked> likeList = new ArrayList<>();
 
     @OneToMany(fetch = FetchType.LAZY,mappedBy = "member",cascade = CascadeType.ALL)
     private List<Entry> entryList = new ArrayList<>();

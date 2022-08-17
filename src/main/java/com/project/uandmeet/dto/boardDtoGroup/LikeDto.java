@@ -12,5 +12,5 @@ import lombok.Setter;
 public class LikeDto {
      private String boardType;
      private Long postid;
-     private boolean isLike;
+     private Boolean isLike;
 }

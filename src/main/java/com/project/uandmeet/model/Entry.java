@@ -27,4 +27,9 @@ public class Entry {
 
     private String nickname;
 
+    public Entry(Board board, Member member) {
+        this.member = member;
+        this.board = board;
+        this.nickname = member.getNickname();
+    }
 }

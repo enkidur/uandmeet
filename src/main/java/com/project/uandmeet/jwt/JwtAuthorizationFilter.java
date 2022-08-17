@@ -45,13 +45,14 @@ public class JwtAuthorizationFilter extends BasicAuthenticationFilter {
         }
 
         //JWT 토큰을 검증을 해서 정상적인 사용자인지 확인
-        String username =
-                JWT.require(Algorithm.HMAC512("cos")).build().verify(jwtHeader).getClaim("username").asString();
+        String email =
+                JWT.require(Algorithm.HMAC512("cos")).build().verify(jwtHeader).getClaim("email").asString();
 
         //서명이 정상적으로 됨.
-        if(username != null) {
-            Member memberEntity = memberRepostiory.findByUsername(username).orElseThrow(
-                    ()-> new IllegalArgumentException("username이 없습니다.")
+        if(email != null) {
+
+            Member memberEntity = memberRepostiory.findByEmail(email).orElseThrow(
+                    ()-> new IllegalArgumentException("email이 없습니다.")
             );
 
             UserDetailsImpl userDetails = new UserDetailsImpl(memberEntity);

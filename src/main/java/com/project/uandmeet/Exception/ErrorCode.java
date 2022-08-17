@@ -39,8 +39,10 @@ public enum ErrorCode {
     DUPLICATE_CHAT_ROOM(HttpStatus.BAD_REQUEST, "채팅 방이 이미 존재합니다"),
 
     // 서버 오류관련
-    INTERNAL_SERVER_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "서버에서 요청사항을 수행할 수 없습니다.");
+    INTERNAL_SERVER_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "서버에서 요청사항을 수행할 수 없습니다."),
 
+    //Entry 관련
+    ACCEPTED_SEAM(HttpStatus.ACCEPTED, "중복입니다");
     private final HttpStatus httpStatus;
     private final String errorMessage;
 

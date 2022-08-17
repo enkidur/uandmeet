@@ -4,7 +4,6 @@ import com.project.uandmeet.dto.boardDtoGroup.BoardRequestDto;
 import lombok.*;
 
 import javax.persistence.*;
-import java.text.DateFormat;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -23,12 +22,16 @@ public class Board {
     private String boardType;
     private String title;
     private String centent;
+
     //좋아요 수
-    private Long likeCount;
+    @Column(nullable = false)
+    private Long likeCount = 0L;
     //조회 수
-    private Long viewCount;
+    @Column(nullable = false)
+    private Long viewCount = 0L;
     //댓글 수
-    private Long commentCount;
+    @Column(nullable = false)
+    private Long commentCount = 0L;
 
     private LocalDateTime createdAt;
 
@@ -59,7 +62,7 @@ public class Board {
     private List<Entry> entryList = new ArrayList<>();
 
     @OneToMany(fetch = FetchType.LAZY,mappedBy = "board",cascade = CascadeType.ALL)
-    private List<Like> likeList = new ArrayList<>();
+    private List<Liked> likeList = new ArrayList<>();
 
     public Board(Member member, Category category, BoardRequestDto.createAndCheck boardRequestDto)
     {
@@ -90,5 +93,9 @@ public class Board {
     }
 
 
+    public Board(Long likeCountadd, Board board) {
+        this.id = board.getId();
+        this.likeCount = likeCountadd;
 
+    }
 }
