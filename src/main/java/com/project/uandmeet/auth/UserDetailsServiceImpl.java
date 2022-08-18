@@ -19,7 +19,8 @@ public class UserDetailsServiceImpl implements UserDetailsService{
     private final MemberRepository memberRepository;
 
     // Security Session => Authentication type => UserDetails type
-    // 함수가 실행되면서 fornt 에서 username 파마미터를 가지고 옴
+    // 함수가 실행되면서 front 에서 username 파라미터를 가지고 옴
+    // 함수 종료시 @AuthenticationPrincipal 어노테이션이 만들어진다.
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
         // front 에서 받아온 username 파라미터와 String username 의 이름 동일
@@ -30,6 +31,6 @@ public class UserDetailsServiceImpl implements UserDetailsService{
         );
 
         // session.setAttribute("loginUser", user);
-        return new UserDetailsImpl(member);
+        return new UserDetailsImpl(member); // 리턴될때 authenticatino에 저장됨
     }
 }

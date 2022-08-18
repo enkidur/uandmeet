@@ -84,10 +84,15 @@ public class Member {
 //        this.refreshToken = newToken;
 //    }
 
-    public Member(String email, String password){
-        this.username = email;
-        this.password = password;
+    // googleUser
+    @Builder
+    public Member(String email, String loginto){
+        this.email = email;
+        this.loginto = loginto;
+//        this.role = role;
     }
+
+
 
     public Member(String loginto) {
         this.loginto = loginto;
