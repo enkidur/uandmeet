@@ -146,4 +146,13 @@ public class MemberController {
         return  ResponseEntity.ok("redirect:/login");
     }
 
+    // OAuth 로그인을 해도 UserDetailsImpl
+    // 일반 로그인을 해도 UserDetailsImpl
+    @GetMapping("/user")
+    public @ResponseBody String loginTest(@AuthenticationPrincipal UserDetailsImpl userDetails){
+        System.out.println("유저디테일"+userDetails);
+        System.out.println("principalDetails: "+userDetails.getMember());
+        return "user";
+    }
+
 }
