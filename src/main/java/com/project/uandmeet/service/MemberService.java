@@ -5,25 +5,23 @@ import com.auth0.jwt.JWTVerifier;
 import com.auth0.jwt.algorithms.Algorithm;
 import com.auth0.jwt.exceptions.JWTVerificationException;
 import com.auth0.jwt.interfaces.DecodedJWT;
-import com.project.uandmeet.dto.CheckAuthNumDto;
-import com.project.uandmeet.dto.EmailDto;
-import com.project.uandmeet.dto.MemberRequestDto;
+import com.project.uandmeet.auth.UserDetailsImpl;
+import com.project.uandmeet.dto.*;
 import com.project.uandmeet.jwt.JwtProperties;
+import com.project.uandmeet.model.Concern;
+import com.project.uandmeet.model.JoinCnt;
 import com.project.uandmeet.model.Member;
 import com.project.uandmeet.redis.RedisUtil;
 import com.project.uandmeet.repository.MemberRepository;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
-import org.springframework.mail.javamail.JavaMailSenderImpl;
-import org.springframework.mail.javamail.MimeMessageHelper;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.bind.annotation.RequestBody;
 
-import javax.mail.MessagingException;
-import javax.mail.internet.MimeMessage;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
@@ -48,14 +46,11 @@ public class MemberService {
         authNumber = checkNum;
     }
 
-    // 회원 가입
-    public String join(MemberRequestDto requestDto) throws IOException {
-        String username = requestDto.getUsername();
+    // 회원 가입 1. emali check
+    public String checkemail(String username) throws IOException {
         String[] emailadress = username.split("@");
         String id = emailadress[0];
         String host = emailadress[1];
-        String password = requestDto.getPassword();
-        String passwordCheck = requestDto.getPasswordCheck();
 //        String pattern = "^[a-zA-Z0-9]*$";
         String pattern = "^[a-zA-Z0-9_!#$%&'\\*+/=?{|}~^.-]+@[a-zA-Z0-9.-]+.[a-zA-Z0-9.-]*$";
         String idpattern = "^[a-zA-Z0-9_!#$%&'\\*+/=?{|}~^.-]*$";
@@ -64,7 +59,7 @@ public class MemberService {
         // ID 영문 대소문자, 숫자, _!#$%&'\*+/=?{|}~^.- 특문허용
         // Host 시작전 @, 영문 대소문자, 숫자, .-특문허용
 
-        // 회원가입 조건
+        // 회원가입 username 조건
         if (username.length() < 10) {
             throw new IllegalArgumentException("이메일을 10자 이상 입력하세요");
         } else if (!Pattern.matches(idpattern, id)) {
@@ -73,44 +68,59 @@ public class MemberService {
             throw new IllegalArgumentException("host에 알파벳 대소문자와 숫자, 특수기호(.-)로만 입력하세요");
         } else if (!Pattern.matches(pattern, username)) {
             throw new IllegalArgumentException("이메일 규격에 맞게 입력하세요");
-        } else if (password.length() < 3) {
-            throw new IllegalArgumentException("비밀번호를 3자 이상 입력하세요");
-        } else if (password.length() > 21) {
-            throw new IllegalArgumentException("비밀번호를 20자 이하로 입력하세요");
-        } else if (password.contains(id)) {
-            throw new IllegalArgumentException(" 비밀번호에 id를 포함할 수없습니다.");
         } else if (username.contains("script")) {
-            throw new IllegalArgumentException("xss공격 멈춰주세요.");
-        } else if (password.contains("script")) {
-            throw new IllegalArgumentException("xss공격 멈춰주세요.");
-        } else if (passwordCheck.contains("script")) {
             throw new IllegalArgumentException("xss공격 멈춰주세요.");
         }
 
         // email 중복 확인
         checkDuplicateEmail(username);
+        return "email check";
+    }
 
         // email 인증 번호 발송
-//        emailService.joinEmail(email);
+//        emailService.joinEmail(username);
         // 인증 번호 확인 절차는 controller 에서 실행
 
         // 비밀번호, 비밀번호 재입력 확인
-        checkPassword(password, passwordCheck);
+        public String checkPassword(String password, String passwordCheck) {
+            if (password.length() < 3) {
+                throw new IllegalArgumentException("비밀번호를 3자 이상 입력하세요");
+            } else if (password.length() > 21) {
+                throw new IllegalArgumentException("비밀번호를 20자 이하로 입력하세요");
+            } else if (password.contains("script")) {
+                throw new IllegalArgumentException("xss공격 멈춰주세요.");
+            } else if (passwordCheck.contains("script")) {
+                throw new IllegalArgumentException("xss공격 멈춰주세요.");
+            }
+            if (!(passwordCheck.equals(password))) {
+                throw new IllegalArgumentException("비밀번호가 일치하지 않습니다.");
+            }
+            return "password check 완료";
+        }
 
-        Member member = requestDto.register();
-        member.setPassword(passwordEncoder.encode(requestDto.getPassword()));
-        // login 구별
-        member.setLoginto("normal");
+        public String signup(MemberRequestDto requestDto) throws IOException {
+            String username = requestDto.getUsername();
+            String[] emailadress = username.split("@");
+            String id = emailadress[0];
 
-        // 프로필 이미지 추가
+            checkemail(requestDto.getUsername());
+            checkPassword(requestDto.getPassword(), requestDto.getPasswordCheck());
+            Member member = requestDto.register();
+            member.setPassword(passwordEncoder.encode(requestDto.getPassword()));
+            // login 구별
+            member.setLoginto("normal");
+            member.setNickname(id);
+
+            // 프로필 이미지 추가
 //        if (requestDto.getUserProfileImage() != null) {
 //            String profileUrl = s3Uploader.upload(requestDto.getUserProfileImage(), "profile");
 //            users.setUserProfileImage(profileUrl);
 //        }
 
-        memberRepository.save(member);
-        return "회원가입 완료";
-    }
+            memberRepository.save(member);
+            return "회원가입 완료";
+        }
+
 
     public void checkDuplicateEmail(String username) {
         Optional<Member> member = memberRepository.findByUsername(username);
@@ -119,11 +129,7 @@ public class MemberService {
         }
     }
 
-    private void checkPassword(String password, String passwordCheck) {
-        if (!(passwordCheck.equals(password))) {
-            throw new IllegalArgumentException("비밀번호가 일치하지 않습니다.");
-        }
-    }
+
 
     // TOKEN
 
@@ -239,6 +245,99 @@ public class MemberService {
                             "로그인 후 비밀번호를 변경해 주세요"; //이메일 내용 삽입
             emailService.mailSend(setFrom, toMail, title, content);
             return authNumber;
+    }
+
+    // 활동 내역
+    public MypageDto action(UserDetailsImpl userDetails) {
+        String username = userDetails.getUsername();
+        Member member = memberRepository.findByUsername(username).orElseThrow(
+                ()-> new RuntimeException("볼수 없는 정보입니다")
+        );
+        String nickname = member.getNickname();
+        List<Concern> concern = member.getConcern();
+        List<JoinCnt> joinCnt = member.getJoinCnt();
+        MypageDto mypageDto = new MypageDto(nickname, concern, joinCnt);
+        return mypageDto;
+    }
+
+    // 활동내역 -> 관심사 수정
+    public MypageDto concernedit(UserDetailsImpl userDetails, List<Concern> concern) {
+        String username = userDetails.getUsername();
+        Member member = memberRepository.findByUsername(username).orElseThrow(
+                ()-> new RuntimeException("수정 권한이 없습니다.")
+        );
+        String nickname = member.getNickname();
+        List<JoinCnt> joinCnt = member.getJoinCnt();
+        MypageDto mypageDto = new MypageDto(nickname, concern, joinCnt);
+        return mypageDto;
+    }
+
+    // 활동 페이지 -> 닉네임 수정
+    public MypageDto nicknameedit(UserDetailsImpl userDetails, String nickname) {
+        String username = userDetails.getUsername();
+        Member member = memberRepository.findByUsername(username).orElseThrow(
+                ()-> new RuntimeException("수정 권한이 없습니다.")
+        );
+        List<Concern> concern = member.getConcern();
+        List<JoinCnt> joinCnt = member.getJoinCnt();
+        MypageDto mypageDto = new MypageDto(nickname, concern, joinCnt);
+        return mypageDto;
+    }
+
+    // memberInfo
+    public MyPageInfoDto myinfo(UserDetailsImpl userDetails) {
+        String username = userDetails.getUsername();
+        Member member = memberRepository.findByUsername(username).orElseThrow(
+                ()-> new RuntimeException("볼 수 없는 정보입니다")
+        );
+        boolean gender = member.isGender();
+        String birth = member.getBirth();
+        MyPageInfoDto myPageInfoDto = new MyPageInfoDto(username, gender, birth);
+        return myPageInfoDto;
+    }
+
+    // info 수정
+    public MyPageInfoDto infoedit(UserDetailsImpl userDetails , InfoeditRequestDto requestDto) {
+        String username = userDetails.getUsername();
+        boolean gender = requestDto.isGender();
+        String birth = requestDto.getBirth();
+        MyPageInfoDto myPageInfoDto = new MyPageInfoDto(username, gender, birth);
+        return myPageInfoDto;
+    }
+
+    // profile
+    public ProfileDto profile(UserDetailsImpl userDetails) {
+        String username = userDetails.getUsername();
+        Member member = memberRepository.findByUsername(username).orElseThrow(
+                ()-> new RuntimeException("볼수 없는 정보입니다")
+        );
+        String nickname = member.getNickname();
+        double star = member.getStar();
+        String profileimgurl = member.getProfileImgUrl();
+        ProfileDto profileDto = new ProfileDto(nickname, star, profileimgurl);
+        return profileDto;
+    }
+
+    // profile 수정
+    public ProfileDto profileedit(UserDetailsImpl userDetails, ProfileEditRequestDto requestDto) {
+        String username = userDetails.getUsername();
+        Member member = memberRepository.findByUsername(username).orElseThrow(
+                ()-> new RuntimeException("볼수 없는 정보입니다")
+        );
+        String nickname = member.getNickname();
+        double star = member.getStar();
+        String profileimgurl = requestDto.getProfileimgurl();
+        ProfileDto profileDto = new ProfileDto(nickname, star, profileimgurl);
+        return profileDto;
+    }
+
+    // 회원 탈퇴
+    public String withdraw(UserDetailsImpl userDetails, String password) {
+        if (userDetails.getPassword().equals(passwordEncoder.encode(password))) {
+            String username = userDetails.getUsername();
+            memberRepository.deleteByUsername(username);
+        }
+        return "회원탈퇴 완료";
     }
 }
 
