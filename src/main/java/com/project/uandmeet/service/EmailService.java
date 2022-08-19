@@ -1,6 +1,5 @@
 package com.project.uandmeet.service;
 
-import com.project.uandmeet.dto.CheckAuthNumDto;
 import com.project.uandmeet.redis.RedisUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.mail.javamail.JavaMailSenderImpl;
@@ -29,10 +28,8 @@ public class EmailService {
         authNumber = checkNum;
     }
 
-    public boolean checkAuthNum(CheckAuthNumDto randomNumDto) {
-        return Objects.equals(randomNumDto.getAuthNumber(), authNumber);
-
-
+    public boolean checkAuthNum(String authnum) {
+        return Objects.equals(authnum, authNumber);
     }
 
 
