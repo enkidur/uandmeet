@@ -12,8 +12,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
-import sun.java2d.cmm.Profile;
-
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
@@ -81,8 +79,8 @@ public class MemberController {
 
     // password 찾기
     @PostMapping("/api/findpassword")
-    public ResponseEntity<String> findpassword(@RequestBody EmailDto requestDto) {
-        memberService.findpassword(requestDto.getUsername());
+    public ResponseEntity<String> findpassword(@RequestBody String username) {
+        memberService.findpassword(username);
         return ResponseEntity.ok("password 찾기 완료");
     }
 
