@@ -296,10 +296,25 @@ public class MemberService {
         return myPageInfoDto;
     }
 
-    // info 수정
-    public MyPageInfoDto infoedit(UserDetailsImpl userDetails , InfoeditRequestDto requestDto) {
+    // info -> gender 수정
+    public MyPageInfoDto genderedit(UserDetailsImpl userDetails , InfoeditRequestDto requestDto) {
         String username = userDetails.getUsername();
+        Member member = memberRepository.findByUsername(username).orElseThrow(
+                ()-> new RuntimeException("볼 수 없는 정보입니다")
+        );
         boolean gender = requestDto.isGender();
+        String birth = member.getBirth();
+        MyPageInfoDto myPageInfoDto = new MyPageInfoDto(username, gender, birth);
+        return myPageInfoDto;
+    }
+
+    // info -> birth 수정
+    public MyPageInfoDto birthedit(UserDetailsImpl userDetails , InfoeditRequestDto requestDto) {
+        String username = userDetails.getUsername();
+        Member member = memberRepository.findByUsername(username).orElseThrow(
+                ()-> new RuntimeException("볼 수 없는 정보입니다")
+        );
+        boolean gender = member.isGender();
         String birth = requestDto.getBirth();
         MyPageInfoDto myPageInfoDto = new MyPageInfoDto(username, gender, birth);
         return myPageInfoDto;

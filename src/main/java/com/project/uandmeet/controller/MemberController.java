@@ -12,8 +12,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
-import sun.java2d.cmm.Profile;
-
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
@@ -110,11 +108,18 @@ public class MemberController {
         return ResponseEntity.ok(memberService.myinfo(userDetails));
     }
 
-    // myinfo 수정
-    @PutMapping("/api/mypage/infoedit")
-    public ResponseEntity<MyPageInfoDto> infoedit(@AuthenticationPrincipal UserDetailsImpl userDetails,
+    // myinfo -> gender 수정
+    @PutMapping("/api/mypage/infoedit/gender")
+    public ResponseEntity<MyPageInfoDto> genderedit(@AuthenticationPrincipal UserDetailsImpl userDetails,
                                                   InfoeditRequestDto requestDto) {
-        return ResponseEntity.ok(memberService.infoedit(userDetails, requestDto));
+        return ResponseEntity.ok(memberService.genderedit(userDetails, requestDto));
+    }
+
+    // myinfo -> birth 수정
+    @PutMapping("/api/mypage/infoedit/birth")
+    public ResponseEntity<MyPageInfoDto> birthedit(@AuthenticationPrincipal UserDetailsImpl userDetails,
+                                                  InfoeditRequestDto requestDto) {
+        return ResponseEntity.ok(memberService.birthedit(userDetails, requestDto));
     }
 
     // profile
