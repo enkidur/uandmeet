@@ -1,12 +1,16 @@
 package com.project.uandmeet.auth;
 
 import com.project.uandmeet.model.Member;
+import lombok.Data;
 import lombok.Getter;
 import lombok.Setter;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.oauth2.core.user.OAuth2User;
+
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Map;
 
 
 // 시큐리티가 /login 을 낚아채서 로그인을 진행함
@@ -17,17 +21,42 @@ import java.util.Collection;
 // 즉, Security Session => Authentication => UserDetails(PrincipalDetails)
 // -> PrincipalDetails 을 UserDetails 로 implements 하여 타입을 변경하여 Authentication 객체 안에 넣어줄 수 있다
 
-@Getter
-@Setter
-public class UserDetailsImpl implements UserDetails {
+@Data
+public class UserDetailsImpl implements UserDetails, OAuth2User {
 
     private Member member; // 컴포지션
 //    private KakaoMember kakaoMember;
+    private Map<String,Object> attributes;
 
+
+    // 일반 로그인
     public UserDetailsImpl(Member member) {
         this.member = member;
     }
 
+    // OAuth 로그인
+    public UserDetailsImpl(Member member, Map<String, Object> attributes) {
+        this.member = member;
+        this.attributes = attributes;
+    }
+
+    //getName()과 getAttributes()는 OAuth2User 클래스의 오버라이딩 메서드
+    @Override
+    public String getName() {
+        return null;
+    }
+
+    @Override
+    public Map<String, Object> getAttributes() {
+        return attributes;
+
+   public UserDetailsImpl(KakaoMember kakaoMember) {
+        this.kakaoMember = kakaoMember;
+    }
+    public Member getMember() {
+        return member;
+
+    }
 
     // 해당 User 의 권한의 리턴
     @Override
@@ -87,4 +116,5 @@ public class UserDetailsImpl implements UserDetails {
         // return false
         return true;
     }
+
 }

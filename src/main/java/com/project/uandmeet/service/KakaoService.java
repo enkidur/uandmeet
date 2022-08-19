@@ -173,12 +173,12 @@ public class KakaoService {
         // redis 에 token 저장
         redisUtil.setDataExpire(member.getUsername(),refreshToken,JwtProperties.REFRESH_EXPIRATION_TIME);
 
-
         // token 을 Header 에 발급
         // 재발급떼문에 set 사용
         HttpHeaders headers = new HttpHeaders();
         headers.set(JwtProperties.HEADER_ACCESS, JwtProperties.TOKEN_PREFIX + accessToken);
         headers.set(JwtProperties.HEADER_REFRESH, JwtProperties.TOKEN_PREFIX + refreshToken);
+
     }
 
 //    private void froceLogin(Member member) {

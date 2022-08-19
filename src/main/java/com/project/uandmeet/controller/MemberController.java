@@ -2,13 +2,26 @@ package com.project.uandmeet.controller;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.project.uandmeet.auth.UserDetailsImpl;
+import com.project.uandmeet.dto.CheckAuthNumDto;
+import com.project.uandmeet.dto.EmailDto;
+import com.project.uandmeet.dto.MemberRequestDto;
+
 import com.project.uandmeet.dto.*;
 import com.project.uandmeet.model.Concern;
 import com.project.uandmeet.service.EmailService;
 import com.project.uandmeet.service.KakaoService;
 import com.project.uandmeet.service.MemberService;
 import lombok.RequiredArgsConstructor;
+
 import org.springframework.http.ResponseEntity;
+
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.oauth2.core.user.OAuth2User;
+
+
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
@@ -28,6 +41,35 @@ public class MemberController {
     private final KakaoService kakaoService;
     private final EmailService emailService;
 
+    // authenticatino으로 받아올 수도 있고, @AuthenticationPrincipal으로 받아올 수 도있음
+    // authenticatino으로 받아올때는 OAuth2User로 다운캐스팅을 해서  getPrincipal()로 받아와야하고
+    // @AuthenticationPrincipal 으로 받아올때는 getAttuributes()로 정보를 받아올수있음
+
+//    시큐리티 세션안에는 Authentication이라는 객체가 있음
+//    이 객체는 UserDetilas 또는 OAuth2User를 담을수있는데
+//    컨트롤러에서 @AuthenticationPrincipal로 가져올수있는건 하나니까
+//    둘 모두를 가져올 방법이 필요하다.
+//    따라서 UserDetails에서 둘다 상속하게 한다.
+    @GetMapping("/test/login")
+    public @ResponseBody String loginTest(Authentication authentication,
+                                          @AuthenticationPrincipal OAuth2User oauth){ // 세션값을 넘겨줌 DI(의존성 주입)
+        OAuth2User oAuth2User = (OAuth2User) authentication.getPrincipal();
+        System.out.println("authentication: "+oAuth2User.getAttributes());
+        System.out.println("oauth2User: "+oauth.getAttributes());
+
+        return "OAuth 세션 정보 확인하기";
+    }
+
+    // OAuth 로그인을 해도 UserDetailsImpl
+    // 일반 로그인을 해도 UserDetailsImpl
+    @GetMapping("/user")
+    public @ResponseBody String loginTest(@AuthenticationPrincipal UserDetailsImpl userDetails){
+        System.out.println("유저디테일"+userDetails);
+        System.out.println("principalDetails: "+userDetails.getMember());
+        return "user";
+    }
+
+
     // 회원가입 1. emali check
     @PostMapping("/api/checemail")
     public ResponseEntity<String> checkemail(@RequestBody String username) throws IOException {
@@ -39,6 +81,7 @@ public class MemberController {
     public @ResponseBody String mailCheck(@RequestBody String username) {
         return emailService.joinEmail(username);
     }
+
 
     // 회원가입 3. Email 인증번호 확인
     @PostMapping("/api/checkAuthNum")
@@ -135,13 +178,31 @@ public class MemberController {
     }
 
 
+    // Email 인증 test
+    @PostMapping("/api/mailCheck")
+    public @ResponseBody String mailCheck(@RequestBody EmailDto requestDto) {
+        System.out.println("이메일 인증 요청이 들어옴!");
+        System.out.println("이메일 인증 이메일 : " + requestDto.getUsername());
+        return emailService.joinEmail(requestDto.getUsername());
+
+
+    @PostMapping("api/join")
+    public String join(@RequestBody MemberRequestDto requestDto) throws IOException {
+        memberService.join(requestDto);
+        return "redirect:/login";
+
+    }
+
+
 
     // kakao login
     @GetMapping("/api/kakaologin")
     public ResponseEntity<String> kakaoLogin(@RequestParam String code) throws JsonProcessingException {
         // authorizedCode: 카카오 서버로부터 받은 인가 코드
         kakaoService.kakaoLogin(code);
+
         return  ResponseEntity.ok("redirect:/login");
+
     }
 
 }

@@ -29,7 +29,6 @@ public class JwtAuthorizationFilter extends BasicAuthenticationFilter{
         this.memberRepository = memberRepository;
     }
 
-    // 인증이나 권한이 필요한 요청이 있을 때 해당 filter 를 실행
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain chain)
             throws IOException, ServletException {
