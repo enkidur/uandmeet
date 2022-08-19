@@ -16,6 +16,10 @@
     <div id="login-title">Log into Select Shop</div>
     <button id="login-kakao-btn" onclick="location.href='/oauth2/authorization/google'">
         구글 로그인
+
+    <button id="login-kakao-btn" onclick="location.href='https://kauth.kakao.com/oauth/authorize?client_id=5d309e8e3962145e21700ba232a4d3bc&redirect_uri=http://localhost:8080/user/kakao/callback&response_type=code'">
+        카카오로 로그인하기
+
     </button>
     <button id="login-id-btn" onclick="location.href='/user/signup'">
         회원 가입하기
@@ -31,6 +35,7 @@
     </form>
     <div id="login-failed" style="display:none" class="alert alert-danger" role="alert">로그인에 실패하였습니다.</div>
     <a href="/oauth2/authorization/google">구글 로그인</a>
+
 </div>
 </body>
 <script>

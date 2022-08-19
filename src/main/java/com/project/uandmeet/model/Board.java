@@ -35,6 +35,16 @@ public class Board extends Timestamped{
     @JoinColumn(name = "MEMBER_ID")
     private Member member;
 
+
 //    @OneToMany(mappedBy = "board", orphanRemoval = true)
 //    private List<BoardLikes> boardLikes;
+
+    public void minuslikecnt() {
+        this.likeCount -= 1;
+    }
+
+    public void pluslikecnt() {
+        this.likeCount += 1;
+    }
+
 }

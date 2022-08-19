@@ -32,7 +32,7 @@ public class Member {
     private String birth;
 
     @Column
-    private String gender;
+    private boolean gender; // true 남성, flase 여성
 
     @Column(nullable = true, unique = true)
     private String email;
@@ -43,8 +43,11 @@ public class Member {
     @Column
     private String profileImgUrl;
 
-    @Column
-    private String concern;
+    @OneToMany(mappedBy = "member", fetch = FetchType.LAZY)
+    private List<Concern> concern;
+
+    @OneToMany(mappedBy = "member", fetch = FetchType.LAZY)
+    private List<JoinCnt> joinCnt;
 
     @Column
     private Double star;
