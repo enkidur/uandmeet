@@ -29,8 +29,8 @@ public class EmailService {
         authNumber = checkNum;
     }
 
-    public boolean checkAuthNum(CheckAuthNumDto randomNumDto) {
-        return Objects.equals(randomNumDto.getAuthNumber(), authNumber);
+    public boolean checkAuthNum(String authNum) {
+        return Objects.equals(authNum, authNumber);
 
 
     }
