@@ -9,12 +9,14 @@ import com.project.uandmeet.service.EmailService;
 import com.project.uandmeet.service.KakaoService;
 import com.project.uandmeet.service.MemberService;
 import lombok.RequiredArgsConstructor;
+
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.oauth2.core.user.OAuth2User;
+
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 import javax.servlet.http.HttpServletRequest;
@@ -112,12 +114,20 @@ public class MemberController {
         return "login.html";
     }
 
+
     // Email 인증 test
     @PostMapping("/api/mailCheck")
     public @ResponseBody String mailCheck(@RequestBody EmailDto requestDto) {
         System.out.println("이메일 인증 요청이 들어옴!");
         System.out.println("이메일 인증 이메일 : " + requestDto.getUsername());
         return emailService.joinEmail(requestDto.getUsername());
+
+
+    @PostMapping("api/join")
+    public String join(@RequestBody MemberRequestDto requestDto) throws IOException {
+        memberService.join(requestDto);
+        return "redirect:/login";
+
     }
 
 
@@ -125,7 +135,9 @@ public class MemberController {
     public ResponseEntity<String> kakaoLogin(@RequestParam String code) throws JsonProcessingException {
         // authorizedCode: 카카오 서버로부터 받은 인가 코드
         kakaoService.kakaoLogin(code);
+
         return  ResponseEntity.ok("redirect:/login");
+
     }
 
 }

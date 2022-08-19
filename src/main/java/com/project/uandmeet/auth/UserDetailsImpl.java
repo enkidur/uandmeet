@@ -49,6 +49,13 @@ public class UserDetailsImpl implements UserDetails, OAuth2User {
     @Override
     public Map<String, Object> getAttributes() {
         return attributes;
+
+   public UserDetailsImpl(KakaoMember kakaoMember) {
+        this.kakaoMember = kakaoMember;
+    }
+    public Member getMember() {
+        return member;
+
     }
 
     // 해당 User 의 권한의 리턴

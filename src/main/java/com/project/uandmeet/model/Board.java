@@ -1,35 +1,40 @@
 package com.project.uandmeet.model;
 
-import lombok.*;
+import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 import javax.persistence.*;
+import java.util.List;
 
+@Setter
 @Getter
-@Builder
+@Entity
 @NoArgsConstructor
 @AllArgsConstructor
-@Entity
-public class Board {
+public class Board extends Timestamped{
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    private Long boardId;
 
-    private String title;
+    @Column(nullable = false)
+    private String content;
 
-    private String centent;
+    @Column(nullable = false)
+    private String category;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "category_id")
-    private Category category;
+    @Column(nullable = false)
+    private String photoUrl;
 
-    private int viewCount;
-
-    private int likeCount;
-
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "member_id")
+    @JsonBackReference
+    @ManyToOne
+    @JoinColumn(name = "MEMBER_ID")
     private Member member;
 
-    //
+//    @OneToMany(mappedBy = "board", orphanRemoval = true)
+//    private List<BoardLikes> boardLikes;
 }
