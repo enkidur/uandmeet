@@ -1,6 +1,7 @@
 package com.project.uandmeet.auth;
 
 import com.project.uandmeet.model.Member;
+import lombok.Data;
 import lombok.Getter;
 import lombok.Setter;
 import org.springframework.security.core.GrantedAuthority;
@@ -20,8 +21,7 @@ import java.util.Map;
 // 즉, Security Session => Authentication => UserDetails(PrincipalDetails)
 // -> PrincipalDetails 을 UserDetails 로 implements 하여 타입을 변경하여 Authentication 객체 안에 넣어줄 수 있다
 
-@Getter
-@Setter
+@Data
 public class UserDetailsImpl implements UserDetails, OAuth2User {
 
     private Member member; // 컴포지션

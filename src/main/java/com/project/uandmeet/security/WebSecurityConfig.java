@@ -11,12 +11,15 @@ import com.project.uandmeet.repository.MemberRepository;
 import com.project.uandmeet.service.MemberService;
 import org.apache.tomcat.util.http.parser.Authorization;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.builders.WebSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.config.http.SessionCreationPolicy;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
 @Configuration
 @EnableWebSecurity // 시큐리티 활성화 -> 기본 스프링 필터체인에 등록
@@ -84,5 +87,6 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter{
                 .userInfoEndpoint()
                 .userService(principalOauth2UserService);// 구글 로그인이 완료된 뒤의 후처리가 필요함. Tip. 코드로 받는게아니고 엑세스토큰+사용자 프로필 정보를 한방에 받게됨
         }
+
 }
 
