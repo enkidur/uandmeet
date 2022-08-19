@@ -4,10 +4,10 @@ import lombok.Getter;
 
 @Getter
 public class InfoeditRequestDto {
-    private boolean gender;
+    private String gender;
     private String birth;
 
-    public void setGender(boolean gender) {
+    public void setGender(String gender) {
         this.gender = gender;
     }
 

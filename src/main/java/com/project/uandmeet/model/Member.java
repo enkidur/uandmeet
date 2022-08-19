@@ -6,12 +6,12 @@ import javax.persistence.*;
 import java.util.ArrayList;
 import java.util.List;
 
+@Getter
+@Setter
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
-@Getter
-@Setter
 public class Member {
 
     @Id
@@ -33,8 +33,8 @@ public class Member {
     @Column
     private String birth;
 
-    @Column
-    private boolean gender; // true 남성, flase 여성
+    @Column(nullable = false)
+    private String gender;
 
     @Column(nullable = true, unique = true)
     private String email;
@@ -51,9 +51,14 @@ public class Member {
     @Column
     private Double star;
 
-    @OneToMany(fetch = FetchType.LAZY,mappedBy = "member",cascade = CascadeType.REMOVE)
+    @OneToMany(fetch = FetchType.LAZY,mappedBy = "member",cascade = CascadeType.ALL)
     private List<Board> boardList = new ArrayList<>();
 
+    @OneToMany(fetch = FetchType.LAZY,mappedBy = "member",cascade = CascadeType.ALL)
+    private List<Liked> likeList = new ArrayList<>();
+
+    @OneToMany(fetch = FetchType.LAZY,mappedBy = "member",cascade = CascadeType.ALL)
+    private List<Entry> entryList = new ArrayList<>();
     @Column
     @Enumerated(value = EnumType.STRING) // Enum type을 STring 으로 변화하여 저장
     private MemberRoleEnum role;

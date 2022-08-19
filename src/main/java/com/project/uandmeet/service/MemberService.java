@@ -290,7 +290,7 @@ public class MemberService {
         Member member = memberRepository.findByUsername(username).orElseThrow(
                 ()-> new RuntimeException("볼 수 없는 정보입니다")
         );
-        boolean gender = member.isGender();
+        String gender = member.getGender();
         String birth = member.getBirth();
         MyPageInfoDto myPageInfoDto = new MyPageInfoDto(username, gender, birth);
         return myPageInfoDto;
@@ -299,7 +299,7 @@ public class MemberService {
     // info 수정
     public MyPageInfoDto infoedit(UserDetailsImpl userDetails , InfoeditRequestDto requestDto) {
         String username = userDetails.getUsername();
-        boolean gender = requestDto.isGender();
+        String gender = requestDto.getGender();
         String birth = requestDto.getBirth();
         MyPageInfoDto myPageInfoDto = new MyPageInfoDto(username, gender, birth);
         return myPageInfoDto;

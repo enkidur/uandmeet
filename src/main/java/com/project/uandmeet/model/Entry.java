@@ -1,19 +1,18 @@
 package com.project.uandmeet.model;
 
-import com.project.uandmeet.dto.LikeDto;
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 import javax.persistence.*;
 
 @Getter
 @Setter
-@Builder
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
-@Table(name = "Likes")
-public class Like {
-
+public class Entry {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -23,13 +22,14 @@ public class Like {
     private Member member;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "board")
+    @JoinColumn(name = "board_id")
     private Board board;
 
+    private String nickname;
 
-    public Like(Member memberid, Board boardid) {
-        this.member = memberid;
-        this.board = boardid;
+    public Entry(Board board, Member member) {
+        this.member = member;
+        this.board = board;
+        this.nickname = member.getNickname();
     }
-
 }
