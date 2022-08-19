@@ -41,4 +41,6 @@ public class BoardRequestDto {
         private double lat;
         private double lng;
     }
+
+
 }

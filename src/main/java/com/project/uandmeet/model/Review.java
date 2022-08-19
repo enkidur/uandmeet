@@ -13,7 +13,7 @@ import java.sql.Timestamp;
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
-public class Review {
+public class  Review {
 /*
 * 리뷰가 회원 리뷰만 들어가는건지?
 * 매칭이 끝난후 그 매칭 게시물에 리뷰가 들어가는건지?

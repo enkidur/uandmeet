@@ -9,7 +9,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Getter
-@Builder
+@Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
@@ -64,6 +64,9 @@ public class Board {
     @OneToMany(fetch = FetchType.LAZY,mappedBy = "board",cascade = CascadeType.ALL)
     private List<Liked> likeList = new ArrayList<>();
 
+    @OneToMany(fetch = FetchType.LAZY,mappedBy = "board",cascade = CascadeType.ALL)
+    private List<Comment> commentList = new ArrayList<>();
+
     public Board(Member member, Category category, BoardRequestDto.createAndCheck boardRequestDto)
     {
         this.member = member;
@@ -90,12 +93,5 @@ public class Board {
         this.gu = boardRequestUpdateDto.getGu();
         this.lat = boardRequestUpdateDto.getLat();
         this.lng = boardRequestUpdateDto.getLng();
-    }
-
-
-    public Board(Long likeCountadd, Board board) {
-        this.id = board.getId();
-        this.likeCount = likeCountadd;
-
     }
 }
