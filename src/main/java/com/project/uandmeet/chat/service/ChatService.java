@@ -9,9 +9,11 @@ import com.project.uandmeet.chat.dto.UserDetailDto;
 import com.project.uandmeet.chat.dto.UserinfoDto;
 import com.project.uandmeet.chat.model.*;
 import com.project.uandmeet.chat.repository.*;
+import com.project.uandmeet.exception.CustomException;
+import com.project.uandmeet.exception.ErrorCode;
 import com.project.uandmeet.model.Member;
 import com.project.uandmeet.repository.BoardRepository;
-import com.project.uandmeet.repository.LikeRepository;
+import com.project.uandmeet.repository.LikedRepository;
 import com.project.uandmeet.repository.MemberRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -38,7 +40,7 @@ public class ChatService {
     private final ChatRoomJpaRepository chatRoomJpaRepository;
     private final ResignChatRoomJpaRepository resignChatRoomJpaRepository;
     private final BoardRepository boardRepository;
-    private final LikeRepository likeRepository;
+    private final LikedRepository likeRepository;
     private final ResignChatMessageJpaRepository resignChatMessageJpaRepository;
 
 
@@ -88,7 +90,6 @@ public class ChatService {
                     messageDto.setQuitOwner(true);
                     messageDto.setMessage("(방장) " + messageDto.getSender() + "님이 나가셨습니다. " +
                             "더 이상 대화를 할 수 없으며 채팅방을 나가면 다시 입장할 수 없습니다.");
-                    likeRepository.deleteByBoardId(Long.parseLong(messageDto.getRoomId()));
                     boardRepository.deleteById(Long.parseLong(messageDto.getRoomId()));
                     ChatRoom findChatRoom = chatRoomJpaRepository.findByRoomId(messageDto.getRoomId());
                     List<ChatMessage> chatMessage = chatMessageJpaRepository.findAllByRoomId(messageDto.getRoomId());
@@ -107,7 +108,6 @@ public class ChatService {
                     messageDto.setQuitOwner(true);
                     messageDto.setMessage("(방장) " + messageDto.getSender() + "님이 나가셨습니다. " +
                             "더 이상 대화를 할 수 없으며 채팅방을 나가면 다시 입장할 수 없습니다.");
-                    likeRepository.deleteByBoardId(Long.parseLong(messageDto.getRoomId()));
                     boardRepository.deleteById(Long.parseLong(messageDto.getRoomId()));
                     ChatRoom findChatRoom = chatRoomJpaRepository.findByRoomId(messageDto.getRoomId());
                     List<ChatMessage> chatMessage = chatMessageJpaRepository.findAllByRoomId(messageDto.getRoomId());
@@ -138,7 +138,7 @@ public class ChatService {
     //채팅방에 참여한 사용자 정보 조회
     public List<UserinfoDto> getUserinfo(UserDetailsImpl userDetails, String roomId) {
         memberRepository.findById(userDetails.getMember().getId()).orElseThrow(
-                () -> new IllegalArgumentException("존재하지 않는 사용자 입니다.")
+                () -> new CustomException(ErrorCode.MEMBER_NOT_FOUND)
         );
         List<InvitedUsers> invitedUsers = invitedUsersRepository.findAllByBoardId(Long.parseLong(roomId));
         List<UserinfoDto> users = new ArrayList<>();
@@ -149,10 +149,11 @@ public class ChatService {
         return users;
     }
 
+
     //유저 정보 상세조회 (채팅방 안에서)
-    public ResponseEntity<UserDetailDto> getUserDetails(String roomId, Long memberId) {
-        Member member = memberRepository.findById(memberId).orElseThrow(
-                () -> new IllegalArgumentException("존재하지 않는 사용자 입니다!")
+    public ResponseEntity<UserDetailDto> getUserDetails(String roomId, Long userId) {
+        Member member = memberRepository.findById(userId).orElseThrow(
+                () -> new CustomException(ErrorCode.MEMBER_NOT_FOUND)
         );
         ChatRoom chatRoom = chatRoomJpaRepository.findByRoomId(roomId);
 
