@@ -2,11 +2,15 @@ package com.project.uandmeet.auth;
 
 import com.project.uandmeet.model.Member;
 import com.project.uandmeet.repository.MemberRepository;
+
 import lombok.RequiredArgsConstructor;
+
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
+
+import lombok.RequiredArgsConstructor;
 
 // security 설정에서 loginProcessingUrl("/login") 때문에
 // login 요청이 오면 자동으로 UserDetailsService 타입으로 IoC 되어 있는 PrincipalDetailsService 의 loadUserByUsername 함수가 실행
@@ -16,10 +20,16 @@ import org.springframework.stereotype.Service;
 @RequiredArgsConstructor // final 생성자 자동 생성
 public class UserDetailsServiceImpl implements UserDetailsService {
 
+
     private final MemberRepository memberRepository;
 
     // Security Session => Authentication type => UserDetails type
+
+    // 함수가 실행되면서 front 에서 username 파라미터를 가지고 옴
+    // 함수 종료시 @AuthenticationPrincipal 어노테이션이 만들어진다.
+
     // 함수가 실행되면서 fornt 에서 username 파마미터를 가지고 옴
+
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
         // front 에서 받아온 username 파라미터와 String username 의 이름 동일
@@ -30,6 +40,10 @@ public class UserDetailsServiceImpl implements UserDetailsService {
         );
 
         // session.setAttribute("loginUser", user);
+
+        return new UserDetailsImpl(member); // 리턴될때 authenticatino에 저장됨
+
         return new UserDetailsImpl(member);
+
     }
 }

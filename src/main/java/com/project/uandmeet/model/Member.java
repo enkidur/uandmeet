@@ -18,29 +18,23 @@ public class Member {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-
-    @Column(nullable = false, unique = true)
+    @Column
     private String username;
-
-    @Column(nullable = false)
-    private String realname;
-
-    @Column(nullable = false, unique = true)
+    @Column(nullable = true, unique = true)
     private String nickname;
-
-    @Column(nullable = false)
+    @Column(nullable = true)
     private String password;
 
-    @Column(nullable = false)
+    @Column
     private String phone;
 
-    @Column(nullable = false)
+    @Column
     private String birth;
 
-    @Column(nullable = false)
+    @Column
     private String gender;
 
-    @Column(nullable = false, unique = true)
+    @Column(nullable = true, unique = true)
     private String email;
 
     @Column(nullable = false)
@@ -63,22 +57,30 @@ public class Member {
     @Enumerated(value = EnumType.STRING) // Enum type을 STring 으로 변화하여 저장
     private MemberRoleEnum role;
 
-    private String refreshToken;
+    @Column
+    private String loginto;
 
-    public Member(String nickname, String encodedPassword, String email, String username) {
+//    private String refreshToken;
+
+
+    // kakaoUser
+    @Builder
+    public Member(String nickname, String encodedPassword, String email) {
         this.nickname = nickname;
         this.password = encodedPassword;
+        this.username = email;
+    }
+
+    // googleUser
+    @Builder
+    public Member(String email, String loginto){
         this.email = email;
-        this.username = username;
+        this.loginto = loginto;
+//        this.role = role;
     }
 
-    public void updateRefreshToken(String newToken) {
-        this.refreshToken = newToken;
-    }
-
-    public Member(String username, String password){
-        this.username = username;
-        this.password = password;
+    public Member(String loginto) {
+        this.loginto = loginto;
     }
 
     //홍산의 추가 (삭제?)

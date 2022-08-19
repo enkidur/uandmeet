@@ -1,11 +1,8 @@
 package com.project.uandmeet.dto;
 
 import lombok.Getter;
-import lombok.Setter;
 
 @Getter
-@Setter
-public class LoginRequestDto {
+public class EmailDto {
     private String username;
-    private String password;
 }

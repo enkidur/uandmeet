@@ -1,30 +1,35 @@
-package com.project.uandmeet.model;
-
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-
-import javax.persistence.*;
-
-@Getter
-@Builder
-@NoArgsConstructor
-@AllArgsConstructor
-@Entity
-@Table(name = "Likes")
-public class Like {
-
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
-
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "member_id")
-    private Member member;
-
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "board")
-    private Board board;
-    ////
-}
+//package com.project.uandmeet.model;
+//
+//import com.project.uandmeet.dto.LikeDto;
+//import lombok.*;
+//
+//import javax.persistence.*;
+//
+//@Getter
+//@Setter
+//@Builder
+//@NoArgsConstructor
+//@AllArgsConstructor
+//@Entity
+//@Table(name = "Likes")
+//public class Like {
+//
+//    @Id
+//    @GeneratedValue(strategy = GenerationType.IDENTITY)
+//    private Long id;
+//
+//    @ManyToOne(fetch = FetchType.LAZY)
+//    @JoinColumn(name = "member_id")
+//    private Member member;
+//
+//    @ManyToOne(fetch = FetchType.LAZY)
+//    @JoinColumn(name = "board")
+//    private Board board;
+//
+//
+//    public Like(Member memberid, Board boardid) {
+//        this.member = memberid;
+//        this.board = boardid;
+//    }
+//
+//}

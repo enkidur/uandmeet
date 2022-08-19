@@ -4,12 +4,11 @@ import lombok.Getter;
 
     @Getter
     public class KakaoUserInfoDto {
-        private String username;
+        private String id;
         private String nickname;
         private String email;
 
-        public KakaoUserInfoDto(String  username, String nickname, String email) {
-            this.username = username;
+        public KakaoUserInfoDto(String nickname, String email) {
             this.nickname = nickname;
             this.email =email;
         }

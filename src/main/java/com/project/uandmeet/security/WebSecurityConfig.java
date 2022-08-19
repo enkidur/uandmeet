@@ -1,24 +1,49 @@
 package com.project.uandmeet.security;
 
+//1. 코드받기 (인증)  2. 액세스토큰(권한)
+//  3. 사용자프로필 정보를 가져와서 4-1. 그 정보를 토대로 회원가입을 자동으로 진행시키기도 함
+// 4-2 (이메일, 전화번호,이름,아이디) 쇼핑몰 -> (집주소), 백화점몰 -> (vip등급, 일반등급)
 import com.project.uandmeet.jwt.JwtAuthenticationFilter;
 import com.project.uandmeet.jwt.JwtAuthorizationFilter;
+import com.project.uandmeet.oauth.PrincipalOauth2UserService;
+import com.project.uandmeet.redis.RedisUtil;
 import com.project.uandmeet.repository.MemberRepository;
+import com.project.uandmeet.service.MemberService;
+import org.apache.tomcat.util.http.parser.Authorization;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.annotation.web.builders.WebSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.config.http.SessionCreationPolicy;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
 @Configuration
 @EnableWebSecurity // 시큐리티 활성화 -> 기본 스프링 필터체인에 등록
 public class WebSecurityConfig extends WebSecurityConfigurerAdapter{
 
     @Autowired
+    private PrincipalOauth2UserService principalOauth2UserService;
+
+    @Autowired
     private MemberRepository memberRepository;
 
     @Autowired
     private CorsConfig corsConfig;
+
+    @Autowired
+//    private MemberService memberService;
+    private RedisUtil redisUtil;
+    @Override
+    public void configure(WebSecurity web) {
+// h2-console 사용에 대한 허용 (CSRF, FrameOptions 무시)
+        web
+                .ignoring()
+                .antMatchers("/h2-console/**");
+    }
 
     @Override
     protected void configure(HttpSecurity http) throws Exception {
@@ -32,10 +57,10 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter{
                     .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS) // session 사용 X (STATELESS 서버)
                 .and()
                     .formLogin().disable() // formLogin 안씀
-                    // Header 의 Authorization key value 에 인증 정보(id, pw)를 담아서 요청하는 방식 -> cookie, session 필요 X
+//                     Header 의 Authorization key value 에 인증 정보(id, pw)를 담아서 요청하는 방식 -> cookie, session 필요 X
                     .httpBasic().disable() // 확장성은 좋지만 암호화가 안되서 보안 취약하기 때문에 https 서버 사용하여 암호화
-
-                    .addFilter(new JwtAuthenticationFilter(authenticationManager())) // AuthenticatonManager 파라미터 필요
+//
+                    .addFilter(new JwtAuthenticationFilter(authenticationManager(),redisUtil)) // AuthenticatonManager 파라미터 필요
                     .addFilter(new JwtAuthorizationFilter(authenticationManager(), memberRepository))// AuthenticatonManager 파라미터 필요
                     // token을 사용하는 형식은 Bearer -> 노출되도 특정 시간 뒤 파기되기 때문에 인증 정보를 그대로 노출하는 것보단 높은 안정성
                     .authorizeRequests()
@@ -45,7 +70,23 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter{
 //                    .access("hasRole('ROLE_MANAGER') or hasRole('ROLE_ADMIN')")
 //                    .antMatchers("/api/admin/**")
 //                    .access("hasRole('ROLE_ADMIN')")
-                    .anyRequest().permitAll();
+                    .anyRequest().permitAll()
+//                .and()
+//        http.authorizeRequests()
+//                .antMatchers("/user/**").authenticated()
+//                //.antMatchers("/admin/**").access("hasRole('ROLE_ADMIN') or hasRole('ROLE_USER')")
+//                //.antMatchers("/admin/**").access("hasRole('ROLE_ADMIN') and hasRole('ROLE_USER')")
+//                .antMatchers("/admin/**").access("hasRole('ROLE_ADMIN')")
+//                .anyRequest().permitAll()
+//                .and()
+//                .formLogin() // 인증이 필요하면 무조건 formLogin()으로 오게 되어있음
+//                .loginPage("/api/loginForm")
+                .and()
+                .oauth2Login()
+                .loginPage("/api/loginForm")
+                .userInfoEndpoint()
+                .userService(principalOauth2UserService);// 구글 로그인이 완료된 뒤의 후처리가 필요함. Tip. 코드로 받는게아니고 엑세스토큰+사용자 프로필 정보를 한방에 받게됨
         }
+
 }
 
