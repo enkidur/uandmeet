@@ -5,7 +5,7 @@ import com.project.uandmeet.model.Board;
 import com.project.uandmeet.model.Like;
 import com.project.uandmeet.model.Member;
 import com.project.uandmeet.repository.BoardRepository;
-import com.project.uandmeet.repository.LIkeRepository;
+import com.project.uandmeet.repository.LikeRepository;
 import com.project.uandmeet.repository.MemberRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -15,7 +15,7 @@ import org.springframework.stereotype.Service;
 public class LikeService {
     private final MemberRepository memberRepository;
     private final BoardRepository boardRepository;
-    private final LIkeRepository lIkeRepository;
+    private final LikeRepository likeRepository;
     private final BoardService boardService;
 
     public void likes(LikeDto likeDto) {
@@ -27,13 +27,13 @@ public class LikeService {
         );
 
         Like like = new Like(memberid, boardid);
-        boolean exists = lIkeRepository.existsByBoardAndMember(likeDto.getPostid(), likeDto.getUserid());
+        boolean exists = likeRepository.existsByBoardAndMember(likeDto.getPostid(), likeDto.getUserid());
         if (exists) {
             boardService.minuslikecnt(likeDto.getPostid()); // commentcount 처럼 size나 count 를 쓴다면 필요없음
-            lIkeRepository.deleteByBoardAndMember(likeDto.getPostid(), likeDto.getUserid());
+            likeRepository.deleteByBoardAndMember(likeDto.getPostid(), likeDto.getUserid());
         } else {
             boardService.pluslikecnt(likeDto.getPostid());
-            lIkeRepository.save(like);
+            likeRepository.save(like);
 
         }
     }

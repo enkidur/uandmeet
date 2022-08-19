@@ -48,7 +48,6 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter{
                     .formLogin().disable() // formLogin 안씀
                     // Header 의 Authorization key value 에 인증 정보(id, pw)를 담아서 요청하는 방식 -> cookie, session 필요 X
                     .httpBasic().disable() // 확장성은 좋지만 암호화가 안되서 보안 취약하기 때문에 https 서버 사용하여 암호화
-
                     .addFilter(new JwtAuthenticationFilter(authenticationManager(),redisUtil)) // AuthenticatonManager 파라미터 필요
                     .addFilter(new JwtAuthorizationFilter(authenticationManager(), memberRepository))// AuthenticatonManager 파라미터 필요
                     // token을 사용하는 형식은 Bearer -> 노출되도 특정 시간 뒤 파기되기 때문에 인증 정보를 그대로 노출하는 것보단 높은 안정성
