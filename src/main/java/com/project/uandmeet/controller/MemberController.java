@@ -85,7 +85,7 @@ public class MemberController {
         return ResponseEntity.ok("password 찾기 완료");
     }
 
-    // 활동페이지
+    // 활동페이지 조회
     @GetMapping("/api/mypage/action")
     public ResponseEntity<MypageDto> action(@AuthenticationPrincipal UserDetailsImpl userDetails){
         return ResponseEntity.ok(memberService.action(userDetails));
@@ -109,14 +109,21 @@ public class MemberController {
         return ResponseEntity.ok(memberService.myinfo(userDetails));
     }
 
-    // myinfo 수정
-    @PutMapping("/api/mypage/infoedit")
-    public ResponseEntity<MyPageInfoDto> infoedit(@AuthenticationPrincipal UserDetailsImpl userDetails,
+    // myinfo -> gender 수정
+    @PutMapping("/api/mypage/infoedit/gender")
+    public ResponseEntity<MyPageInfoDto> genderedit(@AuthenticationPrincipal UserDetailsImpl userDetails,
                                                   InfoeditRequestDto requestDto) {
-        return ResponseEntity.ok(memberService.infoedit(userDetails, requestDto));
+        return ResponseEntity.ok(memberService.genderedit(userDetails, requestDto));
     }
 
-    // profile
+    // myinfo -> birth 수정
+    @PutMapping("/api/mypage/infoedit/birth")
+    public ResponseEntity<MyPageInfoDto> birthedit(@AuthenticationPrincipal UserDetailsImpl userDetails,
+                                                  InfoeditRequestDto requestDto) {
+        return ResponseEntity.ok(memberService.birthedit(userDetails, requestDto));
+    }
+
+    // profile 조회
     @GetMapping("/api/mypage/profile")
     public ResponseEntity<ProfileDto> profile(@AuthenticationPrincipal UserDetailsImpl userDetails){
         return ResponseEntity.ok(memberService.profile(userDetails));
@@ -135,7 +142,13 @@ public class MemberController {
         return "login.html";
     }
 
-
+    // password 변경
+    @PostMapping("/api/changepass")
+    public ResponseEntity<String> changepass(@AuthenticationPrincipal UserDetailsImpl userDetails,
+                                             @RequestBody String passwordcheck,
+                                             String newpassword){
+        return ResponseEntity.ok(memberService.changepass(userDetails, passwordcheck, newpassword));
+    }
 
     // kakao login
     @GetMapping("/api/kakaologin")
