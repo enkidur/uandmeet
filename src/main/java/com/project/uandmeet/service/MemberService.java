@@ -139,6 +139,14 @@ public class MemberService {
 //        member.updateRefreshToken(refreshToken);
 //    }
 
+    // 회원 탈퇴
+    public String withdraw(UserDetailsImpl userDetails, String password) {
+        if (userDetails.getPassword().equals(passwordEncoder.encode(password))) {
+            String username = userDetails.getUsername();
+            memberRepository.deleteByUsername(username);
+        }
+        return "회원탈퇴 완료";
+    }
 
     public Map<String, String> refresh(HttpServletRequest request, HttpServletResponse response) {
 
@@ -247,7 +255,7 @@ public class MemberService {
             return authNumber;
     }
 
-    // 활동 내역
+    // 활동 내역 조회
     public MypageDto action(UserDetailsImpl userDetails) {
         String username = userDetails.getUsername();
         Member member = memberRepository.findByUsername(username).orElseThrow(
@@ -284,7 +292,7 @@ public class MemberService {
         return mypageDto;
     }
 
-    // memberInfo
+    // memberInfo 조회
     public MyPageInfoDto myinfo(UserDetailsImpl userDetails) {
         String username = userDetails.getUsername();
         Member member = memberRepository.findByUsername(username).orElseThrow(
@@ -320,7 +328,7 @@ public class MemberService {
         return myPageInfoDto;
     }
 
-    // profile
+    // profile 조회
     public ProfileDto profile(UserDetailsImpl userDetails) {
         String username = userDetails.getUsername();
         Member member = memberRepository.findByUsername(username).orElseThrow(
@@ -346,13 +354,18 @@ public class MemberService {
         return profileDto;
     }
 
-    // 회원 탈퇴
-    public String withdraw(UserDetailsImpl userDetails, String password) {
-        if (userDetails.getPassword().equals(passwordEncoder.encode(password))) {
-            String username = userDetails.getUsername();
-            memberRepository.deleteByUsername(username);
+    // password 변경
+    public String changepass(UserDetailsImpl userDetails, String passwordcheck, String newpassword) {
+        String username = userDetails.getUsername();
+        Member member = memberRepository.findByUsername(username).orElseThrow(
+                ()->new RuntimeException("해당 권한이 없습니다.")
+        );
+        if (!passwordEncoder.encode(passwordcheck).equals(member.getPassword()))
+        { throw new RuntimeException("비밀번호가 일치하지 않습니다.");
+        } else {
+            member.setPassword(passwordEncoder.encode(newpassword));
         }
-        return "회원탈퇴 완료";
+        return "비밀번호 변경 완료";
     }
 }
 
