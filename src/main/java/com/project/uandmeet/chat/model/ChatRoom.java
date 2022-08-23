@@ -1,5 +1,6 @@
 package com.project.uandmeet.chat.model;
 
+import com.project.uandmeet.auth.UserDetailsImpl;
 import com.project.uandmeet.chat.dto.UserDto;
 import com.project.uandmeet.model.Board;
 import lombok.Getter;
@@ -25,10 +26,10 @@ public class ChatRoom implements Serializable {
     private String username;
 
     //채팅방 생성
-    public static ChatRoom create(Board board, UserDto userDto) {
+    public static ChatRoom create(Board board, UserDetailsImpl userDetails) {
         ChatRoom chatRoom = new ChatRoom();
         chatRoom.roomId = String.valueOf(board.getId());
-        chatRoom.username=userDto.getUsername();
+        chatRoom.username = userDetails.getUsername();
         return chatRoom;
     }
 }

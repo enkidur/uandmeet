@@ -9,6 +9,7 @@ import javax.servlet.http.HttpServletResponse;
 import com.project.uandmeet.auth.UserDetailsImpl;
 import com.project.uandmeet.model.Member;
 import com.project.uandmeet.repository.MemberRepository;
+import org.springframework.http.HttpHeaders;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -33,7 +34,7 @@ public class JwtAuthorizationFilter extends BasicAuthenticationFilter{
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain chain)
             throws IOException, ServletException {
-        String header = request.getHeader(JwtProperties.HEADER_ACCESS);
+        String header = request.getHeader(HttpHeaders.AUTHORIZATION);
         // 로그인, 리프레시 요청이라면 토큰 검사하지 않음
         if (request.getServletPath().equals("/login") || request.getServletPath().equals("/refresh")) {
             chain.doFilter(request, response);
@@ -44,13 +45,13 @@ public class JwtAuthorizationFilter extends BasicAuthenticationFilter{
             return;
         }
         System.out.println("header : "+header);
-        String token = request.getHeader(JwtProperties.HEADER_ACCESS)
+        String token = request.getHeader(HttpHeaders.AUTHORIZATION)
                 .replace(JwtProperties.TOKEN_PREFIX, "");
 
         // 토큰 검증 (이게 인증이기 때문에 AuthenticationManager도 필요 없음)
         // 내가 SecurityContext에 집적접근해서 세션을 만들때 자동으로 UserDetailsService에 있는 loadByUsername이 호출됨.
         String username = JWT.require(Algorithm.HMAC512(JwtProperties.SECRET)).build().verify(token)
-                .getClaim("username").asString();
+                .getSubject();
 
         if(username != null) {
             Member member = memberRepository.findByUsername(username).orElseThrow(

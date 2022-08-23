@@ -33,7 +33,7 @@ public class Member {
     @Column
     private String birth;
 
-    @Column(nullable = false)
+    @Column(nullable = true)
     private String gender;
 
     @Column(nullable = true, unique = true)

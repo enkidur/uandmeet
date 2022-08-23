@@ -1,14 +1,19 @@
 package com.project.uandmeet.chat.config;
 
+import com.project.uandmeet.chat.service.RedisSubscriber;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.data.redis.connection.MessageListener;
 import org.springframework.data.redis.connection.RedisConnectionFactory;
 import org.springframework.data.redis.connection.RedisStandaloneConfiguration;
 import org.springframework.data.redis.connection.lettuce.LettuceConnectionFactory;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.StringRedisTemplate;
+import org.springframework.data.redis.listener.ChannelTopic;
 import org.springframework.data.redis.listener.RedisMessageListenerContainer;
+import org.springframework.data.redis.listener.adapter.MessageListenerAdapter;
 import org.springframework.data.redis.serializer.Jackson2JsonRedisSerializer;
 import org.springframework.data.redis.serializer.StringRedisSerializer;
 
@@ -16,6 +21,7 @@ import org.springframework.data.redis.serializer.StringRedisSerializer;
  * Redis 관련 설정들을 모아놓은 class
  * */
 @Configuration
+@RequiredArgsConstructor
 public class RedisConfig {
 
     @Value("${spring.redis.password}")
@@ -34,6 +40,14 @@ public class RedisConfig {
      *  Lettuce 별도의 설정없이 사용 할 수 있지만, Jedis 사용하려면 의존성을 추가 해야만 한다.
      *  우리는 Lettuce 사용하기로 했다. (따로 설정이 필요하지않고, 성능이 더 좋다고 하여)
      * */
+
+    /**
+     * 단일 Topic 사용을 위한 Bean 설정
+     */
+    @Bean
+    public ChannelTopic channelTopic() {
+        return new ChannelTopic("chatroom");
+    }
 
     @Bean
     public RedisConnectionFactory redisConnectionFactory() {
@@ -79,10 +93,20 @@ public class RedisConfig {
     MessageListener 에서 처리합니다
      */
     @Bean
-    public RedisMessageListenerContainer redisMessageListenerContainer(
-            RedisConnectionFactory redisConnectionFactory) {
+    public RedisMessageListenerContainer redisMessageListenerContainer(RedisConnectionFactory redisConnectionFactory,
+                                                                       MessageListenerAdapter listenerAdapter,
+                                                                       ChannelTopic channelTopic) {
         RedisMessageListenerContainer redisMessageListenerContainer = new RedisMessageListenerContainer();
         redisMessageListenerContainer.setConnectionFactory(redisConnectionFactory);
+        redisMessageListenerContainer.addMessageListener(listenerAdapter, channelTopic);
         return redisMessageListenerContainer;
+    }
+
+    /**
+     * 실제 메시지를 처리하는 subscriber 설정 추가
+     */
+    @Bean
+    public MessageListenerAdapter listenerAdapter(RedisSubscriber subscriber) {
+        return new MessageListenerAdapter(subscriber, "sendMessage");
     }
 }

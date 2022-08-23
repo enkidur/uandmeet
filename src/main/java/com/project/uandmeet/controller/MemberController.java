@@ -4,11 +4,13 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.project.uandmeet.auth.UserDetailsImpl;
 import com.project.uandmeet.dto.*;
 import com.project.uandmeet.model.Concern;
+import com.project.uandmeet.model.Member;
 import com.project.uandmeet.redis.RedisUtil;
 import com.project.uandmeet.service.EmailService;
 import com.project.uandmeet.service.KakaoService;
 import com.project.uandmeet.service.MemberService;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -22,8 +24,9 @@ import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 
-//@RestController
-@Controller
+@RestController
+@Slf4j
+//@Controller
 @RequestMapping
 @RequiredArgsConstructor
 public class MemberController {
@@ -110,6 +113,13 @@ public class MemberController {
         return res;
     }
 
+    // 회원가입 test
+    @PostMapping("/api/join")
+    public void join(@RequestBody MemberRequestDto requestDto) {
+        memberService.join(requestDto);
+
+    }
+
     // 회원 탈퇴
     @DeleteMapping("/api/withdraw")
     public ResponseEntity<String> withdraw(@AuthenticationPrincipal UserDetailsImpl userDetails, String password){
@@ -146,6 +156,7 @@ public class MemberController {
     // 활동페이지 -> nickname 수정
     @PutMapping("/api/mypage/actionedit/nickname")
     public ResponseEntity<MypageDto> nicknameedit(@AuthenticationPrincipal UserDetailsImpl userDetails, String nickname) {
+        log.info(userDetails.getUsername());
         return ResponseEntity.ok(memberService.nicknameedit(userDetails, nickname));
     }
 
@@ -158,6 +169,7 @@ public class MemberController {
     //myInfo 페이지
     @GetMapping("/api/mypage/info")
     public ResponseEntity<MyPageInfoDto> myinfo(@AuthenticationPrincipal UserDetailsImpl userDetails){
+        log.info(userDetails.getUsername());
         return ResponseEntity.ok(memberService.myinfo(userDetails));
     }
 

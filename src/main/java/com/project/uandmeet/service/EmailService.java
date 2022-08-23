@@ -29,8 +29,8 @@ public class EmailService {
         authNumber = checkNum;
     }
 
-    public boolean checkAuthNum(String authNum) {
-        return Objects.equals(authNum, authNumber);
+    public String checkAuthNum(String authNum) {
+        return String.valueOf(Objects.equals(authNum, authNumber));
 
 
     }

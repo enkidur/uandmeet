@@ -1,6 +1,6 @@
-package com.project.uandmeet.exception;
+package com.project.uandmeet.Exception;
 
-
+import com.project.uandmeet.exception.ErrorCode;
 import lombok.Builder;
 import lombok.Getter;
 import org.springframework.http.ResponseEntity;

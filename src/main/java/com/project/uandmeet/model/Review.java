@@ -27,11 +27,11 @@ public class Review {
     private Board board;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "member")
+    @JoinColumn(name = "from_member")
     private Member from;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "member")
+    @JoinColumn(name = "to_member")
     private Member to;
 
     //리뷰 메시지
