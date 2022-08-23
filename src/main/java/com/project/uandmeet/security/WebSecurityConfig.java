@@ -77,12 +77,7 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
 //        configuration.addAllowedOriginPattern("http://localhost:3000");
-        configuration.addAllowedOriginPattern("https://localhost:3000");
-        configuration.addAllowedOriginPattern("https://authex-d42a5.web.app/");
-        configuration.addAllowedOriginPattern("https://auth-6eb37.web.app");
-        configuration.addAllowedOriginPattern("https://test-react-basic.web.app");
-        configuration.addAllowedOriginPattern("https://authex-d42a5.web.app");
-        configuration.addAllowedOriginPattern("https://bungle.life");
+        //이곳에 관련 url 추가 해야합니다 도메인,리액트(?) 등
         configuration.addAllowedMethod("*");
         configuration.addAllowedHeader("*");
         configuration.addExposedHeader("Authorization");
