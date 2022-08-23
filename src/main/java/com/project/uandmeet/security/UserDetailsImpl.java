@@ -1,16 +1,15 @@
-package com.project.uandmeet.auth;
+package com.project.uandmeet.security;
+
 
 import com.project.uandmeet.model.Member;
 import lombok.Getter;
 import lombok.Setter;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.oauth2.core.user.OAuth2User;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Map;
-
+import java.util.Collections;
 
 // 시큐리티가 /login 을 낚아채서 로그인을 진행함
 // 로그인 진행이 완료되면 시큐리티 session 을 만듦 (Security ContextHolder 라는 key Value 로 session 정보 저장)
@@ -22,28 +21,15 @@ import java.util.Map;
 
 @Getter
 @Setter
-public class UserDetailsImpl implements UserDetails, OAuth2User {
+public class UserDetailsImpl implements UserDetails {
 
     private Member member; // 컴포지션
 //    private KakaoMember kakaoMember;
-
-    private Map<String, Object> attributes;
 
     public UserDetailsImpl(Member member) {
         this.member = member;
     }
 
-    // OAuth 로그인
-    public UserDetailsImpl(Member member, Map<String, Object> attributes) {
-        this.member = member;
-        this.attributes = attributes;
-    }
-
-
-    @Override
-    public Map<String, Object> getAttributes() {
-        return attributes;
-    }
 
     // 해당 User 의 권한의 리턴
     @Override
@@ -102,10 +88,5 @@ public class UserDetailsImpl implements UserDetails, OAuth2User {
         // 현재시간 - user.getLoginDate() => 1년
         // return false
         return true;
-    }
-
-    @Override
-    public String getName() {
-        return null;
     }
 }

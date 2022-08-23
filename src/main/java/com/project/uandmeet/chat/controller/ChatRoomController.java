@@ -1,10 +1,10 @@
 package com.project.uandmeet.chat.controller;
 
 
-import com.project.uandmeet.auth.UserDetailsImpl;
 import com.project.uandmeet.chat.dto.ChatListMessageDto;
 import com.project.uandmeet.chat.repository.ChatRoomRepository;
 import com.project.uandmeet.model.Member;
+import com.project.uandmeet.security.UserDetailsImpl;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
@@ -25,7 +25,7 @@ public class ChatRoomController {
     }
 
     // 특정 채팅방 입장
-    @PostMapping("/room/{postId}")
+    @PostMapping("/room/{boardId}")
     @ResponseBody
     public String roomInfo(@PathVariable Long boardId) {
         return String.valueOf(boardId);

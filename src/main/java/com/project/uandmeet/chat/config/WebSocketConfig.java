@@ -21,12 +21,23 @@ import org.springframework.web.socket.config.annotation.WebSocketMessageBrokerCo
 public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
     private final StompHandler stompHandler; // jwt 인증
 
+    /**
+     * 메세지브로커 설정
+     * 내부 브로커 사용 및 "/queue", "/topic" 캐치
+     * prefix : "/api"
+     * @param registry
+     */
     @Override
-    public void configureMessageBroker(MessageBrokerRegistry config) {
-        config.enableSimpleBroker("/topic/chat");
-        config.setApplicationDestinationPrefixes("/app");
+    public void configureMessageBroker(MessageBrokerRegistry registry) {
+        registry.enableSimpleBroker("/topic","/queue");
+        registry.setApplicationDestinationPrefixes("/api");
     }
 
+    /**
+     * 소켓 관련 설정 메소드
+     * endpoint 설정(, 예외 핸들러 설정)
+     * @param registry
+     * */
     @Override
     public void registerStompEndpoints(StompEndpointRegistry registry) {
         registry.addEndpoint("/ws")
@@ -34,6 +45,10 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
                 .withSockJS();
     }
 
+    /**
+     * 메세지 관련 사용자 검증 설정 메소드
+     * @param registration
+     */
     @Override
     public void configureClientInboundChannel(ChannelRegistration registration) {
         registration.interceptors(stompHandler);

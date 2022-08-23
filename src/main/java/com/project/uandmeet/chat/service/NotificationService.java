@@ -1,7 +1,5 @@
 package com.project.uandmeet.chat.service;
 
-
-import com.project.uandmeet.auth.UserDetailsImpl;
 import com.project.uandmeet.chat.dto.NotificationDto;
 import com.project.uandmeet.chat.model.ChatMessage;
 import com.project.uandmeet.chat.model.InvitedUsers;
@@ -9,6 +7,7 @@ import com.project.uandmeet.chat.repository.ChatMessageJpaRepository;
 import com.project.uandmeet.chat.repository.InvitedUsersRepository;
 import com.project.uandmeet.model.Board;
 import com.project.uandmeet.repository.BoardRepository;
+import com.project.uandmeet.security.UserDetailsImpl;
 import com.project.uandmeet.util.NotificationComparator;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;

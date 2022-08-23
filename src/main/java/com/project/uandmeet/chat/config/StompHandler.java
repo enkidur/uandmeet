@@ -1,10 +1,8 @@
 package com.project.uandmeet.chat.config;
 
-import com.auth0.jwt.JWT;
-import com.auth0.jwt.algorithms.Algorithm;
 import com.project.uandmeet.chat.repository.ChatMessageRepository;
 import com.project.uandmeet.chat.service.ChatRoomService;
-import com.project.uandmeet.jwt.JwtProperties;
+import com.project.uandmeet.security.jwt.JwtTokenProvider;
 import lombok.RequiredArgsConstructor;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageChannel;
@@ -16,14 +14,19 @@ import org.springframework.stereotype.Component;
 import java.util.Objects;
 import java.util.Optional;
 
-/*
- * Websocket 을 통하여 요청이 들어오면 Intercept 하여 JWt 인증 구현 및 사전처리
+/**
+ * <h1>StompHandler</h1>
+ * <p>
+ *     채팅 전달 전, 사용자의 인증을 수행하는 클래스
+ * </p>
  */
+
 @RequiredArgsConstructor
 @Component
 public class StompHandler implements ChannelInterceptor {
     private final ChatRoomService chatRoomService;
     private final ChatMessageRepository chatMessageRepository;
+    private final JwtTokenProvider jwtTokenProvider;
 
     @Override
     public Message<?> preSend(Message<?> message, MessageChannel channel) {
@@ -31,8 +34,9 @@ public class StompHandler implements ChannelInterceptor {
         String sessionId = (String) message.getHeaders().get("simpSessionId");
         // websocket 연결시 헤더의 jwt token 검증
         if (StompCommand.CONNECT == accessor.getCommand()) {
-            JWT.require(Algorithm.HMAC512(JwtProperties.SECRET)).build().
-                    verify(Objects.requireNonNull(accessor.getFirstNativeHeader("token")));
+            jwtTokenProvider.validateToken(accessor.getFirstNativeHeader("token"));
+            //테스트시 검증이 잘 될런지 모르겠다.
+
             // 구독 요청시 유저의 카운트수를 저장하고 최대인원수를 관리하며 , 세션정보를 저장한다.
         } else if (StompCommand.SUBSCRIBE == accessor.getCommand()) {
             String roomId = chatRoomService.getRoomId((String) Optional.ofNullable(message.getHeaders().get("simpDestination")).orElse("InvalidRoomId"));

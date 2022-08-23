@@ -3,7 +3,6 @@ package com.project.uandmeet.chat.service;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 
-import com.project.uandmeet.auth.UserDetailsImpl;
 import com.project.uandmeet.chat.dto.ChatMessageDto;
 import com.project.uandmeet.chat.dto.UserDetailDto;
 import com.project.uandmeet.chat.dto.UserinfoDto;
@@ -15,6 +14,7 @@ import com.project.uandmeet.model.Member;
 import com.project.uandmeet.repository.BoardRepository;
 import com.project.uandmeet.repository.LikedRepository;
 import com.project.uandmeet.repository.MemberRepository;
+import com.project.uandmeet.security.UserDetailsImpl;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;

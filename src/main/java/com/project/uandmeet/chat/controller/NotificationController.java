@@ -1,8 +1,8 @@
 package com.project.uandmeet.chat.controller;
 
-import com.project.uandmeet.auth.UserDetailsImpl;
 import com.project.uandmeet.chat.dto.NotificationDto;
 import com.project.uandmeet.chat.service.NotificationService;
+import com.project.uandmeet.security.UserDetailsImpl;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;

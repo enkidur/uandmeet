@@ -1,9 +1,9 @@
 package com.project.uandmeet.controller;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.project.uandmeet.auth.UserDetailsImpl;
 import com.project.uandmeet.dto.*;
 import com.project.uandmeet.model.Concern;
+import com.project.uandmeet.security.UserDetailsImpl;
 import com.project.uandmeet.service.EmailService;
 import com.project.uandmeet.service.KakaoService;
 import com.project.uandmeet.service.MemberService;

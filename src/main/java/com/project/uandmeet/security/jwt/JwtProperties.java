@@ -1,4 +1,4 @@
-package com.project.uandmeet.jwt;
+package com.project.uandmeet.security.jwt;
 
 public interface JwtProperties {
     // 편의상

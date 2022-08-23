@@ -1,7 +1,8 @@
 package com.project.uandmeet.controller;
 
-import com.project.uandmeet.auth.UserDetailsImpl;
+
 import com.project.uandmeet.dto.CommentRequestDto;
+import com.project.uandmeet.security.UserDetailsImpl;
 import com.project.uandmeet.service.CommentService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;

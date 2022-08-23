@@ -2,13 +2,13 @@ package com.project.uandmeet.service;
 
 import com.project.uandmeet.exception.CustomException;
 import com.project.uandmeet.exception.ErrorCode;
-import com.project.uandmeet.auth.UserDetailsImpl;
 import com.project.uandmeet.dto.MemberDtoGroup.MemberSimpleDto;
 import com.project.uandmeet.dto.boardDtoGroup.BoardRequestDto;
 import com.project.uandmeet.dto.boardDtoGroup.BoardResponseDto;
 import com.project.uandmeet.dto.boardDtoGroup.LikeDto;
 import com.project.uandmeet.model.*;
 import com.project.uandmeet.repository.*;
+import com.project.uandmeet.security.UserDetailsImpl;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;

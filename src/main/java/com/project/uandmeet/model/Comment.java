@@ -2,11 +2,13 @@ package com.project.uandmeet.model;
 
 import com.project.uandmeet.dto.CommentRequestDto;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
 
 @Getter
 @Entity
+@NoArgsConstructor
 public class Comment {
 
     @Id

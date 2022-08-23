@@ -2,11 +2,11 @@ package com.project.uandmeet.oauth;
 
 import com.auth0.jwt.JWT;
 import com.auth0.jwt.algorithms.Algorithm;
-import com.project.uandmeet.auth.UserDetailsImpl;
-import com.project.uandmeet.jwt.JwtProperties;
 import com.project.uandmeet.model.Member;
 import com.project.uandmeet.redis.RedisUtil;
 import com.project.uandmeet.repository.MemberRepository;
+import com.project.uandmeet.security.UserDetailsImpl;
+import com.project.uandmeet.security.jwt.JwtProperties;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpHeaders;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;

@@ -2,11 +2,11 @@ package com.project.uandmeet.chat.controller;
 
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.project.uandmeet.auth.UserDetailsImpl;
 import com.project.uandmeet.chat.dto.ChatMessageDto;
 import com.project.uandmeet.chat.dto.UserDetailDto;
 import com.project.uandmeet.chat.dto.UserinfoDto;
 import com.project.uandmeet.chat.service.ChatService;
+import com.project.uandmeet.security.UserDetailsImpl;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.messaging.handler.annotation.Header;
@@ -14,7 +14,6 @@ import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 

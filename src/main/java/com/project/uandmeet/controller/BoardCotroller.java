@@ -1,19 +1,20 @@
 package com.project.uandmeet.controller;
 
-
-import com.project.uandmeet.auth.UserDetailsImpl;
 import com.project.uandmeet.dto.boardDtoGroup.BoardRequestDto;
 import com.project.uandmeet.dto.boardDtoGroup.BoardResponseDto;
 import com.project.uandmeet.dto.boardDtoGroup.LikeDto;
 import com.project.uandmeet.exception.CustomException;
 import com.project.uandmeet.exception.ErrorCode;
+import com.project.uandmeet.security.UserDetailsImpl;
 import com.project.uandmeet.service.BoardService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
+import javax.validation.Valid;
 import java.util.List;
 
 @Controller
