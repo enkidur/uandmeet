@@ -9,4 +9,9 @@ public interface JwtProperties {
     String TOKEN_PREFIX = "Bearer ";
     String HEADER_ACCESS = "AccessToken";
     String HEADER_REFRESH = "RefreshToken";
+
+    String CLAIM_EXPIRED_DATE = "EXPIRED_DATE";
+
+    String CLAIM_USER_NAME = "MEMBER_USERNAME";
+    String CLAIM_MEMBER_NICKNAME = "MEMBER_NICKNAME";
 }

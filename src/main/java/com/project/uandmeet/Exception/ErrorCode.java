@@ -14,6 +14,7 @@ public enum ErrorCode {
     PASSWORD_LEGNTH(HttpStatus.CONFLICT, "패스워드를 8자이상으로 만들어주세요."),
     PASSWORD_PASSWORDCHECK(HttpStatus.BAD_REQUEST, "패스워드와 패스워드 체크가 맞지 않습니다."),
     // 400 Bad Request
+    MEMBER_HAS_FULL(HttpStatus.CONFLICT,"참여할 수 있는 최대 인원을 초과했습니다"),
     EMPTY_CONTENT(HttpStatus.BAD_REQUEST,"필수입력값이 없습니다."),
     /* 401 UNAUTHORIZED : 인증되지 않은 사용자 */
     INVALID_AUTH_TOKEN(HttpStatus.UNAUTHORIZED, "만료되었거나 유효하지 않은 토큰입니다."),

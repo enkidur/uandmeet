@@ -1,57 +1,59 @@
 package com.project.uandmeet.chat.model;
 
-import com.project.uandmeet.chat.dto.ChatMessageDto;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import com.project.uandmeet.chat.dto.ChatMessageRequestDto;
+import com.project.uandmeet.model.Member;
+import lombok.*;
 
 import javax.persistence.*;
-import java.time.LocalDateTime;
 
-@Setter
-@Getter
 @Entity
+@Getter
+@Setter
 @NoArgsConstructor
+@AllArgsConstructor
 public class ChatMessage {
-    // 메시지 타입 : 입장, 채팅, 나가기
+
     public enum MessageType {
-        ENTER, TALK, QUIT
+        STAMP, TALK, RESULT, ISSUE
     }
+    //ENTER를 STAMP로 QUIT-> RESULT
+
     @Id
-    @GeneratedValue(strategy =GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column
     private Long id;
-    @Column(nullable = false)
-    private String roomId;
-    @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
+
+    @Column
     private MessageType type;
-    @Column(nullable = false)
+
+    @Column
+    private String roomId;
+
+    // Redis MessageListener 로 뒙소켓을 통해 바로 채팅방에 메시지를 전달해주기 위한 값을 따로 설정해주었다
+    @Column
+    private String nickname;
+
+    @Column
     private String sender;
-    @Column(nullable = false)
+
+    @Column
     private String message;
-    @Column(nullable = false)
+
+    @Column
     private String profileUrl;
+
     @Column
-    private Long enterUserCnt;
-    @Column(nullable = false)
-    private Long memberId ;
-    @Column(nullable = false)
-    private LocalDateTime createdAt;
-    @Column
-    private String fileUrl;
-    @Column
-    private Boolean quitOwner = false;
+    private String createdAt;
 
 
-    public ChatMessage(ChatMessageDto chatMessageDto, LocalDateTime createdAt) {
-        this.type = chatMessageDto.getType();
-        this.roomId = chatMessageDto.getRoomId();
-        this.message = chatMessageDto.getMessage();
-        this.sender = chatMessageDto.getSender();
-        this.profileUrl = chatMessageDto.getProfileUrl();
-        this.enterUserCnt = chatMessageDto.getEnterUserCnt();
-        this.memberId = chatMessageDto.getMemberId();
+    @Builder
+    public ChatMessage(ChatMessageRequestDto chatMessageRequestDto, Member member, String createdAt) {
+        this.type = chatMessageRequestDto.getType();
+        this.roomId = chatMessageRequestDto.getRoomId();
+        this.nickname = chatMessageRequestDto.getNickname();
+        this.sender = chatMessageRequestDto.getSender();
+        this.message = chatMessageRequestDto.getMessage();
+        this.profileUrl = member.getProfileImgUrl();
         this.createdAt = createdAt;
-        this.fileUrl = chatMessageDto.getFileUrl();
     }
 }

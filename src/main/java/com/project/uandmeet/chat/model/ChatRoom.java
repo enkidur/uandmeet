@@ -1,34 +1,35 @@
 package com.project.uandmeet.chat.model;
 
-import com.project.uandmeet.chat.dto.UserDto;
-import com.project.uandmeet.model.Board;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
+import lombok.*;
 
 import javax.persistence.*;
-import java.io.Serializable;
+import java.util.List;
 
-@Getter
 @Setter
-@NoArgsConstructor
+@Getter
 @Entity
-public class ChatRoom implements Serializable {
-    private static final long serialVersionUID = 6494678977089006639L;
-
+@NoArgsConstructor
+@Builder
+@AllArgsConstructor
+public class ChatRoom extends Timestamped {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long Id;
-    @Column(nullable = false)
-    private String roomId;
-    @Column(nullable = false)
-    private String username;
+    @Column(name = "chat_room_id")
+    private Long id;
 
-    //채팅방 생성
-    public static ChatRoom create(Board board, UserDto userDto) {
-        ChatRoom chatRoom = new ChatRoom();
-        chatRoom.roomId = String.valueOf(board.getId());
-        chatRoom.username=userDto.getUsername();
-        return chatRoom;
+    @Column
+    private String chatRoomName;
+
+    @Column
+    private Long boardId;
+
+    @JsonManagedReference
+    @OneToMany(mappedBy = "chatRoom",fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    List<ChatRoomMember> member;
+
+
+    public ChatRoom(String name){
+        this.chatRoomName = name;
     }
 }
+

@@ -1,10 +1,17 @@
 package com.project.uandmeet.security.jwt;
 
+import com.auth0.jwt.JWT;
+import com.auth0.jwt.JWTVerifier;
+import com.auth0.jwt.algorithms.Algorithm;
+import com.auth0.jwt.interfaces.DecodedJWT;
+import com.project.uandmeet.exception.CustomException;
+import com.project.uandmeet.exception.ErrorCode;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jws;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -17,7 +24,11 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.util.Base64;
 import java.util.Date;
+import java.util.Optional;
 
+import static com.project.uandmeet.security.jwt.JwtProperties.*;
+
+@Slf4j
 @RequiredArgsConstructor
 @Component
 public class JwtTokenProvider {
@@ -64,6 +75,63 @@ public class JwtTokenProvider {
                 .compact();
         response.addHeader("RefreshToken","Bearer " + refreshToken);
         return refreshToken;
+    }
+
+    public String decodeUsername(String token) {
+        DecodedJWT decodedJWT = isValidToken(token)
+                .orElseThrow(() -> new CustomException(ErrorCode.INVALID_AUTH_TOKEN));
+
+        Date expiredDate = decodedJWT
+                .getClaim(CLAIM_EXPIRED_DATE)
+                .asDate();
+
+        Date now = new Date();
+        if (expiredDate.before(now)) {
+            throw new CustomException(ErrorCode.INVALID_AUTH_TOKEN);
+        }
+
+        String username = decodedJWT
+                .getClaim(CLAIM_USER_NAME)
+                .asString();
+
+        return username;
+    }
+
+    public String decodeNickname(String token) {
+        DecodedJWT decodedJWT = isValidToken(token)
+                .orElseThrow(() -> new CustomException(ErrorCode.INVALID_AUTH_TOKEN));
+
+        Date expiredDate = decodedJWT
+                .getClaim(CLAIM_EXPIRED_DATE)
+                .asDate();
+
+        Date now = new Date();
+        if (expiredDate.before(now)) {
+            throw new CustomException(ErrorCode.INVALID_AUTH_TOKEN);
+        }
+
+        String nickname = decodedJWT
+                .getClaim(CLAIM_MEMBER_NICKNAME)
+                .asString();
+
+        return nickname;
+    }
+
+    private Optional<DecodedJWT> isValidToken(String token) {
+        DecodedJWT jwt = null;
+
+        try {
+            Algorithm algorithm = Algorithm.HMAC512(secretKey);
+            JWTVerifier verifier = JWT
+                    .require(algorithm)
+                    .build();
+
+            jwt = verifier.verify(token);
+        } catch (Exception e) {
+            log.error(e.getMessage());
+        }
+
+        return Optional.ofNullable(jwt);
     }
 
     // 토큰에서 회원 정보 추출

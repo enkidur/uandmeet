@@ -1,18 +1,29 @@
 package com.project.uandmeet.chat.dto;
 
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
 
-@Setter
+import com.project.uandmeet.chat.model.ChatRoom;
+import lombok.Getter;
+import lombok.Setter;
+import lombok.ToString;
+
+import java.util.List;
+
+@ToString
 @Getter
-@NoArgsConstructor
+@Setter
 public class ChatRoomResponseDto {
-    private String lastMessage;
-    private String boardUrl;
-    private String boardTitle;
-    private String lastMessageTime;
-    private boolean isLetter;
-    private String boardTime;
-    private Long boardId;
+
+    private Long roomId;
+    private String chatRoomName;
+
+    private List<NicknameResponseDto> userList;
+
+    private int userCnt;
+
+    public ChatRoomResponseDto(ChatRoom chatRoom, int userCnt, List<NicknameResponseDto> userList){
+        this.roomId = chatRoom.getId();;
+        this.chatRoomName = chatRoom.getChatRoomName();
+        this.userCnt = userCnt;
+    }
 }
+
