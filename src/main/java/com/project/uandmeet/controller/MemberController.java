@@ -4,10 +4,13 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.project.uandmeet.auth.UserDetailsImpl;
 import com.project.uandmeet.dto.*;
 import com.project.uandmeet.model.Concern;
+import com.project.uandmeet.redis.RedisUtil;
 import com.project.uandmeet.service.EmailService;
 import com.project.uandmeet.service.KakaoService;
 import com.project.uandmeet.service.MemberService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
@@ -24,38 +27,87 @@ import java.util.Map;
 @RequestMapping
 @RequiredArgsConstructor
 public class MemberController {
-
+    private final RedisUtil redisUtil;
     private final MemberService memberService;
     private final KakaoService kakaoService;
     private final EmailService emailService;
 
     // 회원가입 1. emali check
-    @PostMapping("/api/checemail")
+    @PostMapping("/api/checkemail")
     public ResponseEntity<String> checkemail(@RequestBody String username) throws IOException {
-        return ResponseEntity.ok(memberService.checkemail(username));
+        // 헤더에 전달
+//        headers.set("level","1");
+//        ResponseEntity<String> res = ResponseEntity.ok()
+//                                     .headers(headers)
+//                                     .body(memberService.checkemail(username));
+        // redis 에 저장
+        ResponseEntity<String> res = ResponseEntity.ok(memberService.checkemail(username));
+            redisUtil.setDataExpire(username+"level", "1", 300L);
+            // 해당 정보를 client 에서 처리하게 좋을지 서버에서 처리하는게 좋을지
+        // client 에 저장하면 이동 시 노출위험 -> 암호화 필수 but 서버 부담 감소
+// stateless 구조 설계 권장
+        return res;
     }
 
     // 회원가입 2. Email 인증
-    @PostMapping("/api/mailCheck")
-    public @ResponseBody String mailCheck(@RequestBody String username) {
-        return emailService.joinEmail(username);
+    @PostMapping("/api/mailcheck")
+    public @ResponseBody ResponseEntity<String> mailCheck(@RequestBody String username) {
+        // 헤더에 전달
+//        int level = Integer.parseInt(String.valueOf(headers.get("level")));
+//        if (level < 1) {
+//            ResponseEntity<String> res = ResponseEntity.ok()
+//                    .headers(headers)
+//                    .body(emailService.joinEmail(username));
+
+            //  redis 에 저장
+        String level = redisUtil.getData(username+"level");
+        ResponseEntity<String> res = ResponseEntity.ok(emailService.joinEmail(username));
+        int val = Integer.parseInt(level);
+        if (val < 1) {
+            return ResponseEntity.ok("잘못된 접근입니다.");
+        }
+        redisUtil.setDataExpire(username+"level", "2", 300L);
+            return res;
+//        }
+//        return null;
     }
 
     // 회원가입 3. Email 인증번호 확인
     @PostMapping("/api/checkAuthNum")
-    public @ResponseBody ResponseEntity<Boolean> checkAuthNum(@RequestBody String authNum) {
-        return ResponseEntity.ok(emailService.checkAuthNum(authNum));
+    public @ResponseBody ResponseEntity<String> checkAuthNum(@RequestBody String authNum, String username) {
+        String level = redisUtil.getData(username+"level");
+        ResponseEntity<String> res = ResponseEntity.ok(emailService.checkAuthNum(authNum));
+        int val = Integer.parseInt(level);
+        if (val < 2) {
+            return ResponseEntity.ok("잘못된 접근입니다.");
+        }
+        redisUtil.setDataExpire(username+"level", "3", 300L);
+        return res;
     }
 
     // 회원가입 4. password check
     @PostMapping("/api/checkpassword")
-    public ResponseEntity<String> checkPassword(@RequestBody String password, @RequestBody String passwordCheck) {
-        return ResponseEntity.ok(memberService.checkPassword(password, passwordCheck));
+    public ResponseEntity<String> checkPassword(@RequestBody String password, @RequestBody String passwordCheck, String username) {
+        String level = redisUtil.getData(username+"level");
+        ResponseEntity<String> res = ResponseEntity.ok(memberService.checkPassword(password, passwordCheck));
+        int val = Integer.parseInt(level);
+        if (val < 3) {
+            return ResponseEntity.ok("잘못된 접근입니다.");
+        }
+        redisUtil.setDataExpire(username+"level", "4", 300L);
+        return res;
     }
     // 회원가입 5. 가입완료
     @PostMapping("/api/signup")
     public ResponseEntity<String > signup(@RequestBody MemberRequestDto requestDto) throws IOException {
-        return ResponseEntity.ok(memberService.signup(requestDto));
+        String level = redisUtil.getData(requestDto.getUsername()+"level");
+        ResponseEntity<String> res = ResponseEntity.ok(memberService.signup(requestDto));
+        int val = Integer.parseInt(level);
+        if (val < 4) {
+            return ResponseEntity.ok("잘못된 접근입니다.");
+        }
+        redisUtil.deleteData(requestDto.getUsername()+"level");
+        return res;
     }
 
     // 회원 탈퇴

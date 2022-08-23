@@ -28,7 +28,11 @@ public class Review {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "member")
-    private Member member;
+    private Member from;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "member")
+    private Member to;
 
     //리뷰 메시지
     @Column(nullable = false)
@@ -38,4 +42,21 @@ public class Review {
     private Long evaluation_items;
 
     private Timestamp created_at;
- }
+
+    private int num;
+
+    public Review(Board board, Member from, Member to, Long score) {
+        this.board = board;
+        this.from = from;
+        this.to = to;
+        evaluation_items = score;
+    }
+
+    public Review(Board board, Member from, Member to, int num, String review) {
+        this.board = board;
+        this.from = from;
+        this.to = to;
+        this.num = num;
+        message = review;
+    }
+}

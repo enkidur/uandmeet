@@ -11,17 +11,15 @@ import com.project.uandmeet.jwt.JwtProperties;
 import com.project.uandmeet.model.Concern;
 import com.project.uandmeet.model.JoinCnt;
 import com.project.uandmeet.model.Member;
+import com.project.uandmeet.model.Star;
 import com.project.uandmeet.redis.RedisUtil;
 import com.project.uandmeet.repository.MemberRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpHeaders;
-import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.bind.annotation.RequestBody;
-
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
@@ -74,6 +72,7 @@ public class MemberService {
 
         // email 중복 확인
         checkDuplicateEmail(username);
+        //redis 에서 저장
         return "email check";
     }
 
@@ -335,7 +334,7 @@ public class MemberService {
                 ()-> new RuntimeException("볼수 없는 정보입니다")
         );
         String nickname = member.getNickname();
-        double star = member.getStar();
+        List<Star> star = member.getStar();
         String profileimgurl = member.getProfileImgUrl();
         ProfileDto profileDto = new ProfileDto(nickname, star, profileimgurl);
         return profileDto;
@@ -348,7 +347,7 @@ public class MemberService {
                 ()-> new RuntimeException("볼수 없는 정보입니다")
         );
         String nickname = member.getNickname();
-        double star = member.getStar();
+        List<Star> star = member.getStar();
         String profileimgurl = requestDto.getProfileimgurl();
         ProfileDto profileDto = new ProfileDto(nickname, star, profileimgurl);
         return profileDto;
