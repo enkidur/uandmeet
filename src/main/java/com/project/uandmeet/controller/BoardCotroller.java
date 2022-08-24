@@ -1,5 +1,6 @@
 package com.project.uandmeet.controller;
 
+import com.project.uandmeet.dto.SearchResponseDto;
 import com.project.uandmeet.dto.boardDtoGroup.BoardRequestDto;
 import com.project.uandmeet.dto.boardDtoGroup.BoardResponseDto;
 import com.project.uandmeet.dto.boardDtoGroup.LikeDto;
@@ -7,7 +8,9 @@ import com.project.uandmeet.exception.CustomException;
 import com.project.uandmeet.exception.ErrorCode;
 import com.project.uandmeet.security.UserDetailsImpl;
 import com.project.uandmeet.service.BoardService;
+import com.project.uandmeet.service.SearchService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
@@ -21,6 +24,8 @@ import java.util.List;
 @RequiredArgsConstructor
 public class BoardCotroller {
     private final BoardService boardService;
+
+    private final SearchService searchService;
 
     //게시물 작성
     @PostMapping("/api/board/create")
@@ -74,9 +79,22 @@ public class BoardCotroller {
     private ResponseEntity<Long> likeClick(LikeDto likeDto,
                                            @AuthenticationPrincipal UserDetailsImpl userDetails) {
         return boardService.likeClick(likeDto, userDetails);
+    }
+    @GetMapping("/board/search")
+    public ResponseEntity<List<SearchResponseDto>> search(@RequestParam(value = "sort") String sort,
+                                                          @RequestParam(value = "keyword") String keyword,
+                                                          @RequestParam(value = "city") String city,
+                                                          @RequestParam(value = "gu") String gu) {
+
+        List<SearchResponseDto> searchResponseDto = searchService.queryDslSearch(sort, keyword, city, gu);
+
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .body(searchResponseDto);
 
     }
 }
+
+
 
 /*
     @PostMapping("/board/{id}/matchingentry")
