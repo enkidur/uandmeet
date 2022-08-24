@@ -48,8 +48,8 @@ public class Member {
     @OneToMany(mappedBy = "member", fetch = FetchType.LAZY)
     private List<JoinCnt> joinCnt;
 
-    @Column
-    private Double star;
+    @OneToMany(fetch = FetchType.LAZY,mappedBy = "member")
+    private List<Star> star;
 
     @OneToMany(fetch = FetchType.LAZY,mappedBy = "member",cascade = CascadeType.ALL)
     private List<Board> boardList = new ArrayList<>();
@@ -67,8 +67,6 @@ public class Member {
     private String loginto;
 
 //    private String refreshToken;
-
-
 
     // 일반 사용자
 //    public Member(String nickname, String encodedPassword, String email, String username) {

@@ -37,16 +37,17 @@ import static com.project.uandmeet.security.jwt.JwtProperties.*;
 public class JwtTokenProvider {
 
     @Value("${jwt.secretKey}")
-    private Key secretKey;
+    private String secretKey;
     public static final String AUTH_HEADER = "Authorization";
     public final HttpServletResponse response;
 
     private final UserDetailsService userDetailsService;
+    private Key key;
 
     @PostConstruct
     protected void init() {
-        byte[] keyBytes = Decoders.BASE64.decode(String.valueOf(secretKey));
-        this.secretKey = Keys.hmacShaKeyFor(keyBytes);
+        byte[] keyBytes = Decoders.BASE64.decode(secretKey);
+        this.key = Keys.hmacShaKeyFor(keyBytes);
     }
 
     // 토큰 생성
@@ -57,7 +58,7 @@ public class JwtTokenProvider {
                 .setClaims(claims)//정보저장
                 .setIssuedAt(now)//토큰 발행 시간 정보
                 .setExpiration(new Date(now.getTime() + ACCESS_EXPIRATION_TIME))
-                .signWith(secretKey, SignatureAlgorithm.HS256)//사용할 암호화 알고리즘
+                .signWith(key, SignatureAlgorithm.HS256)//사용할 암호화 알고리즘
                 //signature에 들어갈 secret값 세팅
                 .compact();
 
@@ -70,7 +71,7 @@ public class JwtTokenProvider {
         String refreshToken= Jwts.builder()
                 .setIssuedAt(now)
                 .setExpiration(new Date(now.getTime() + REFRESH_EXPIRATION_TIME))
-                .signWith( secretKey, SignatureAlgorithm.HS256)
+                .signWith( key, SignatureAlgorithm.HS256)
                 .compact();
         response.addHeader("RefreshToken","Bearer " + refreshToken);
         return refreshToken;
