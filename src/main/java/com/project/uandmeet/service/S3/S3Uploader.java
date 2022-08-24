@@ -26,7 +26,7 @@ public class S3Uploader {
     private final ImageRepository imageRepository;
 
 
-    @Value("${cloud.aws.s3.bucket}")
+    @Value("${Bucket}")
     public String bucket; // S3 버킷 이름
 
     public ImageDto upload(MultipartFile multipartFile, String dirName) throws IOException {
