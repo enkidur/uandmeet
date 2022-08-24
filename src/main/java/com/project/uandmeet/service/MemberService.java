@@ -1,10 +1,5 @@
 package com.project.uandmeet.service;
 
-import com.auth0.jwt.JWT;
-import com.auth0.jwt.JWTVerifier;
-import com.auth0.jwt.algorithms.Algorithm;
-import com.auth0.jwt.exceptions.JWTVerificationException;
-import com.auth0.jwt.interfaces.DecodedJWT;
 import com.project.uandmeet.dto.*;
 import com.project.uandmeet.model.Concern;
 import com.project.uandmeet.model.JoinCnt;
@@ -13,15 +8,12 @@ import com.project.uandmeet.redis.RedisUtil;
 import com.project.uandmeet.repository.MemberRepository;
 import com.project.uandmeet.security.UserDetailsImpl;
 import com.project.uandmeet.security.jwt.JwtProperties;
+import com.project.uandmeet.security.jwt.JwtTokenProvider;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpHeaders;
-import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.bind.annotation.RequestBody;
-
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
@@ -36,6 +28,7 @@ public class MemberService {
     private final BCryptPasswordEncoder passwordEncoder;
     private final EmailService emailService;
     private final RedisUtil redisUtil;
+    private final JwtTokenProvider jwtTokenProvider;
     private String authNumber; // 난수 번호
 
     // 난수 생성
@@ -77,49 +70,46 @@ public class MemberService {
         return "email check";
     }
 
-        // email 인증 번호 발송
-//        emailService.joinEmail(username);
-        // 인증 번호 확인 절차는 controller 에서 실행
 
-        // 비밀번호, 비밀번호 재입력 확인
-        public String checkPassword(String password, String passwordCheck) {
-            if (password.length() < 3) {
-                throw new IllegalArgumentException("비밀번호를 3자 이상 입력하세요");
-            } else if (password.length() > 21) {
-                throw new IllegalArgumentException("비밀번호를 20자 이하로 입력하세요");
-            } else if (password.contains("script")) {
-                throw new IllegalArgumentException("xss공격 멈춰주세요.");
-            } else if (passwordCheck.contains("script")) {
-                throw new IllegalArgumentException("xss공격 멈춰주세요.");
-            }
-            if (!(passwordCheck.equals(password))) {
-                throw new IllegalArgumentException("비밀번호가 일치하지 않습니다.");
-            }
-            return "password check 완료";
+    // 비밀번호, 비밀번호 재입력 확인
+    public String checkPassword(String password, String passwordCheck) {
+        if (password.length() < 3) {
+            throw new IllegalArgumentException("비밀번호를 3자 이상 입력하세요");
+        } else if (password.length() > 21) {
+            throw new IllegalArgumentException("비밀번호를 20자 이하로 입력하세요");
+        } else if (password.contains("script")) {
+            throw new IllegalArgumentException("xss공격 멈춰주세요.");
+        } else if (passwordCheck.contains("script")) {
+            throw new IllegalArgumentException("xss공격 멈춰주세요.");
         }
+        if (!(passwordCheck.equals(password))) {
+            throw new IllegalArgumentException("비밀번호가 일치하지 않습니다.");
+        }
+        return "password check 완료";
+    }
 
-        public String signup(MemberRequestDto requestDto) throws IOException {
-            String username = requestDto.getUsername();
-            String[] emailadress = username.split("@");
-            String id = emailadress[0];
+    public String signup(MemberRequestDto requestDto) throws IOException {
+        String username = requestDto.getUsername();
+        String[] emailadress = username.split("@");
+        String id = emailadress[0];
 
-            checkemail(requestDto.getUsername());
-            checkPassword(requestDto.getPassword(), requestDto.getPasswordCheck());
-            Member member = requestDto.register();
-            member.setPassword(passwordEncoder.encode(requestDto.getPassword()));
-            // login 구별
-            member.setLoginto("normal");
-            member.setNickname(id);
+        checkemail(requestDto.getUsername());
+        checkPassword(requestDto.getPassword(), requestDto.getPasswordCheck());
+        Member member = requestDto.register();
+        member.setPassword(passwordEncoder.encode(requestDto.getPassword()));
+        // login 구별
+        member.setLoginto("normal");
+        member.setNickname(id);
 
-            // 프로필 이미지 추가
+        // 프로필 이미지 추가
 //        if (requestDto.getUserProfileImage() != null) {
 //            String profileUrl = s3Uploader.upload(requestDto.getUserProfileImage(), "profile");
 //            users.setUserProfileImage(profileUrl);
 //        }
 
-            memberRepository.save(member);
-            return "회원가입 완료";
-        }
+        memberRepository.save(member);
+        return "회원가입 완료";
+    }
 
 
     public void checkDuplicateEmail(String username) {
@@ -130,14 +120,6 @@ public class MemberService {
     }
 
 
-
-    // TOKEN
-
-    // db 의 refreshToken 변경
-//    public void updateRefreshToken(String username, String refreshToken) {
-//        Member member = memberRepository.findByUsername(username).orElseThrow(() -> new RuntimeException("사용자를 찾을 수 없습니다."));
-//        member.updateRefreshToken(refreshToken);
-//    }
 
     // 회원 탈퇴
     public String withdraw(UserDetailsImpl userDetails, String password) {
@@ -156,71 +138,23 @@ public class MemberService {
         if (authorizationHeader == null || !authorizationHeader.startsWith(JwtProperties.TOKEN_PREFIX)) {
             throw new RuntimeException("JWT Token이 존재하지 않습니다.");
         }
-        String refreshToken = authorizationHeader.substring(JwtProperties.TOKEN_PREFIX.length());
 
         // Refresh Token 유효성 검사
-        // 토큰 해독 객체 생성
-        JWTVerifier verifier = JWT.require(Algorithm.HMAC512(JwtProperties.SECRET2)).build();
-        // 토큰 검증
-        DecodedJWT decodedJWT = verifier.verify(refreshToken);
-
-        // 그냥 합쳐서 사용가능, 가독성을 위해 분해
-//        String username =
-//                JWT.require(Algorithm.HMAC512(JwtProperties.SECRET)).build()
-//                        .verify(refreshToken).getClaim("username").asString();
-//
-//        or
-//
-//        String username =
-//                JWT.require(Algorithm.HMAC512(JwtProperties.SECRET)).build()
-//                        .verify(refreshToken).getSubject();
-
-
+        jwtTokenProvider.validateToken(authorizationHeader);
+        String username = jwtTokenProvider.getUserPk(authorizationHeader);
         // Access Token 재발급
-        long now = System.currentTimeMillis();
-//        String username = decodedJWT.getSubject();
-        String username = decodedJWT.getSubject();
-        Member member = memberRepository.findByUsername(username)
-                .orElseThrow(() -> new UsernameNotFoundException("사용자를 찾을 수 없습니다."));
-        // db 의 refreshToken 과 header 의 refreshToken 비교
-//        if (!member.getRefreshToken().equals(refreshToken)) {
-//            throw new JWTVerificationException("유효하지 않은 Refresh Token 입니다.");
-//        }
-        // redis 의 refreshToken 과 header 의 refreshToken 비교
-        if (!redisUtil.getData(member.getUsername()).equals(refreshToken)) {
-            throw new JWTVerificationException("유효하지 않은 Refresh Token 입니다.");
-        }
-        String accessToken = JWT.create()
-                .withSubject(member.getUsername()) // PrincipalDetails 에서 가져오는 방법 찾는 중
-                .withExpiresAt(new Date(now + JwtProperties.ACCESS_EXPIRATION_TIME))
-                .withClaim("id", member.getId())
-//                .withClaim("email", member.getUsername())
-                // map 은 스트림 내 요소들을 하나씩 특정 값으로 변환
-                // Role 을 name 으로 매핑 (Role 의 name 을 꺼내옴)
-//                .withClaim("roles", member.getRoles().stream().map(Role::getName)
-//                        .collect(Collectors.toList()))
-                .withIssuedAt(new Date(now))
-                .sign(Algorithm.HMAC512(JwtProperties.SECRET));
-
+        String accessToken = jwtTokenProvider.createToken(username);
 
         Map<String, String> accessTokenResponseMap = new HashMap<>();
 
         // 현재시간과 Refresh Token 만료날짜를 통해 남은 만료기간 계산 (만료기간 전 재발급이 필요없다면 삭제)
         // Refresh Token 만료시간 계산해 특정 시간 미만일 시 refresh token 도 재발급
-        long refreshExpireTime = decodedJWT.getClaim("exp").asLong() * 1000;
-        long diffDays = (refreshExpireTime - now) / 1000 / (24 * 3600);
-        long diffMin = (refreshExpireTime - now) / 1000 / 60;
-        if (diffDays < 2) { // refresh token 만료시간이 특정시간보다 작으면 재발급
-            String newRefreshToken = JWT.create()
-                    .withSubject(member.getUsername())
-                    .withExpiresAt(new Date(now + JwtProperties.REFRESH_EXPIRATION_TIME))
-                    .withIssuedAt(new Date(now))
-                    .sign(Algorithm.HMAC512(JwtProperties.SECRET2));
+        Date now = new Date();
+        Date refreshExpireTime = jwtTokenProvider.ExpireTime(authorizationHeader);
+        if (refreshExpireTime.before(new Date(now.getTime() + 1000 * 60 * 60 * 24L))) { // refresh token 만료시간이 특정시간보다 작으면 재발급
+            String newRefreshToken = jwtTokenProvider.createRefreshToken();
             accessTokenResponseMap.put(JwtProperties.HEADER_REFRESH, JwtProperties.TOKEN_PREFIX + newRefreshToken);
-            // db 에 new refreshToken 저장
-//            member.updateRefreshToken(newRefreshToken);
-            // refreshToken redis에 저장
-            redisUtil.setDataExpire(member.getUsername(), refreshToken, JwtProperties.REFRESH_EXPIRATION_TIME);
+            redisUtil.setDataExpire(jwtTokenProvider.getUserPk(accessToken), newRefreshToken, JwtProperties.REFRESH_EXPIRATION_TIME);
         }
 
         accessTokenResponseMap.put(JwtProperties.HEADER_ACCESS, JwtProperties.TOKEN_PREFIX + accessToken);
@@ -237,29 +171,29 @@ public class MemberService {
         makeRandomNumber();
 
         Member member = memberRepository.findByUsername(username).orElseThrow(
-                ()-> new IllegalArgumentException("해당 아이디가 없습니다.")
+                () -> new IllegalArgumentException("해당 아이디가 없습니다.")
         );
         member.setPassword(passwordEncoder.encode(authNumber));
 
-            //인증메일 보내기
-            String setFrom = "wjdgns5488@naver.com"; // email-config에 설정한 자신의 이메일 주소를 입력
-            String toMail = username;
-            String title = "비밀번호 찾기 이메일 입니다."; // 이메일 제목
-            String content =
-                    "홈페이지를 방문해주셔서 감사합니다." +    //html 형식으로 작성 !
-                            "<br><br>" +
-                            "임시 비밀번호는 " + authNumber + "입니다." +
-                            "<br>" +
-                            "로그인 후 비밀번호를 변경해 주세요"; //이메일 내용 삽입
-            emailService.mailSend(setFrom, toMail, title, content);
-            return authNumber;
+        //인증메일 보내기
+        String setFrom = "wjdgns5488@naver.com"; // email-config에 설정한 자신의 이메일 주소를 입력
+        String toMail = username;
+        String title = "비밀번호 찾기 이메일 입니다."; // 이메일 제목
+        String content =
+                "홈페이지를 방문해주셔서 감사합니다." +    //html 형식으로 작성 !
+                        "<br><br>" +
+                        "임시 비밀번호는 " + authNumber + "입니다." +
+                        "<br>" +
+                        "로그인 후 비밀번호를 변경해 주세요"; //이메일 내용 삽입
+        emailService.mailSend(setFrom, toMail, title, content);
+        return authNumber;
     }
 
     // 활동 내역 조회
     public MypageDto action(UserDetailsImpl userDetails) {
         String username = userDetails.getUsername();
         Member member = memberRepository.findByUsername(username).orElseThrow(
-                ()-> new RuntimeException("볼수 없는 정보입니다")
+                () -> new RuntimeException("볼수 없는 정보입니다")
         );
         String nickname = member.getNickname();
         List<Concern> concern = member.getConcern();
@@ -272,7 +206,7 @@ public class MemberService {
     public MypageDto concernedit(UserDetailsImpl userDetails, List<Concern> concern) {
         String username = userDetails.getUsername();
         Member member = memberRepository.findByUsername(username).orElseThrow(
-                ()-> new RuntimeException("수정 권한이 없습니다.")
+                () -> new RuntimeException("수정 권한이 없습니다.")
         );
         String nickname = member.getNickname();
         List<JoinCnt> joinCnt = member.getJoinCnt();
@@ -284,7 +218,7 @@ public class MemberService {
     public MypageDto nicknameedit(UserDetailsImpl userDetails, String nickname) {
         String username = userDetails.getUsername();
         Member member = memberRepository.findByUsername(username).orElseThrow(
-                ()-> new RuntimeException("수정 권한이 없습니다.")
+                () -> new RuntimeException("수정 권한이 없습니다.")
         );
         List<Concern> concern = member.getConcern();
         List<JoinCnt> joinCnt = member.getJoinCnt();
@@ -296,7 +230,7 @@ public class MemberService {
     public MyPageInfoDto myinfo(UserDetailsImpl userDetails) {
         String username = userDetails.getUsername();
         Member member = memberRepository.findByUsername(username).orElseThrow(
-                ()-> new RuntimeException("볼 수 없는 정보입니다")
+                () -> new RuntimeException("볼 수 없는 정보입니다")
         );
         String gender = member.getGender();
         String birth = member.getBirth();
@@ -305,10 +239,10 @@ public class MemberService {
     }
 
     // info -> gender 수정
-    public MyPageInfoDto genderedit(UserDetailsImpl userDetails , InfoeditRequestDto requestDto) {
+    public MyPageInfoDto genderedit(UserDetailsImpl userDetails, InfoeditRequestDto requestDto) {
         String username = userDetails.getUsername();
         Member member = memberRepository.findByUsername(username).orElseThrow(
-                ()-> new RuntimeException("볼 수 없는 정보입니다")
+                () -> new RuntimeException("볼 수 없는 정보입니다")
         );
         String gender = requestDto.getGender();
         String birth = member.getBirth();
@@ -317,10 +251,10 @@ public class MemberService {
     }
 
     // info -> birth 수정
-    public MyPageInfoDto birthedit(UserDetailsImpl userDetails , InfoeditRequestDto requestDto) {
+    public MyPageInfoDto birthedit(UserDetailsImpl userDetails, InfoeditRequestDto requestDto) {
         String username = userDetails.getUsername();
         Member member = memberRepository.findByUsername(username).orElseThrow(
-                ()-> new RuntimeException("볼 수 없는 정보입니다")
+                () -> new RuntimeException("볼 수 없는 정보입니다")
         );
         String gender = member.getGender();
         String birth = requestDto.getBirth();
@@ -332,7 +266,7 @@ public class MemberService {
     public ProfileDto profile(UserDetailsImpl userDetails) {
         String username = userDetails.getUsername();
         Member member = memberRepository.findByUsername(username).orElseThrow(
-                ()-> new RuntimeException("볼수 없는 정보입니다")
+                () -> new RuntimeException("볼수 없는 정보입니다")
         );
         String nickname = member.getNickname();
         double star = member.getStar();
@@ -345,7 +279,7 @@ public class MemberService {
     public ProfileDto profileedit(UserDetailsImpl userDetails, ProfileEditRequestDto requestDto) {
         String username = userDetails.getUsername();
         Member member = memberRepository.findByUsername(username).orElseThrow(
-                ()-> new RuntimeException("볼수 없는 정보입니다")
+                () -> new RuntimeException("볼수 없는 정보입니다")
         );
         String nickname = member.getNickname();
         double star = member.getStar();
@@ -358,10 +292,10 @@ public class MemberService {
     public String changepass(UserDetailsImpl userDetails, String passwordcheck, String newpassword) {
         String username = userDetails.getUsername();
         Member member = memberRepository.findByUsername(username).orElseThrow(
-                ()->new RuntimeException("해당 권한이 없습니다.")
+                () -> new RuntimeException("해당 권한이 없습니다.")
         );
-        if (!passwordEncoder.encode(passwordcheck).equals(member.getPassword()))
-        { throw new RuntimeException("비밀번호가 일치하지 않습니다.");
+        if (!passwordEncoder.encode(passwordcheck).equals(member.getPassword())) {
+            throw new RuntimeException("비밀번호가 일치하지 않습니다.");
         } else {
             member.setPassword(passwordEncoder.encode(newpassword));
         }

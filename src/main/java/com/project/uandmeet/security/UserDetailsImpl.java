@@ -9,7 +9,6 @@ import org.springframework.security.core.userdetails.UserDetails;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 
 // 시큐리티가 /login 을 낚아채서 로그인을 진행함
 // 로그인 진행이 완료되면 시큐리티 session 을 만듦 (Security ContextHolder 라는 key Value 로 session 정보 저장)

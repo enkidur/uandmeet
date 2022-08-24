@@ -1,13 +1,30 @@
 package com.project.uandmeet.service.S3;
 
+import com.amazonaws.services.s3.AmazonS3Client;
+import com.amazonaws.services.s3.model.CannedAccessControlList;
+import com.amazonaws.services.s3.model.DeleteObjectRequest;
+import com.amazonaws.services.s3.model.PutObjectRequest;
+import com.project.uandmeet.dto.ImageDto;
+import com.project.uandmeet.repository.ImageRepository;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Component;
+import org.springframework.web.multipart.MultipartFile;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.util.Optional;
+import java.util.UUID;
+
+
 @Slf4j
 @RequiredArgsConstructor
 @Component
 public class S3Uploader {
     private final AmazonS3Client amazonS3Client;
-    //    private final PostImageRepository postImageRepository;
     private final ImageRepository imageRepository;
-    private final TeamImageRepository teamImageRepository;
+
 
     @Value("${cloud.aws.s3.bucket}")
     public String bucket; // S3 버킷 이름
@@ -26,20 +43,7 @@ public class S3Uploader {
         DeleteObjectRequest request = new DeleteObjectRequest(bucket, fileName);
         amazonS3Client.deleteObject(request);
     }
-    //s3삭제 team삭제
-    public void deleteTeamImage(Long teamImageId){
-        String fileName = teamImageRepository.findById(teamImageId).orElseThrow(IllegalArgumentException::new).getFilename();
 
-        DeleteObjectRequest request = new DeleteObjectRequest(bucket, fileName);
-        amazonS3Client.deleteObject(request);
-    }
-
-//    public void deletePostImage(Long imageId){
-//        String fileName = postImageRepository.findById(imageId).orElseThrow(IllegalArgumentException::new).getFileName();
-//
-//        DeleteObjectRequest request = new DeleteObjectRequest(bucket, fileName);
-//        amazonS3Client.deleteObject(request);
-//    }
 
     // S3로 파일 업로드하기
     private ImageDto upload(File uploadFile, String dirName) {

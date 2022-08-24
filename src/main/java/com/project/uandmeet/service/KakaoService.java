@@ -11,6 +11,7 @@ import com.project.uandmeet.model.MemberRoleEnum;
 import com.project.uandmeet.redis.RedisUtil;
 import com.project.uandmeet.repository.MemberRepository;
 import com.project.uandmeet.security.jwt.JwtProperties;
+import com.project.uandmeet.security.jwt.JwtTokenProvider;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
@@ -37,6 +38,7 @@ public class KakaoService {
     private final MemberRepository memberRepository;
     private final BCryptPasswordEncoder passwordEncoder;
     private final MemberService memberService;
+    private final JwtTokenProvider jwtTokenProvider;
     private final RedisUtil redisUtil;
 
 
@@ -153,19 +155,22 @@ public class KakaoService {
 
     private void createToken(Member member) {
 
-        String accessToken = JWT.create()
-                .withSubject(member.getUsername())
-                .withExpiresAt(new Date(System.currentTimeMillis() + JwtProperties.ACCESS_EXPIRATION_TIME))
-                .withClaim("id", member.getId())
-//                .withClaim("email", member.getUsername())
-                .withIssuedAt(new Date(System.currentTimeMillis()))
-                .sign(Algorithm.HMAC512(JwtProperties.SECRET));
+        String accessToken = jwtTokenProvider.createToken(member.getUsername());
+        String refreshToken = jwtTokenProvider.createRefreshToken();
 
-        String refreshToken = JWT.create()
-                .withSubject(member.getUsername())
-                .withExpiresAt(new Date(System.currentTimeMillis() + JwtProperties.REFRESH_EXPIRATION_TIME))
-                .withIssuedAt(new Date(System.currentTimeMillis()))
-                .sign(Algorithm.HMAC512(JwtProperties.SECRET2));
+//        String accessToken = JWT.create()
+//                .withSubject(member.getUsername())
+//                .withExpiresAt(new Date(System.currentTimeMillis() + JwtProperties.ACCESS_EXPIRATION_TIME))
+//                .withClaim("id", member.getId())
+////                .withClaim("email", member.getUsername())
+//                .withIssuedAt(new Date(System.currentTimeMillis()))
+//                .sign(Algorithm.HMAC512(JwtProperties.SECRET));
+//
+//        String refreshToken = JWT.create()
+//                .withSubject(member.getUsername())
+//                .withExpiresAt(new Date(System.currentTimeMillis() + JwtProperties.REFRESH_EXPIRATION_TIME))
+//                .withIssuedAt(new Date(System.currentTimeMillis()))
+//                .sign(Algorithm.HMAC512(JwtProperties.SECRET2));
 
         // Refresh Token DB에 저장
 //        memberService.updateRefreshToken(member.getUsername(), refreshToken);
