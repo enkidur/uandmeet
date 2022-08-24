@@ -1,5 +1,6 @@
 package com.project.uandmeet.security;
 
+import com.project.uandmeet.oauth.PrincipalOauth2UserService;
 import com.project.uandmeet.security.jwt.JwtAuthenticationFilter;
 import com.project.uandmeet.security.jwt.JwtExceptionFilter;
 import com.project.uandmeet.security.jwt.JwtTokenProvider;
@@ -19,6 +20,8 @@ import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
+import java.security.Principal;
+
 @RequiredArgsConstructor
 @Configuration
 @EnableWebSecurity // 스프링 Security 지원을 가능하게 함
@@ -26,6 +29,8 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 
     private final JwtTokenProvider jwtTokenProvider;
     private final JwtExceptionFilter jwtExceptionFilter;
+
+    private final PrincipalOauth2UserService principalOauth2UserService;
 
     @Bean
     public BCryptPasswordEncoder encodePassword() {
@@ -71,6 +76,13 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
                 .and()
                 .addFilterBefore(new JwtAuthenticationFilter(jwtTokenProvider), UsernamePasswordAuthenticationFilter.class)
                 .addFilterBefore(jwtExceptionFilter, JwtAuthenticationFilter.class);
+
+        http.authorizeRequests()
+                .and()
+                .oauth2Login()
+                .loginPage("/login")
+                .userInfoEndpoint()
+                .userService(principalOauth2UserService);
     }
 
     @Bean

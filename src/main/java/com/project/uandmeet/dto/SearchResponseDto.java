@@ -1,38 +1,37 @@
-package com.project.uandmeet.dto.boardDtoGroup;
+package com.project.uandmeet.dto;
 
-import com.project.uandmeet.dto.MemberDtoGroup.MemberSimpleDto;
 import com.project.uandmeet.model.Board;
 import com.project.uandmeet.model.Category;
-import lombok.*;
+import lombok.Data;
 
-import java.net.PortUnreachableException;
-import java.sql.Timestamp;
 import java.time.LocalDateTime;
 
-@Getter
-@Setter
-@NoArgsConstructor
-public class BoardResponseDto {
-    private MemberSimpleDto memberSimpleDto;
+@Data
+public class SearchResponseDto {
+
+    private String boardType;
+    private Category category;
     private Long id;
     private LocalDateTime createdAt;
     private String title;
+    private String centent;
     private String boardimage;
-    private Long likeCount;
-    private Long commentCount;
-
+    private LocalDateTime endDateAt;
     private String city;
     private String gu;
 
+    private Long likeCount;
+    private Long commentCount;
+
     private Long maxEntry;
     private Long currentEntry;
+
+    //경도
     private double lat;
+    //위도
     private double lng;
-    //private String category;
-    private Category category;
-    public BoardResponseDto(MemberSimpleDto memberSimpleDto ,Board board)
-    {
-        this.memberSimpleDto = memberSimpleDto;
+
+    public SearchResponseDto(Board board){
         this.city = board.getCity();
         this.gu = board.getGu();
         this.id = board.getId();
@@ -44,6 +43,7 @@ public class BoardResponseDto {
         this.commentCount = board.getCommentCount();
         this.maxEntry = board.getMaxEntry();
         this.currentEntry = board.getCurrentEntry();
+
     }
 
 }

@@ -6,9 +6,11 @@ import lombok.Getter;
 import lombok.Setter;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.oauth2.core.user.OAuth2User;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Map;
 
 // 시큐리티가 /login 을 낚아채서 로그인을 진행함
 // 로그인 진행이 완료되면 시큐리티 session 을 만듦 (Security ContextHolder 라는 key Value 로 session 정보 저장)
@@ -20,15 +22,28 @@ import java.util.Collection;
 
 @Getter
 @Setter
-public class UserDetailsImpl implements UserDetails {
+public class UserDetailsImpl implements UserDetails, OAuth2User {
 
     private Member member; // 컴포지션
 //    private KakaoMember kakaoMember;
+    private Map<String,Object> attributes; // OAuth2
 
     public UserDetailsImpl(Member member) {
         this.member = member;
     }
 
+
+    // Oauth2 오버라이드 메서드
+    @Override
+    public Map<String, Object> getAttributes() {
+        return attributes;
+    }
+
+    // Oauth2 오버라이드 메서드
+    @Override
+    public String getName() {
+        return null;
+    }
 
     // 해당 User 의 권한의 리턴
     @Override
@@ -88,4 +103,6 @@ public class UserDetailsImpl implements UserDetails {
         // return false
         return true;
     }
+
+
 }
