@@ -10,6 +10,8 @@ import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jws;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
+import io.jsonwebtoken.io.Decoders;
+import io.jsonwebtoken.security.Keys;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -22,7 +24,7 @@ import org.springframework.stereotype.Component;
 import javax.annotation.PostConstruct;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import java.util.Base64;
+import java.security.Key;
 import java.util.Date;
 import java.util.Optional;
 
@@ -34,7 +36,7 @@ import static com.project.uandmeet.security.jwt.JwtProperties.*;
 public class JwtTokenProvider {
 
     @Value("${jwt.secretKey}")
-    private String secretKey;
+    private Key secretKey;
     public static final String AUTH_HEADER = "Authorization";
     public final HttpServletResponse response;
 
@@ -47,7 +49,8 @@ public class JwtTokenProvider {
 
     @PostConstruct
     protected void init() {
-        secretKey = Base64.getEncoder().encodeToString(secretKey.getBytes());
+        byte[] keyBytes = Decoders.BASE64.decode(String.valueOf(secretKey));
+        this.secretKey = Keys.hmacShaKeyFor(keyBytes);
     }
 
     // 토큰 생성
@@ -58,7 +61,7 @@ public class JwtTokenProvider {
                 .setClaims(claims)//정보저장
                 .setIssuedAt(now)//토큰 발행 시간 정보
                 .setExpiration(new Date(now.getTime() + tokenValidTime))
-                .signWith(SignatureAlgorithm.HS256, secretKey)//사용할 암호화 알고리즘
+                .signWith(secretKey,SignatureAlgorithm.HS512)//사용할 암호화 알고리즘
                 //signature에 들어갈 secret값 세팅
                 .compact();
 
@@ -71,7 +74,7 @@ public class JwtTokenProvider {
         String refreshToken= Jwts.builder()
                 .setIssuedAt(now)
                 .setExpiration(new Date(now.getTime() + refreshTokenValidTime))
-                .signWith(SignatureAlgorithm.HS256, secretKey)
+                .signWith(secretKey,SignatureAlgorithm.HS512)
                 .compact();
         response.addHeader("RefreshToken","Bearer " + refreshToken);
         return refreshToken;
@@ -121,7 +124,7 @@ public class JwtTokenProvider {
         DecodedJWT jwt = null;
 
         try {
-            Algorithm algorithm = Algorithm.HMAC512(secretKey);
+            Algorithm algorithm = Algorithm.HMAC512(secretKey.getEncoded());
             JWTVerifier verifier = JWT
                     .require(algorithm)
                     .build();
@@ -136,7 +139,7 @@ public class JwtTokenProvider {
 
     // 토큰에서 회원 정보 추출
     public String getUserPk(String jwtToken) {
-        return Jwts.parser().setSigningKey(secretKey).parseClaimsJws(setTokenName(jwtToken)).getBody().getSubject();
+        return Jwts.parserBuilder().setSigningKey(secretKey).build().parseClaimsJws(setTokenName(jwtToken)).getBody().getSubject();
     }
 
     // JWT 토큰에서 인증 정보 조회
@@ -158,7 +161,7 @@ public class JwtTokenProvider {
     public boolean validateToken(String jwtToken) {
 
         try {
-            Jws<Claims> claims = Jwts.parser().setSigningKey(secretKey).parseClaimsJws(setTokenName(jwtToken));
+            Jws<Claims> claims = Jwts.parserBuilder().setSigningKey(secretKey).build().parseClaimsJws(setTokenName(jwtToken));
             return !claims.getBody().getExpiration().before(new Date());
         } catch (Exception e) {
             return false;
