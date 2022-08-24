@@ -7,6 +7,7 @@ import com.project.uandmeet.redis.RedisUtil;
 import com.project.uandmeet.repository.MemberRepository;
 import com.project.uandmeet.security.UserDetailsImpl;
 import com.project.uandmeet.security.jwt.JwtProperties;
+import com.project.uandmeet.security.jwt.JwtTokenProvider;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpHeaders;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -27,6 +28,7 @@ public class PrincipalOauth2UserService extends DefaultOAuth2UserService {
     private final MemberRepository memberRepository;
     private final BCryptPasswordEncoder passwordEncoder;
     private final RedisUtil redisUtil;
+    private final JwtTokenProvider jwtTokenProvider;
 
     //구글로 받은 userRequest 데이터에 대한 후처리되는 함수
     // 함수 종료시 @AuthenticationPrincipal 어노테이션이 만들어진다.
@@ -61,21 +63,9 @@ public class PrincipalOauth2UserService extends DefaultOAuth2UserService {
             memberRepository.save(memberEntity);
 
 
-            String accessToken = JWT.create()
-                    .withSubject(memberEntity.getUsername())
-                    .withExpiresAt(new Date(System.currentTimeMillis() + JwtProperties.ACCESS_EXPIRATION_TIME))
-                    .withClaim("id", memberEntity.getId())
-                    .withIssuedAt(new Date(System.currentTimeMillis()))
-                    .sign(Algorithm.HMAC512(JwtProperties.SECRET));
+            String accessToken = jwtTokenProvider.createToken(memberEntity.getUsername());
+            String refreshToken = jwtTokenProvider.createRefreshToken();
 
-            String refreshToken = JWT.create()
-                    .withSubject(memberEntity.getUsername())
-                    .withExpiresAt(new Date(System.currentTimeMillis() + JwtProperties.REFRESH_EXPIRATION_TIME))
-                    .withIssuedAt(new Date(System.currentTimeMillis()))
-                    .sign(Algorithm.HMAC512(JwtProperties.SECRET2));
-
-            // Refresh Token DB에 저장
-//        memberService.updateRefreshToken(member.getUsername(), refreshToken);
             // redis 에 token 저장
             redisUtil.setDataExpire(memberEntity.getUsername(),refreshToken,JwtProperties.REFRESH_EXPIRATION_TIME);
 

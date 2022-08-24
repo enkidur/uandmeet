@@ -43,7 +43,7 @@ public class MemberController {
 
     // 회원가입 3. Email 인증번호 확인
     @PostMapping("/api/checkAuthNum")
-    public @ResponseBody ResponseEntity<Boolean> checkAuthNum(@RequestBody String authNum) {
+    public @ResponseBody ResponseEntity<String> checkAuthNum(@RequestBody String authNum) {
         return ResponseEntity.ok(emailService.checkAuthNum(authNum));
     }
 
