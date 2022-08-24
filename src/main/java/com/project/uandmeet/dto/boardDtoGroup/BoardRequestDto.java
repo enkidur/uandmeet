@@ -6,9 +6,9 @@ import java.time.LocalDateTime;
 
 
 public class BoardRequestDto {
-
     //정보공유 : information,  매칭:matching 둘중 하나.
-    @Data
+
+    @Getter
     @AllArgsConstructor
     @NoArgsConstructor
     public static class createAndCheck {
@@ -26,6 +26,7 @@ public class BoardRequestDto {
         private double lat;
         //위도
         private double lng;
+
     }
 
     @Data

@@ -1,5 +1,4 @@
-package com.project.uandmeet.exception;
-
+package com.project.uandmeet.Exception;
 
 import lombok.Builder;
 import lombok.Getter;

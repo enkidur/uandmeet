@@ -13,4 +13,5 @@ public class LikeDto {
      private String boardType;
      private Long postid;
      private Boolean isLike;
+
 }
