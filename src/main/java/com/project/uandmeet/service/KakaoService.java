@@ -71,7 +71,7 @@ public class KakaoService {
         body.add("grant_type", "authorization_code");
         // rest Api key
         body.add("client_id", "5d309e8e3962145e21700ba232a4d3bc");
-        body.add("redirect_uri", "http://localhost:8080/user/kakao/callback");
+        body.add("redirect_uri", "http://localhost:3000/api/kakaoLogin");
         body.add("code", code);
 
         // HTTP 요청 보내기

@@ -11,37 +11,54 @@ import com.project.uandmeet.service.KakaoService;
 import com.project.uandmeet.service.MemberService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
+
+import javax.crypto.BadPaddingException;
+import javax.crypto.IllegalBlockSizeException;
+import javax.crypto.NoSuchPaddingException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
+import java.security.InvalidAlgorithmParameterException;
+import java.security.InvalidKeyException;
+import java.security.NoSuchAlgorithmException;
 import java.util.List;
 import java.util.Map;
 
-@RestController
+//@RestController
 @Slf4j
-//@Controller
+@Controller
 @RequestMapping
 @RequiredArgsConstructor
 public class MemberController {
-    private final RedisUtil redisUtil;
     private final MemberService memberService;
     private final KakaoService kakaoService;
     private final EmailService emailService;
+    private final String key = "level";
 
     // 회원가입 1. emali check
     @PostMapping("/api/checkemail")
-    public ResponseEntity<String> checkemail(@RequestBody String username) throws IOException {
+    public ResponseEntity<String> checkemail(@RequestBody String username) throws IOException, InvalidAlgorithmParameterException, NoSuchPaddingException, IllegalBlockSizeException, NoSuchAlgorithmException, BadPaddingException, InvalidKeyException {
         // 헤더에 전달
-//        headers.set("level","1");
-//        ResponseEntity<String> res = ResponseEntity.ok()
-//                                     .headers(headers)
-//                                     .body(memberService.checkemail(username));
+        HttpHeaders headers = new HttpHeaders();
+        String value = "1";
+        Aes256 aes256 = Aes256.getInstance();
+        String keyEncode = aes256.AES_Encode(key);
+        String valueEncode = aes256.AES_Encode(value);
+        headers.set(key, valueEncode);
+        ResponseEntity<String> res = ResponseEntity.ok()
+                .headers(headers)
+                .body(memberService.checkemail(username));
+
+        log.info(String.valueOf(res.getHeaders()));
         // redis 에 저장
-        ResponseEntity<String> res = ResponseEntity.ok(memberService.checkemail(username));
-        redisUtil.setDataExpire(username + "level", "1", 300L);
+//        ResponseEntity<String> res = ResponseEntity.ok(memberService.checkemail(username));
+//        redisUtil.setDataExpire(username + "level", "1", 300L);
         // 해당 정보를 client 에서 처리하게 좋을지 서버에서 처리하는게 좋을지
         // client 에 저장하면 이동 시 노출위험 -> 암호화 필수 but 서버 부담 감소
 // stateless 구조 설계 권장
@@ -50,68 +67,107 @@ public class MemberController {
 
     // 회원가입 2. Email 인증
     @PostMapping("/api/mailcheck")
-    public @ResponseBody ResponseEntity<String> mailCheck(@RequestBody String username) {
+    public @ResponseBody ResponseEntity<String> mailCheck(@RequestBody String username) throws InvalidAlgorithmParameterException, UnsupportedEncodingException, NoSuchPaddingException, IllegalBlockSizeException, NoSuchAlgorithmException, BadPaddingException, InvalidKeyException {
         // 헤더에 전달
-//        int level = Integer.parseInt(String.valueOf(headers.get("level")));
-//        if (level < 1) {
-//            ResponseEntity<String> res = ResponseEntity.ok()
-//                    .headers(headers)
-//                    .body(emailService.joinEmail(username));
+        HttpHeaders headers = new HttpHeaders();
+        Aes256 aes256 = Aes256.getInstance();
+        int val = Integer.parseInt(String.valueOf(headers.get(aes256.AES_Decode(key))));
+        if (val < 1) {
+            return ResponseEntity.ok("잘못된 접근입니다.");
+        }
+        ResponseEntity<String> res = ResponseEntity.ok()
+                .headers(headers)
+                .body(emailService.joinEmail(username));
+
+        String value = "2";
+        String keyEncode = aes256.AES_Encode(key);
+        String valueEncode = aes256.AES_Encode(value);
+        headers.set(key, valueEncode);
 
         //  redis 에 저장
-        String level = redisUtil.getData(username + "level");
-        ResponseEntity<String> res = ResponseEntity.ok(emailService.joinEmail(username));
-        redisUtil.setDataExpire(username + "level", "2", 300L);
+//        String level = redisUtil.getData(username + "level");
+//        ResponseEntity<String> res = ResponseEntity.ok(emailService.joinEmail(username));
+//        redisUtil.setDataExpire(username + "level", "2", 300L);
         return res;
-//        }
-//        return null;
     }
 
     // 회원가입 3. Email 인증번호 확인
     @PostMapping("/api/checkAuthNum")
-    public @ResponseBody ResponseEntity<String> checkAuthNum(@RequestBody String authNum, String username) {
-        String level = redisUtil.getData(username + "level");
-        ResponseEntity<String> res = ResponseEntity.ok(emailService.checkAuthNum(authNum));
-        int val = Integer.parseInt(level);
+    public @ResponseBody ResponseEntity<String> checkAuthNum(@RequestBody String authNum) throws InvalidAlgorithmParameterException, UnsupportedEncodingException, NoSuchPaddingException, IllegalBlockSizeException, NoSuchAlgorithmException, BadPaddingException, InvalidKeyException {
+//        String level = redisUtil.getData(username + "level");
+//        ResponseEntity<String> res = ResponseEntity.ok(emailService.checkAuthNum(authNum));
+        // 헤더에 전달
+        HttpHeaders headers = new HttpHeaders();
+        Aes256 aes256 = Aes256.getInstance();
+        int val = Integer.parseInt(String.valueOf(headers.get(aes256.AES_Decode(key))));
         if (val < 2) {
             return ResponseEntity.ok("잘못된 접근입니다.");
         }
-        redisUtil.setDataExpire(username + "level", "3", 300L);
+        ResponseEntity<String> res = ResponseEntity.ok()
+                .headers(headers)
+                .body(emailService.checkAuthNum(authNum));
+
+        String value = "3";
+        String keyEncode = aes256.AES_Encode(key);
+        String valueEncode = aes256.AES_Encode(value);
+        headers.set(key, valueEncode);
+//        redisUtil.setDataExpire(username + "level", "3", 300L);
         return res;
     }
 
     // 회원가입 4. password check
     @PostMapping("/api/checkpassword")
-    public ResponseEntity<String> checkPassword(@RequestBody String password, @RequestBody String passwordCheck, String username) {
-        String level = redisUtil.getData(username + "level");
-        ResponseEntity<String> res = ResponseEntity.ok(memberService.checkPassword(password, passwordCheck));
-        int val = Integer.parseInt(level);
+    public ResponseEntity<String> checkPassword(@RequestBody String password, @RequestBody String passwordCheck) throws InvalidAlgorithmParameterException, UnsupportedEncodingException, NoSuchPaddingException, IllegalBlockSizeException, NoSuchAlgorithmException, BadPaddingException, InvalidKeyException {
+//        String level = redisUtil.getData(username + "level");
+//        ResponseEntity<String> res = ResponseEntity.ok(memberService.checkPassword(password, passwordCheck));
+//        int val = Integer.parseInt(level);
+        // 헤더에 전달
+        HttpHeaders headers = new HttpHeaders();
+        Aes256 aes256 = Aes256.getInstance();
+        int val = Integer.parseInt(String.valueOf(headers.get(aes256.AES_Decode(key))));
         if (val < 3) {
             return ResponseEntity.ok("잘못된 접근입니다.");
         }
-        redisUtil.setDataExpire(username + "level", "4", 300L);
+        String decodePass = aes256.AES_Decode(password);
+        String decodePassCheck = aes256.AES_Decode(passwordCheck);
+        ResponseEntity<String> res = ResponseEntity.ok()
+                .headers(headers)
+                .body(memberService.checkPassword(decodePass, decodePassCheck));
+//        redisUtil.setDataExpire(username + "level", "4", 300L);
+        String value = "4";
+        String keyEncode = aes256.AES_Encode(key);
+        String valueEncode = aes256.AES_Encode(value);
+        headers.set(key, valueEncode);
         return res;
     }
 
     // 회원가입 5. 가입완료
     @PostMapping("/api/signup")
-    public ResponseEntity<String> signup(@RequestBody MemberRequestDto requestDto) throws IOException {
-        String level = redisUtil.getData(requestDto.getUsername() + "level");
-        ResponseEntity<String> res = ResponseEntity.ok(memberService.signup(requestDto));
-        int val = Integer.parseInt(level);
+    public ResponseEntity<String> signup(@RequestBody MemberRequestDto requestDto) throws IOException, InvalidAlgorithmParameterException, NoSuchPaddingException, IllegalBlockSizeException, NoSuchAlgorithmException, BadPaddingException, InvalidKeyException {
+//        String level = redisUtil.getData(requestDto.getUsername() + "level");
+//        ResponseEntity<String> res = ResponseEntity.ok(memberService.signup(requestDto));
+        // 헤더에 전달
+        HttpHeaders headers = new HttpHeaders();
+        Aes256 aes256 = Aes256.getInstance();
+        int val = Integer.parseInt(String.valueOf(headers.get(aes256.AES_Decode(key))));
         if (val < 4) {
             return ResponseEntity.ok("잘못된 접근입니다.");
         }
-        redisUtil.deleteData(requestDto.getUsername() + "level");
+        ResponseEntity<String> res = ResponseEntity.ok()
+                .headers(headers)
+                .body(memberService.signup(requestDto));
+
+//        redisUtil.deleteData(requestDto.getUsername() + "level");
         return res;
     }
 
     // 회원가입 test
     @PostMapping("/api/join")
-    public void join(@RequestBody MemberRequestDto requestDto) {
+    public void join(@RequestBody MemberRequestDto requestDto) throws InvalidAlgorithmParameterException, UnsupportedEncodingException, NoSuchPaddingException, IllegalBlockSizeException, NoSuchAlgorithmException, BadPaddingException, InvalidKeyException {
         memberService.join(requestDto);
 
     }
+
 
     // 회원 탈퇴
     @DeleteMapping("/api/withdraw")

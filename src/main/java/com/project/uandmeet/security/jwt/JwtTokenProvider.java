@@ -38,7 +38,6 @@ public class JwtTokenProvider {
 
     @Value("${jwt.secretKey}")
     private String secretKey;
-    public static final String AUTH_HEADER = "Authorization";
     public final HttpServletResponse response;
 
     private final UserDetailsService userDetailsService;

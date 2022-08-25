@@ -1,5 +1,6 @@
 package com.project.uandmeet.service;
 
+import com.project.uandmeet.controller.Aes256;
 import com.project.uandmeet.dto.*;
 import com.project.uandmeet.model.Concern;
 import com.project.uandmeet.model.JoinCnt;
@@ -12,12 +13,21 @@ import com.project.uandmeet.security.jwt.JwtProperties;
 import com.project.uandmeet.security.jwt.JwtTokenProvider;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import javax.crypto.BadPaddingException;
+import javax.crypto.IllegalBlockSizeException;
+import javax.crypto.NoSuchPaddingException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
+import java.security.InvalidAlgorithmParameterException;
+import java.security.InvalidKeyException;
+import java.security.NoSuchAlgorithmException;
 import java.util.*;
 import java.util.regex.Pattern;
 
@@ -46,9 +56,9 @@ public class MemberService {
         String[] emailadress = username.split("@");
         String id = emailadress[0];
         String host = emailadress[1];
-//        String pattern = "^[a-zA-Z0-9]*$";
-        String pattern = "^[a-zA-Z0-9_!#$%&'\\*+/=?{|}~^.-]+@[a-zA-Z0-9.-]+.[a-zA-Z0-9.-]*$";
-        String idpattern = "^[a-zA-Z0-9_!#$%&'\\*+/=?{|}~^.-]*$";
+        String pattern = "^[a-zA-Z0-9]*$";
+//        String pattern = "^[a-zA-Z0-9_!#$%&'\\*+/=?{|}~^.-]+@[a-zA-Z0-9.-]+.[a-zA-Z0-9.-]*$";
+        String idpattern = "^[a-zA-Z0-9]*$";
         String hostpattern = "^[a-zA-Z0-9.-]*$";
         // email 조건
         // ID 영문 대소문자, 숫자, _!#$%&'\*+/=?{|}~^.- 특문허용
@@ -57,11 +67,11 @@ public class MemberService {
         // 회원가입 username 조건
         if (username.length() < 10) {
             throw new IllegalArgumentException("이메일을 10자 이상 입력하세요");
-        } else if (!Pattern.matches(idpattern, id)) {
-            throw new IllegalArgumentException("id에 알파벳 대소문자와 숫자, 특수기호( _!#$%&'\\*+/=?{|}~^.-)로만 입력하세요");
-        } else if (!Pattern.matches(hostpattern, host)) {
-            throw new IllegalArgumentException("host에 알파벳 대소문자와 숫자, 특수기호(.-)로만 입력하세요");
-        } else if (!Pattern.matches(pattern, username)) {
+//        } else if (!Pattern.matches(idpattern, id)) {
+//            throw new IllegalArgumentException("id에 알파벳 대소문자와 숫자, 특수기호( _!#$%&'\\*+/=?{|}~^.-)로만 입력하세요");
+//        } else if (!Pattern.matches(hostpattern, host)) {
+//            throw new IllegalArgumentException("host에 알파벳 대소문자와 숫자, 특수기호(.-)로만 입력하세요");
+        } else if (Pattern.matches(pattern, username)) {
             throw new IllegalArgumentException("이메일 규격에 맞게 입력하세요");
         } else if (username.contains("script")) {
             throw new IllegalArgumentException("xss공격 멈춰주세요.");
@@ -90,15 +100,18 @@ public class MemberService {
         return "password check 완료";
     }
 
-    public String signup(MemberRequestDto requestDto) throws IOException {
+    public String signup(MemberRequestDto requestDto) throws IOException, InvalidAlgorithmParameterException, NoSuchPaddingException, IllegalBlockSizeException, NoSuchAlgorithmException, BadPaddingException, InvalidKeyException {
         String username = requestDto.getUsername();
         String[] emailadress = username.split("@");
         String id = emailadress[0];
 
+        Aes256 aes256 = Aes256.getInstance();
+        String decodePass = aes256.AES_Decode(requestDto.getPassword());
+        String decodePassCheck = aes256.AES_Decode(requestDto.getPasswordCheck());
         checkemail(requestDto.getUsername());
-        checkPassword(requestDto.getPassword(), requestDto.getPasswordCheck());
-        Member member = requestDto.register();
-        member.setPassword(passwordEncoder.encode(requestDto.getPassword()));
+        checkPassword(decodePass, decodePassCheck);
+        Member member = requestDto.register(decodePass);
+        member.setPassword(passwordEncoder.encode(decodePass));
         // login 구별
         member.setLoginto("normal");
         member.setNickname(id);
@@ -334,8 +347,11 @@ public class MemberService {
         return "비밀번호 변경 완료";
     }
 
-    public void join(MemberRequestDto requestDto) {
-        Member member = requestDto.register();
+    public void join(MemberRequestDto requestDto) throws InvalidAlgorithmParameterException, UnsupportedEncodingException, NoSuchPaddingException, IllegalBlockSizeException, NoSuchAlgorithmException, BadPaddingException, InvalidKeyException {
+        Aes256 aes256 = Aes256.getInstance();
+        String decodePass = aes256.AES_Decode(requestDto.getPassword());
+        String decodePassCheck = aes256.AES_Decode(requestDto.getPasswordCheck());
+        Member member = requestDto.register(decodePass);
         member.setPassword(passwordEncoder.encode(requestDto.getPassword()));
         memberRepository.save(member);
     }

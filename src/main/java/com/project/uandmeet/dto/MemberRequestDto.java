@@ -13,7 +13,10 @@ public class MemberRequestDto {
     private String password;
     private String passwordCheck;
 //    private MultipartFile userProfileImage;
-
+//
+    public Member register(String decodePass) {
+        return new Member(username, this.password = decodePass);
+    }
     public Member register() {
         return new Member(username, password);
     }
