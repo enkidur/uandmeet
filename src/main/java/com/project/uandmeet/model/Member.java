@@ -40,7 +40,7 @@ public class Member {
     private String email;
 
     @Column
-    private String profileImgUrl;
+    private String profile;
 
     @OneToMany(mappedBy = "member", fetch = FetchType.LAZY)
     private List<Concern> concern;

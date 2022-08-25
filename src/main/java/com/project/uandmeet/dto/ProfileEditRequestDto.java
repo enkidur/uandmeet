@@ -4,5 +4,5 @@ import lombok.Getter;
 
 @Getter
 public class ProfileEditRequestDto {
-    private String profileimgurl;
+    private String profile;
 }

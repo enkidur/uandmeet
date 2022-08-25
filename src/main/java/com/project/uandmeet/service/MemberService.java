@@ -1,10 +1,5 @@
 package com.project.uandmeet.service;
 
-import com.auth0.jwt.JWT;
-import com.auth0.jwt.JWTVerifier;
-import com.auth0.jwt.algorithms.Algorithm;
-import com.auth0.jwt.exceptions.JWTVerificationException;
-import com.auth0.jwt.interfaces.DecodedJWT;
 import com.project.uandmeet.dto.*;
 import com.project.uandmeet.model.Concern;
 import com.project.uandmeet.model.JoinCnt;
@@ -17,13 +12,9 @@ import com.project.uandmeet.security.jwt.JwtProperties;
 import com.project.uandmeet.security.jwt.JwtTokenProvider;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpHeaders;
-import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.bind.annotation.RequestBody;
-
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
@@ -40,6 +31,7 @@ public class MemberService {
     private final RedisUtil redisUtil;
     private final JwtTokenProvider jwtTokenProvider;
     private String authNumber; // 난수 번호
+    private int emailCnt; // email 인증 횟수
 
     // 난수 생성
     public void makeRandomNumber() {
@@ -177,26 +169,56 @@ public class MemberService {
     }
 
     public String findpassword(String username) {
-        // 비밀번호 난수 생성
-        makeRandomNumber();
+        if (emailCnt < 4) {
+            // 비밀번호 난수 생성
+            makeRandomNumber();
 
+            Member member = memberRepository.findByUsername(username).orElseThrow(
+                    () -> new IllegalArgumentException("해당 아이디가 없습니다.")
+            );
+            member.setPassword(passwordEncoder.encode(authNumber));
+
+            //인증메일 보내기
+            String setFrom = "wjdgns5488@naver.com"; // email-config에 설정한 자신의 이메일 주소를 입력
+            String toMail = username;
+            String title = "비밀번호 찾기 이메일 입니다."; // 이메일 제목
+            String content =
+                    "홈페이지를 방문해주셔서 감사합니다." +    //html 형식으로 작성 !
+                            "<br><br>" +
+                            "비밀번호 찾기 인증번호는 " + authNumber + "입니다." +
+                            "<br>" +
+                            "인증 후 비밀번호를 변경해 주세요"; //이메일 내용 삽입
+            emailService.mailSend(setFrom, toMail, title, content);
+            emailCnt += 1;
+            int restCnt = 3 - emailCnt;
+            // 유효 시간(3분)동안 {fromEmail, authKey} 저장
+            redisUtil.setDataExpire(authNumber, setFrom, 60 * 3L);
+            // 횟수
+            redisUtil.setDataExpire("Cnt" + authNumber, String.valueOf(emailCnt),60 * 60L);
+            // 유효 시간(1시간)동안 {toEmail, emailCnt} 저장
+            redisUtil.setDataExpire(toMail, String.valueOf(emailCnt),60 * 60L);
+            return "인증 번호 :" + authNumber + "남은 횟수 :" + restCnt;
+        }
+        return "인증 횟수를 초과하였습니다. 1시간 뒤에 다시 시도해 주세요.";
+    }
+
+    // 인증 체크
+    public String findCheck(String authNum) {
+        return String.valueOf(authNum.equals( authNumber));
+    }
+
+    // 비밀번호 변경
+    public String passChange(UserDetailsImpl userDetails, PasswordChangeDto passwordChangeDto) {
+        String username = userDetails.getUsername();
         Member member = memberRepository.findByUsername(username).orElseThrow(
-                () -> new IllegalArgumentException("해당 아이디가 없습니다.")
+                () -> new RuntimeException("해당 권한이 없습니다.")
         );
-        member.setPassword(passwordEncoder.encode(authNumber));
-
-        //인증메일 보내기
-        String setFrom = "wjdgns5488@naver.com"; // email-config에 설정한 자신의 이메일 주소를 입력
-        String toMail = username;
-        String title = "비밀번호 찾기 이메일 입니다."; // 이메일 제목
-        String content =
-                "홈페이지를 방문해주셔서 감사합니다." +    //html 형식으로 작성 !
-                        "<br><br>" +
-                        "임시 비밀번호는 " + authNumber + "입니다." +
-                        "<br>" +
-                        "로그인 후 비밀번호를 변경해 주세요"; //이메일 내용 삽입
-        emailService.mailSend(setFrom, toMail, title, content);
-        return authNumber;
+        if (!passwordChangeDto.getNewPassword().equals(passwordChangeDto.getNewPasswordCheck())) {
+            throw new RuntimeException("비밀번호가 일치하지 않습니다.");
+        } else {
+            member.setPassword(passwordEncoder.encode(passwordChangeDto.getNewPassword()));
+        }
+        return "비밀번호 변경 완료";
     }
 
     // 활동 내역 조회
@@ -218,7 +240,7 @@ public class MemberService {
         Member member = memberRepository.findByUsername(username).orElseThrow(
                 () -> new RuntimeException("수정 권한이 없습니다.")
         );
-        String nickname = member.getNickname();
+        String nickname = member.getNickname(); // 고민중
         List<JoinCnt> joinCnt = member.getJoinCnt();
         MypageDto mypageDto = new MypageDto(nickname, concern, joinCnt);
         return mypageDto;
@@ -243,7 +265,7 @@ public class MemberService {
                 () -> new RuntimeException("볼 수 없는 정보입니다")
         );
         String gender = member.getGender();
-        String birth = member.getBirth();
+        String birth = member.getBirth(); // year, month, day
         MyPageInfoDto myPageInfoDto = new MyPageInfoDto(username, gender, birth);
         return myPageInfoDto;
     }
@@ -280,8 +302,8 @@ public class MemberService {
         );
         String nickname = member.getNickname();
         List<Star> star = member.getStar();
-        String profileimgurl = member.getProfileImgUrl();
-        ProfileDto profileDto = new ProfileDto(nickname, star, profileimgurl);
+        String profile = member.getProfile();
+        ProfileDto profileDto = new ProfileDto(nickname, star, profile);
         return profileDto;
     }
 
@@ -293,21 +315,21 @@ public class MemberService {
         );
         String nickname = member.getNickname();
         List<Star> star = member.getStar();
-        String profileimgurl = requestDto.getProfileimgurl();
-        ProfileDto profileDto = new ProfileDto(nickname, star, profileimgurl);
+        String profile = requestDto.getProfile();
+        ProfileDto profileDto = new ProfileDto(nickname, star, profile);
         return profileDto;
     }
 
     // password 변경
-    public String changepass(UserDetailsImpl userDetails, String passwordcheck, String newpassword) {
+    public String changepass(UserDetailsImpl userDetails, PasswordChangeDto passwordChangeDto) {
         String username = userDetails.getUsername();
         Member member = memberRepository.findByUsername(username).orElseThrow(
                 () -> new RuntimeException("해당 권한이 없습니다.")
         );
-        if (!passwordEncoder.encode(passwordcheck).equals(member.getPassword())) {
+        if (!passwordEncoder.encode(passwordChangeDto.getPasswordCheck()).equals(member.getPassword()) && !passwordChangeDto.getNewPassword().equals(passwordChangeDto.getNewPasswordCheck())) {
             throw new RuntimeException("비밀번호가 일치하지 않습니다.");
         } else {
-            member.setPassword(passwordEncoder.encode(newpassword));
+            member.setPassword(passwordEncoder.encode(passwordChangeDto.getNewPassword()));
         }
         return "비밀번호 변경 완료";
     }
@@ -317,5 +339,6 @@ public class MemberService {
         member.setPassword(passwordEncoder.encode(requestDto.getPassword()));
         memberRepository.save(member);
     }
+
 }
 

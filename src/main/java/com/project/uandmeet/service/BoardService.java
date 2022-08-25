@@ -64,7 +64,7 @@ public class BoardService {
             for (Board boardTemp : boards) {
                 //작성자 간이 닉네임 생성.
                 MemberSimpleDto memberSimpleDto = new MemberSimpleDto(boardTemp.getMember().getNickname(),
-                        boardTemp.getMember().getEmail(), boardTemp.getMember().getProfileImgUrl());
+                        boardTemp.getMember().getEmail(), boardTemp.getMember().getProfile());
 
                 BoardResponseDto boardResponseDto = new BoardResponseDto(memberSimpleDto,boardTemp);
                 boardResponseDtos.add(boardResponseDto);
@@ -87,7 +87,7 @@ public class BoardService {
         if (boards != null) {
             //작성자 간이 닉네임 생성.
             MemberSimpleDto memberSimpleDto = new MemberSimpleDto(boards.getMember().getNickname(),
-                    boards.getMember().getEmail(), boards.getMember().getProfileImgUrl());
+                    boards.getMember().getEmail(), boards.getMember().getProfile());
 
             boardResponseDto = new BoardResponseDto(memberSimpleDto, boards);
             return boardResponseDto;

@@ -30,7 +30,7 @@ public class EmailService {
     }
 
     public String checkAuthNum(String authNum) {
-        return String.valueOf(Objects.equals(authNum, authNumber));
+        return String.valueOf(authNum.equals(authNumber));
     }
 
 
@@ -75,7 +75,7 @@ public class EmailService {
             // 유효 시간(3분)동안 {fromEmail, authKey} 저장
             redisUtil.setDataExpire(authNumber, setFrom, 60 * 3L);
             // 횟수
-            redisUtil.setDataExpire(authNumber + emailCnt, String.valueOf(emailCnt),60 * 60L);
+            redisUtil.setDataExpire("Cnt" + authNumber, String.valueOf(emailCnt),60 * 60L);
             // 유효 시간(1시간)동안 {toEmail, emailCnt} 저장
             redisUtil.setDataExpire(toMail, String.valueOf(emailCnt),60 * 60L);
         }

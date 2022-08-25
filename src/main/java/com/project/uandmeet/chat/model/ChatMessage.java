@@ -53,7 +53,7 @@ public class ChatMessage {
         this.nickname = chatMessageRequestDto.getNickname();
         this.sender = chatMessageRequestDto.getSender();
         this.message = chatMessageRequestDto.getMessage();
-        this.profileUrl = member.getProfileImgUrl();
+        this.profileUrl = member.getProfile();
         this.createdAt = createdAt;
     }
 }
