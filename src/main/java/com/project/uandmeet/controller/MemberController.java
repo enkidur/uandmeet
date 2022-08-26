@@ -44,16 +44,16 @@ public class MemberController {
     // 회원가입 1. emali check
     @PostMapping("/api/checkemail")
     public ResponseEntity<String> checkemail(@RequestBody String username) throws IOException {
-        // 헤더에 전달
-        HttpHeaders headers = new HttpHeaders();
-        headers.set("level","1");
-        ResponseEntity<String> res = ResponseEntity.ok()
-                                     .headers(headers)
-                                     .body(memberService.checkemail(username));
-        log.info(String.valueOf(res.getHeaders()));
-        // redis 에 저장
-//        ResponseEntity<String> res = ResponseEntity.ok(memberService.checkemail(username));
-//        redisUtil.setDataExpire(username + "level", "1", 300L);
+//        // 헤더에 전달
+//        HttpHeaders headers = new HttpHeaders();
+//        headers.set("level","1");
+//        ResponseEntity<String> res = ResponseEntity.ok()
+//                                     .headers(headers)
+//                                     .body(memberService.checkemail(username));
+//        log.info(String.valueOf(res.getHeaders()));
+//         redis 에 저장
+        ResponseEntity<String> res = ResponseEntity.ok(memberService.checkemail(username));
+        redisUtil.setDataExpire(username + "level", "1", 300L);
         // 해당 정보를 client 에서 처리하게 좋을지 서버에서 처리하는게 좋을지
         // client 에 저장하면 이동 시 노출위험 -> 암호화 필수 but 서버 부담 감소
 // stateless 구조 설계 권장
@@ -249,6 +249,11 @@ public class MemberController {
         System.out.println("유저디테일" + userDetails);
         System.out.println("principalDetails: " + userDetails.getMember());
         return "user";
+    }
+
+    @PostMapping("/login/google")
+    public String tem(){
+        return "login.html";
     }
 
 }

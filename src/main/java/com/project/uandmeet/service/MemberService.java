@@ -251,6 +251,7 @@ public class MemberService {
         );
         String nickname = member.getNickname(); // 고민중
         List<JoinCnt> joinCnt = member.getJoinCnt();
+        member.setConcern(concern);
         MypageDto mypageDto = new MypageDto(nickname, concern, joinCnt);
         return mypageDto;
     }
@@ -263,6 +264,7 @@ public class MemberService {
         );
         List<Concern> concern = member.getConcern();
         List<JoinCnt> joinCnt = member.getJoinCnt();
+        member.setNickname(nickname);
         MypageDto mypageDto = new MypageDto(nickname, concern, joinCnt);
         return mypageDto;
     }
@@ -287,6 +289,7 @@ public class MemberService {
         );
         String gender = requestDto.getGender();
         String birth = member.getBirth();
+        member.setGender(gender);
         MyPageInfoDto myPageInfoDto = new MyPageInfoDto(username, gender, birth);
         return myPageInfoDto;
     }
@@ -299,6 +302,7 @@ public class MemberService {
         );
         String gender = member.getGender();
         String birth = requestDto.getBirth();
+        member.setBirth(birth);
         MyPageInfoDto myPageInfoDto = new MyPageInfoDto(username, gender, birth);
         return myPageInfoDto;
     }
@@ -325,6 +329,7 @@ public class MemberService {
         String nickname = member.getNickname();
         List<Star> star = member.getStar();
         String profile = requestDto.getProfile();
+        member.setProfile(profile);
         ProfileDto profileDto = new ProfileDto(nickname, star, profile);
         return profileDto;
     }
