@@ -14,6 +14,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -21,9 +22,9 @@ import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 
-@RestController
+//@RestController
 @Slf4j
-//@Controller
+@Controller
 @RequestMapping
 @RequiredArgsConstructor
 public class MemberController {
@@ -41,6 +42,7 @@ public class MemberController {
         ResponseEntity<String> res = ResponseEntity.ok()
                                      .headers(headers)
                                      .body(memberService.checkemail(username));
+        log.info(String.valueOf(res.getHeaders()));
         // redis 에 저장
 //        ResponseEntity<String> res = ResponseEntity.ok(memberService.checkemail(username));
 //        redisUtil.setDataExpire(username + "level", "1", 300L);
