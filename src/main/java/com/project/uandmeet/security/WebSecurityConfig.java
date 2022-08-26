@@ -81,6 +81,7 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
                 .antMatchers("/wss/chat/**").permitAll()
                 .antMatchers("/api/**").permitAll()
                 .anyRequest().permitAll()
+
                 // 그 외 어떤 요청이든 '인증'
                 .and()
                 .addFilterBefore(new JwtAuthenticationFilter(jwtTokenProvider), BasicAuthenticationFilter.class)
