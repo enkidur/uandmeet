@@ -93,6 +93,7 @@ public class BoardCotroller {
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(searchResponseDto);
 
+
     }
 }
 

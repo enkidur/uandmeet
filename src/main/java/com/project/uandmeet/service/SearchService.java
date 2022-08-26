@@ -29,6 +29,7 @@ public class SearchService {
 
             Pageable pageable = PageRequest.of(page, size, Sort.by("id").descending());
 
+
             QBoard qBoard = QBoard.board;
 
 
