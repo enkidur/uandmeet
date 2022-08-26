@@ -23,7 +23,7 @@ public final class JwtTokenUtils {
     // Refresh Token의 유효기간: 3일 (단위: milliseconds)
     private static final int REFRESH_TOKEN_VALID_MILLI_SEC = REFRESH_TOKEN_VALID_SEC * 1000;
 
-    public static final String CLAIM_USER_ID = "userId";
+    public static final String CLAIM_MEMBER_ID = "memberId";
     public static final String CLAIM_EXPIRED_DATE = "EXPIRED_DATE";
     public static final String CLAIM_USER_NAME = "USER_NAME";
     public static final String CLAIM_USER_NICKNAME = "USER_NICKNAME";
@@ -34,7 +34,7 @@ public final class JwtTokenUtils {
         try {
             token = JWT.create()
                     .withIssuer("Unanimous")
-                    .withClaim(CLAIM_USER_ID, userDetails.getMember().getId())
+                    .withClaim(CLAIM_MEMBER_ID, userDetails.getMember().getId())
                     .withClaim(CLAIM_USER_NAME, userDetails.getUsername())
                     .withClaim(CLAIM_USER_NICKNAME, userDetails.getMember().getNickname())
                     // 토큰 만료 일시 = 현재 시간 + 토큰 유효기간)
@@ -52,7 +52,7 @@ public final class JwtTokenUtils {
         try {
             refreshToken = JWT.create()
                     .withIssuer("Unanimous")
-                    .withClaim(CLAIM_USER_ID, member.getId())
+                    .withClaim(CLAIM_MEMBER_ID, member.getId())
                     .withClaim(CLAIM_USER_NAME, member.getUsername())
                     .withClaim(CLAIM_USER_NICKNAME, member.getNickname())
                     // 토큰 만료 일시 = 현재 시간 + 토큰 유효기간)
