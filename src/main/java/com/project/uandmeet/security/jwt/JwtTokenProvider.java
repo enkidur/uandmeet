@@ -153,7 +153,8 @@ public class JwtTokenProvider {
     //Request의 Header에서 token 값을 가져옴
     //"X-AUTH-TOKEN":"TOKEN 값"
     public String resolveToken(HttpServletRequest request) {
-        return request.getHeader("Authorization");
+//        return request.getHeader("Authorization");
+        return request.getHeader("AccessToken");
     }
     public String resolveRefreshToken(HttpServletRequest request) {
         return request.getHeader("RefreshToken");
@@ -161,7 +162,6 @@ public class JwtTokenProvider {
 
     // 토큰의 유효성 + 만료일자 확인
     public boolean validateToken(String jwtToken) {
-
         try {
             Jws<Claims> claims = Jwts.parser().setSigningKey(secretKey).parseClaimsJws(setTokenName(jwtToken));
             return !claims.getBody().getExpiration().before(new Date());
