@@ -11,7 +11,6 @@ public enum ErrorCode {
     USERNAME_LEGNTH(HttpStatus.CONFLICT, "ID를 4자이상으로 만들어주세요."),
     USERNAME_EMAIL(HttpStatus.CONFLICT, "ID를 이메일 형식으로 만들어주세요."),
     PASSWORD_CONTAINUSERNAME(HttpStatus.BAD_REQUEST, "패스워드에 아이디가 들어갈 수 없습니다."),
-    PASSWORD_LEGNTH(HttpStatus.CONFLICT, "패스워드를 8자이상으로 만들어주세요."),
     PASSWORD_PASSWORDCHECK(HttpStatus.BAD_REQUEST, "패스워드와 패스워드 체크가 맞지 않습니다."),
     // 400 Bad Request
     MEMBER_HAS_FULL(HttpStatus.CONFLICT,"참여할 수 있는 최대 인원을 초과했습니다"),
@@ -29,6 +28,19 @@ public enum ErrorCode {
     DUPLICATE_USERNAME(HttpStatus.CONFLICT, "중복된 사용자명이 존재합니다"),
     /*유저의 이름을 4자이상으로 만들어주세요 */
     DUPLICATE_NICKNAME(HttpStatus.CONFLICT, "중복된 닉네임이 존재합니다"),
+//회원가입시 에러코드
+    EMPTY_USERNAME(HttpStatus.BAD_REQUEST,"이메일을 입력해주세요"),
+    USERNAME_WRONG(HttpStatus.CONFLICT, "아이디는 이메일 형식으로 입력해주세요"),
+    MEMBER_PASSWORD_NOT_FOUND(HttpStatus.NOT_FOUND, "유저의 아이디,비밀번호를 다시 확인해주세요."),
+    DUPLICATE_EMAIL(HttpStatus.CONFLICT, "중복된 이메일이 존재합니다"),
+    EMPTY_PASSWORD(HttpStatus.BAD_REQUEST,"비밀번호를 입력해주세요."),
+    PASSWORD_LEGNTH(HttpStatus.CONFLICT, "비밀번호는 6자 이상 12자 이하여야 합니다"),
+    PASSWORD_WRONG(HttpStatus.CONFLICT, "비밀번호는 영문, 숫자, 특수문자를 포함해야합니다"),
+    PASSWORD_CHECK(HttpStatus.CONFLICT, "비밀번호가 일치하지 않습니다."),
+    EMPTY_NICKNAME(HttpStatus.BAD_REQUEST,"닉네임을 입력해주세요."),
+    NICKNAME_LEGNTH(HttpStatus.CONFLICT, "닉네임은 최소 2자 이상 10자 이하여야 합니다"),
+    NOT_FOUND_MEMBER(HttpStatus.NOT_FOUND, "회원을 찾을 수 없습니다"),
+
 
     /*FRIEND 관련 에러코드*/
     /*유저 이름이 같을 때 보내는 코드*/

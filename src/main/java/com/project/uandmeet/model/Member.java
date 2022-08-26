@@ -78,20 +78,19 @@ public class Member {
 //    }
 
     // kakaoUser
-    @Builder
-    public Member(String nickname, String encodedPassword, String email) {
-        this.nickname = nickname;
-        this.password = encodedPassword;
-        this.username = email;
-    }
-
 
 //    public void updateRefreshToken(String newToken) {
 //        this.refreshToken = newToken;
 //    }
 
-    public Member(String email, String password){
-        this.username = email;
+    public Member(String username, String password){
+        this.username = username;
+        this.password = password;
+    }
+
+    public Member(String username, String nickname, String password){
+        this.username = username;
+        this.nickname = nickname;
         this.password = password;
     }
 

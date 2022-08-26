@@ -1,73 +1,29 @@
 package com.project.uandmeet.security;
 
-
+import com.project.uandmeet.dto.MemberRequestDto;
 import com.project.uandmeet.model.Member;
-import lombok.Getter;
-import lombok.Setter;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
-//import org.springframework.security.oauth2.core.user.OAuth2User;
 
-import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Map;
+import java.util.Collections;
 
-// 시큐리티가 /login 을 낚아채서 로그인을 진행함
-// 로그인 진행이 완료되면 시큐리티 session 을 만듦 (Security ContextHolder 라는 key Value 로 session 정보 저장)
-// Security session 오브젝트 타입은 Authentication 타입 객채
-// Authentication 안에는 user 정보
-// USer 오브젝트 타입은 UserDetails 타입 객체
-// 즉, Security Session => Authentication => UserDetails(PrincipalDetails)
-// -> PrincipalDetails 을 UserDetails 로 implements 하여 타입을 변경하여 Authentication 객체 안에 넣어줄 수 있다
+public class UserDetailsImpl implements UserDetails {
 
-@Getter
-@Setter
-//public class UserDetailsImpl implements UserDetails, OAuth2User {
-    public class UserDetailsImpl implements UserDetails {
-
-    private Member member; // 컴포지션
-//    private KakaoMember kakaoMember;
-
-//    private Map<String,Object> attributes; // OAuth2
+    private final Member member;
+    private String username;
+    private String nickname;
 
     public UserDetailsImpl(Member member) {
         this.member = member;
     }
 
-//    // OAuth로그인
-//    public UserDetailsImpl(Member member,Map<String,Object>attributes) {
-//        this.member=member;
-//        this.attributes =attributes;
-//    }
+    public UserDetailsImpl() {
+        this.member = null;
+    }
 
-//    // OAuth2 오버라이드 메소드
-//   @Override
-//    public Map<String, Object> getAttributes() {
-//        return attributes;
-//    }
-//    @Override
-//    public String getName() {
-//        return null;
-//    }
-
-    // 해당 User 의 권한의 리턴
-    @Override
-    public Collection<? extends GrantedAuthority> getAuthorities() {
-        // member.getRole()을 Collection 타입으로 받기위해
-        Collection<GrantedAuthority> collection = new ArrayList<>();
-        collection.add(new GrantedAuthority() {
-            @Override
-            public String getAuthority() {
-                return String.valueOf(member.getRole());
-            }
-        });
-//        Collection<GrantedAuthority> collection = new ArrayList<>();
-//        member.getRole().forEach(r-> { // r : return
-//            collection.add(()-> String.valueOf(r));
-//        });
-        return collection;
-        // 권한이 존재안할 시
-//        return Collections.emptyList();
+    public Member getMember() {
+        return member;
     }
 
     @Override
@@ -80,33 +36,39 @@ import java.util.Map;
         return member.getUsername();
     }
 
-//    public String getEmail() {return member.getEmail();}
-
-    // 계정이 만료되었는지 않았는지(ture : 만료 X, false : 만료)
-    @Override
+    @Override //계정의 만료여부 리턴 스프링시큐리티의 기능들
     public boolean isAccountNonExpired() {
         return true;
     }
 
-    // 계정의 잠지 않았는지(ture : 잠김 X, false : 잠김)
-    @Override
+    @Override //계정의 잠금여부를 리턴
     public boolean isAccountNonLocked() {
         return true;
     }
 
-    // 계정의 비밀번호 기간이 지났는지 않았는지(ture : 지남 X, false : 지남)
-    @Override
+    @Override //계정의 비번이 만료되었는지 리턴
     public boolean isCredentialsNonExpired() {
         return true;
     }
 
-    // 계정의 활성화 여부(ture : 활성화, false : 활성화 X)
-    @Override
+    @Override //사용가능한계정인지 리턴
     public boolean isEnabled() {
-        // 1년 미로그인 고객 비활성화
-        // 현재시간 - user.getLoginDate() => 1년
-        // return false
         return true;
     }
 
+    @Override public Collection<? extends GrantedAuthority> getAuthorities() {
+        return Collections.emptyList();
+    }
+
+    // UserRequestDto로부터 UserDetailsImpl 생성
+    public static UserDetailsImpl fromMemberRequestDto(MemberRequestDto requestDto){
+
+        UserDetailsImpl userDetails = new UserDetailsImpl();
+
+        userDetails.username = requestDto.getUsername();
+        userDetails.nickname = requestDto.getNickname();
+
+
+        return userDetails;
+    }
 }

@@ -10,7 +10,7 @@ import com.project.uandmeet.exception.CustomException;
 import com.project.uandmeet.exception.ErrorCode;
 import com.project.uandmeet.model.Member;
 import com.project.uandmeet.repository.MemberRepository;
-import com.project.uandmeet.security.jwt.JwtTokenProvider;
+import com.project.uandmeet.security.jwt.JwtDecoder;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.messaging.Message;
@@ -28,7 +28,7 @@ import java.util.Optional;
 @Component
 public class StompHandler implements ChannelInterceptor {
 
-    private final JwtTokenProvider jwtDecoder;
+    private final JwtDecoder jwtDecoder;
     private final ChatRoomService chatRoomService;
     private final ChatMessageService chatMessageService;
     private final MemberRepository memberRepository;

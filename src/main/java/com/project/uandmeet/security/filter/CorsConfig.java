@@ -1,4 +1,4 @@
-package com.project.uandmeet.security;
+package com.project.uandmeet.security.filter;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

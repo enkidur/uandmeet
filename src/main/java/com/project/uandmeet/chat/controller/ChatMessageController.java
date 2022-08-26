@@ -6,7 +6,7 @@ import com.project.uandmeet.chat.model.ChatMessage;
 import com.project.uandmeet.chat.service.ChatMessageService;
 import com.project.uandmeet.model.Member;
 import com.project.uandmeet.repository.MemberRepository;
-import com.project.uandmeet.security.jwt.JwtTokenProvider;
+import com.project.uandmeet.security.jwt.JwtDecoder;
 import lombok.RequiredArgsConstructor;
 import org.springframework.messaging.handler.annotation.Header;
 import org.springframework.messaging.handler.annotation.MessageMapping;
@@ -24,7 +24,7 @@ import java.util.TimeZone;
 public class ChatMessageController {
 
     private final ChatMessageService chatMessageService;
-    private final JwtTokenProvider jwtTokenProvider;
+    private final JwtDecoder jwtDecoder;
     private final MemberRepository memberRepository;
 
 
@@ -34,7 +34,7 @@ public class ChatMessageController {
     public void message(@RequestBody ChatMessageRequestDto messageRequestDto, @Header("token") String token) {
 
         // 로그인 회원 정보를 들어온 메시지에 값 세팅
-        String nickname = jwtTokenProvider.decodeNickname(token.substring(7));
+        String nickname = jwtDecoder.decodeNickname(token.substring(7));
         System.out.println(nickname);
         Optional<Member> member1 = memberRepository.findByNickname(nickname);
         Member member = member1.get();
