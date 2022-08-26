@@ -23,13 +23,14 @@ public class SearchService {
     private final BoardRepository boardRepository;
 
 
-    public List<SearchResponseDto> queryDslSearch( String sort, String keyword, String city, String gu) {
+    public List<SearchResponseDto> queryDslSearch(int page, int size, String sort, String keyword, String city, String gu) {
 
         if(sort.equals("title")){
 
-            Pageable pageable = PageRequest.of(0, 10, Sort.by("id").descending());
+            Pageable pageable = PageRequest.of(page, size, Sort.by("id").descending());
 
             QBoard qBoard = QBoard.board;
+
 
             BooleanBuilder builder = new BooleanBuilder();
 

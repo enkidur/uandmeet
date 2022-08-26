@@ -11,6 +11,7 @@ import com.project.uandmeet.service.KakaoService;
 import com.project.uandmeet.service.MemberService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
@@ -35,13 +36,14 @@ public class MemberController {
     @PostMapping("/api/checkemail")
     public ResponseEntity<String> checkemail(@RequestBody String username) throws IOException {
         // 헤더에 전달
-//        headers.set("level","1");
-//        ResponseEntity<String> res = ResponseEntity.ok()
-//                                     .headers(headers)
-//                                     .body(memberService.checkemail(username));
+        HttpHeaders headers = new HttpHeaders();
+        headers.set("level","1");
+        ResponseEntity<String> res = ResponseEntity.ok()
+                                     .headers(headers)
+                                     .body(memberService.checkemail(username));
         // redis 에 저장
-        ResponseEntity<String> res = ResponseEntity.ok(memberService.checkemail(username));
-        redisUtil.setDataExpire(username + "level", "1", 300L);
+//        ResponseEntity<String> res = ResponseEntity.ok(memberService.checkemail(username));
+//        redisUtil.setDataExpire(username + "level", "1", 300L);
         // 해당 정보를 client 에서 처리하게 좋을지 서버에서 처리하는게 좋을지
         // client 에 저장하면 이동 시 노출위험 -> 암호화 필수 but 서버 부담 감소
 // stateless 구조 설계 권장

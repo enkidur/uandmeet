@@ -46,26 +46,26 @@ public class MemberService {
         String[] emailadress = username.split("@");
         String id = emailadress[0];
         String host = emailadress[1];
-//        String pattern = "^[a-zA-Z0-9]*$";
-        String pattern = "^[a-zA-Z0-9_!#$%&'\\*+/=?{|}~^.-]+@[a-zA-Z0-9.-]+.[a-zA-Z0-9.-]*$";
-        String idpattern = "^[a-zA-Z0-9_!#$%&'\\*+/=?{|}~^.-]*$";
-        String hostpattern = "^[a-zA-Z0-9.-]*$";
-        // email 조건
-        // ID 영문 대소문자, 숫자, _!#$%&'\*+/=?{|}~^.- 특문허용
-        // Host 시작전 @, 영문 대소문자, 숫자, .-특문허용
-
-        // 회원가입 username 조건
-        if (username.length() < 10) {
-            throw new IllegalArgumentException("이메일을 10자 이상 입력하세요");
-        } else if (!Pattern.matches(idpattern, id)) {
-            throw new IllegalArgumentException("id에 알파벳 대소문자와 숫자, 특수기호( _!#$%&'\\*+/=?{|}~^.-)로만 입력하세요");
-        } else if (!Pattern.matches(hostpattern, host)) {
-            throw new IllegalArgumentException("host에 알파벳 대소문자와 숫자, 특수기호(.-)로만 입력하세요");
-        } else if (!Pattern.matches(pattern, username)) {
-            throw new IllegalArgumentException("이메일 규격에 맞게 입력하세요");
-        } else if (username.contains("script")) {
-            throw new IllegalArgumentException("xss공격 멈춰주세요.");
-        }
+////        String pattern = "^[a-zA-Z0-9]*$";
+//        String pattern = "^[a-zA-Z0-9_!#$%&'\\*+/=?{|}~^.-]+@[a-zA-Z0-9.-]+.[a-zA-Z0-9.-]*$";
+//        String idpattern = "^[a-zA-Z0-9_!#$%&'\\*+/=?{|}~^.-]*$";
+//        String hostpattern = "^[a-zA-Z0-9.-]*$";
+//        // email 조건
+//        // ID 영문 대소문자, 숫자, _!#$%&'\*+/=?{|}~^.- 특문허용
+//        // Host 시작전 @, 영문 대소문자, 숫자, .-특문허용
+//
+//        // 회원가입 username 조건
+//        if (username.length() < 10) {
+//            throw new IllegalArgumentException("이메일을 10자 이상 입력하세요");
+//        } else if (!Pattern.matches(idpattern, id)) {
+//            throw new IllegalArgumentException("id에 알파벳 대소문자와 숫자, 특수기호( _!#$%&'\\*+/=?{|}~^.-)로만 입력하세요");
+//        } else if (!Pattern.matches(hostpattern, host)) {
+//            throw new IllegalArgumentException("host에 알파벳 대소문자와 숫자, 특수기호(.-)로만 입력하세요");
+//        } else if (!Pattern.matches(pattern, username)) {
+//            throw new IllegalArgumentException("이메일 규격에 맞게 입력하세요");
+//        } else if (username.contains("script")) {
+//            throw new IllegalArgumentException("xss공격 멈춰주세요.");
+//        }
 
         // email 중복 확인
         checkDuplicateEmail(username);

@@ -81,12 +81,14 @@ public class BoardCotroller {
         return boardService.likeClick(likeDto, userDetails);
     }
     @GetMapping("/board/search")
-    public ResponseEntity<List<SearchResponseDto>> search(@RequestParam(value = "sort") String sort,
+    public ResponseEntity<List<SearchResponseDto>> search(@RequestParam(value = "page") int page,
+                                                          @RequestParam(value = "amount") int size,
+                                                          @RequestParam(value = "sort") String sort,
                                                           @RequestParam(value = "keyword") String keyword,
                                                           @RequestParam(value = "city") String city,
                                                           @RequestParam(value = "gu") String gu) {
 
-        List<SearchResponseDto> searchResponseDto = searchService.queryDslSearch(sort, keyword, city, gu);
+        List<SearchResponseDto> searchResponseDto = searchService.queryDslSearch(page, size, sort, keyword, city, gu);
 
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(searchResponseDto);
