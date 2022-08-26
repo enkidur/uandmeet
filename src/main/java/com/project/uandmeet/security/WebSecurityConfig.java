@@ -32,20 +32,17 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 
     private final JwtTokenProvider jwtTokenProvider;
     private final JwtExceptionFilter jwtExceptionFilter;
-//    private final PrincipalOauth2UserService principalOauth2UserService;
-    private final CorsFilter corsFilter;
-
-    private final RedisUtil redisUtil;
+    private final PrincipalOauth2UserService principalOauth2UserService;
 
     @Bean
     public BCryptPasswordEncoder encodePassword() {
         return new BCryptPasswordEncoder();
     }
 
-
+    @Bean
     @Override
-    protected AuthenticationManager authenticationManager() throws Exception {
-        return super.authenticationManager();
+    public AuthenticationManager authenticationManagerBean() throws Exception {
+        return super.authenticationManagerBean();
     }
 
     @Override
@@ -58,42 +55,37 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 
     @Override
     protected void configure(HttpSecurity http) throws Exception {
-//        http.cors().configurationSource(corsConfigurationSource());
+        http.cors().configurationSource(corsConfigurationSource());
         // 토큰 인증이므로 세션 사용x
-        http.csrf().disable().sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)
-                        .and()
-                        .addFilter(corsFilter);
+        http.csrf().disable().sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS);
         http.headers().frameOptions().sameOrigin();
-
 
 
         http.authorizeRequests()
                 // 회원 관리 처리 API 전부를 login 없이 허용
-                .antMatchers("/user/duplicate/username").permitAll()
-                .antMatchers("/api/**").permitAll()
-                .antMatchers("/user/signup").permitAll()
-                .antMatchers("/user/login").permitAll()
-                .antMatchers("/user/refresh").permitAll()
-                .antMatchers("/user/confirmEmail").permitAll()
-                .antMatchers("/user/signin/**").permitAll()
-                .antMatchers("/health/**").permitAll()
-                .antMatchers("/health").permitAll()
-                .antMatchers("/user/confirmEmail").permitAll()
-                .antMatchers("/wss/chat/**").permitAll()
-                .antMatchers("/api/**").permitAll()
-                .anyRequest().permitAll()
-
+                .antMatchers("/**").permitAll()
+//                .antMatchers("/user/duplicate/username").permitAll()
+//                .antMatchers("/api/**").permitAll()
+//                .antMatchers("/user/signup").permitAll()
+//                .antMatchers("/user/login").permitAll()
+//                .antMatchers("/user/refresh").permitAll()
+//                .antMatchers("/user/confirmEmail").permitAll()
+//                .antMatchers("/user/signin/**").permitAll()
+//                .antMatchers("/health/**").permitAll()
+//                .antMatchers("/health").permitAll()
+//                .antMatchers("/user/confirmEmail").permitAll()
+//                .antMatchers("/wss/chat/**").permitAll()
+//                .antMatchers("/api/**").permitAll()
+                .anyRequest().authenticated()
                 // 그 외 어떤 요청이든 '인증'
                 .and()
-                .addFilterBefore(new JwtAuthenticationFilter(jwtTokenProvider), BasicAuthenticationFilter.class)
-//                .addFilterBefore(new JwtAuthenticationFilter(jwtTokenProvider), UsernamePasswordAuthenticationFilter.class)
-                .addFilterBefore(new FormLoginFilter(authenticationManager(),jwtTokenProvider,redisUtil), UsernamePasswordAuthenticationFilter.class );
-//                .addFilterBefore(jwtExceptionFilter, JwtAuthenticationFilter.class);
+                .addFilterBefore(new JwtAuthenticationFilter(jwtTokenProvider), UsernamePasswordAuthenticationFilter.class)
+                .addFilterBefore(jwtExceptionFilter, JwtAuthenticationFilter.class);
 
 //        http.authorizeRequests()
 //                .and()
 //                .oauth2Login()
-////                .loginPage("/login")
+//                .loginPage("/login")
 //                .userInfoEndpoint()
 //                .userService(principalOauth2UserService);
     }
@@ -101,11 +93,11 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-        configuration.addAllowedOriginPattern("http://localhost:3000");
+//        configuration.addAllowedOriginPattern("http://localhost:3000");
+        configuration.addAllowedOriginPattern("http://13.209.65.84:8080");
         //이곳에 관련 url 추가 해야합니다 도메인,리액트(?) 등
         configuration.addAllowedMethod("*");
         configuration.addAllowedHeader("*");
-        configuration.addAllowedOrigin("*");
         configuration.addExposedHeader("Authorization");
         configuration.addExposedHeader("RefreshToken");
         configuration.setAllowCredentials(true);
