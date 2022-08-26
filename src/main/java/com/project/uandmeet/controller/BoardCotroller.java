@@ -31,6 +31,7 @@ public class BoardCotroller {
     @PostMapping("/api/board/create")
     private CustomException boardNew(@RequestBody BoardRequestDto.createAndCheck boardRequestDto,
                                      @AuthenticationPrincipal UserDetailsImpl userDetails) {
+        System.out.println(userDetails.getMember());
         return boardService.boardNew(boardRequestDto, userDetails);
     }
 

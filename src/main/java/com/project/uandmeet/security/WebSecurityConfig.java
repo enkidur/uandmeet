@@ -2,7 +2,7 @@ package com.project.uandmeet.security;
 
 //import com.project.uandmeet.oauth.PrincipalOauth2UserService;
 import com.project.uandmeet.security.jwt.JwtAuthenticationFilter;
-import com.project.uandmeet.security.jwt.JwtExceptionFilter;
+//import com.project.uandmeet.security.jwt.JwtExceptionFilter;
 import com.project.uandmeet.security.jwt.JwtTokenProvider;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,7 +22,7 @@ import org.springframework.security.web.authentication.www.BasicAuthenticationFi
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
-
+import org.springframework.web.filter.CorsFilter;
 
 
 @RequiredArgsConstructor
@@ -30,12 +30,14 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 @EnableWebSecurity // 스프링 Security 지원을 가능하게 함
 public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 
-    @Autowired
-    @Lazy
-    private JwtExceptionFilter jwtExceptionFilter;
+//    @Autowired
+//    @Lazy
+//    private JwtExceptionFilter jwtExceptionFilter;
     @Autowired
     @Lazy
     private AuthenticationManager authenticationManager;
+
+    private final CorsFilter corsFilter;
 
     private final JwtTokenProvider jwtTokenProvider;
 //    private final PrincipalOauth2UserService principalOauth2UserService;
@@ -56,11 +58,14 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 
     @Override
     protected void configure(HttpSecurity http) throws Exception {
-        http.cors().configurationSource(corsConfigurationSource());
+//        http.cors().configurationSource(corsConfigurationSource());
         // 토큰 인증이므로 세션 사용x
-        http.csrf().disable().sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS);
+        http.csrf().disable().sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+                .and()
+                .addFilter(corsFilter)
+                .formLogin().disable() // 기본적인 formLogin방식을 쓰지않음 -> JWT를 쓰려면 필수 위 세션허용,cors등록,formLogin방식을 꺼야함
+                .httpBasic().disable(); // httpbasic방식(기본인증방식) : authorization에 id,pw를 담아서 보내는 방식(여기서 id,pw가 노출될수 있음)
         http.headers().frameOptions().sameOrigin();
-
 
         http.authorizeRequests()
                 // 회원 관리 처리 API 전부를 login 없이 허용
@@ -77,12 +82,12 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 //                .antMatchers("/user/confirmEmail").permitAll()
 //                .antMatchers("/wss/chat/**").permitAll()
 //                .antMatchers("/api/**").permitAll()
-                .anyRequest().authenticated()
+                .anyRequest().permitAll()
                 // 그 외 어떤 요청이든 '인증'
                 .and()
 //                .addFilterBefore(new JwtAuthenticationFilter(authenticationManager), UsernamePasswordAuthenticationFilter.class)
                 .addFilterBefore(new JwtAuthenticationFilter(jwtTokenProvider), UsernamePasswordAuthenticationFilter.class)
-                .addFilterBefore(jwtExceptionFilter, JwtAuthenticationFilter.class);
+                .addFilterBefore(new JwtAuthenticationFilter(jwtTokenProvider), BasicAuthenticationFilter.class);
 
 //        http.authorizeRequests()
 //                .and()
