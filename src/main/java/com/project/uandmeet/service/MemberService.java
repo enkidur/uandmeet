@@ -344,8 +344,8 @@ public class MemberService {
     }
 
     public void join(MemberRequestDto requestDto) {
-        Member member = requestDto.register();
-        member.setPassword(passwordEncoder.encode("{noop}"+requestDto.getPassword()));
+        Member member = new Member(requestDto.getUsername(),passwordEncoder.encode(requestDto.getPassword()));
+//        member.setPassword(passwordEncoder.encode(requestDto.getPassword()));
         memberRepository.save(member);
     }
 
@@ -359,15 +359,10 @@ public class MemberService {
         if (!passwordEncoder.matches(requestDto.getPassword(), member.getPassword())) {
             throw new IllegalArgumentException("비밀번호를 확인해 주세요");
         }
-
-        //
-        accessAndRefreshTokenProcess(member.getUsername());
-        return "완료";
-    }
-    public void accessAndRefreshTokenProcess(String username) {
         String refreshToken = jwtTokenProvider.createRefreshToken();
-        redisUtil.setDataExpire(username,refreshToken,JwtProperties.REFRESH_EXPIRATION_TIME);
-        jwtTokenProvider.createToken(username);
+        redisUtil.setDataExpire(requestDto.getUsername(),refreshToken,JwtProperties.REFRESH_EXPIRATION_TIME);
+        jwtTokenProvider.createToken(requestDto.getUsername());
+        return "완료";
     }
 }
 

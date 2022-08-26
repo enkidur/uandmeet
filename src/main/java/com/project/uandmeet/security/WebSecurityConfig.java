@@ -1,15 +1,15 @@
 package com.project.uandmeet.security;
 
 //import com.project.uandmeet.oauth.PrincipalOauth2UserService;
-import com.project.uandmeet.redis.RedisUtil;
-import com.project.uandmeet.security.jwt.FormLoginFilter;
 import com.project.uandmeet.security.jwt.JwtAuthenticationFilter;
 import com.project.uandmeet.security.jwt.JwtExceptionFilter;
 import com.project.uandmeet.security.jwt.JwtTokenProvider;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.security.servlet.PathRequest;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.builders.WebSecurity;
@@ -22,7 +22,7 @@ import org.springframework.security.web.authentication.www.BasicAuthenticationFi
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
-import org.springframework.web.filter.CorsFilter;
+
 
 
 @RequiredArgsConstructor
@@ -30,14 +30,15 @@ import org.springframework.web.filter.CorsFilter;
 @EnableWebSecurity // 스프링 Security 지원을 가능하게 함
 public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 
-    private final JwtTokenProvider jwtTokenProvider;
-    private final JwtExceptionFilter jwtExceptionFilter;
-//    private final PrincipalOauth2UserService principalOauth2UserService;
+    @Autowired
+    @Lazy
+    private JwtExceptionFilter jwtExceptionFilter;
+    @Autowired
+    @Lazy
+    private AuthenticationManager authenticationManager;
 
-    @Bean
-    public BCryptPasswordEncoder encodePassword() {
-        return new BCryptPasswordEncoder();
-    }
+    private final JwtTokenProvider jwtTokenProvider;
+//    private final PrincipalOauth2UserService principalOauth2UserService;
 
     @Bean
     @Override
@@ -79,6 +80,7 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
                 .anyRequest().authenticated()
                 // 그 외 어떤 요청이든 '인증'
                 .and()
+//                .addFilterBefore(new JwtAuthenticationFilter(authenticationManager), UsernamePasswordAuthenticationFilter.class)
                 .addFilterBefore(new JwtAuthenticationFilter(jwtTokenProvider), UsernamePasswordAuthenticationFilter.class)
                 .addFilterBefore(jwtExceptionFilter, JwtAuthenticationFilter.class);
 
