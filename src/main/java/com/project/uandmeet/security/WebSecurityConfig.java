@@ -24,6 +24,7 @@ import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 import org.springframework.web.filter.CorsFilter;
 
+
 @RequiredArgsConstructor
 @Configuration
 @EnableWebSecurity // 스프링 Security 지원을 가능하게 함
