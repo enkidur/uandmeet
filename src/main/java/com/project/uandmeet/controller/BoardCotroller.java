@@ -55,7 +55,6 @@ public class BoardCotroller {
             throw new CustomException(ErrorCode.CAN_NOT_CREATE_ROOM);
         } else
             return boardChoiceInquiry;
-
     }
 
     //개시물 수정

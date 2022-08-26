@@ -23,7 +23,7 @@ import java.util.List;
 public class BoardService {
 
     private final BoardRepository boardRepository;
-    private final MemberRepostiory memberRepostiory;
+    private final MemberRepository memberRepostiory;
     private final CategoryRepository categoryRepository;
     private final LikedRepository likedRepository;
     private final EntryRepository entryRepository;

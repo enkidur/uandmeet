@@ -24,7 +24,7 @@ import java.util.Map;
 
 //@RestController
 @Slf4j
-@Controller
+@RestController
 @RequestMapping
 @RequiredArgsConstructor
 public class MemberController {
@@ -32,6 +32,12 @@ public class MemberController {
     private final MemberService memberService;
     private final KakaoService kakaoService;
     private final EmailService emailService;
+
+    //로그인
+    @PostMapping("/user/login")
+    public String login(@RequestBody LoginRequestDto requestDto) {
+        return memberService.login(requestDto);
+    }
 
     // 회원가입 1. emali check
     @PostMapping("/api/checkemail")
@@ -54,7 +60,7 @@ public class MemberController {
 
     // 회원가입 2. Email 인증
     @PostMapping("/api/mailcheck")
-    public @ResponseBody ResponseEntity<String> mailCheck(@RequestBody String username) {
+    public @ResponseBody ResponseEntity<String> mailCheck(@RequestBody String username) throws IOException {
         // 헤더에 전달
 //        int level = Integer.parseInt(String.valueOf(headers.get("level")));
 //        if (level < 1) {

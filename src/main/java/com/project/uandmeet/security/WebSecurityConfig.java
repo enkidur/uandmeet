@@ -1,6 +1,8 @@
 package com.project.uandmeet.security;
 
-import com.project.uandmeet.oauth.PrincipalOauth2UserService;
+//import com.project.uandmeet.oauth.PrincipalOauth2UserService;
+import com.project.uandmeet.redis.RedisUtil;
+import com.project.uandmeet.security.jwt.FormLoginFilter;
 import com.project.uandmeet.security.jwt.JwtAuthenticationFilter;
 import com.project.uandmeet.security.jwt.JwtExceptionFilter;
 import com.project.uandmeet.security.jwt.JwtTokenProvider;
@@ -16,9 +18,11 @@ import org.springframework.security.config.annotation.web.configuration.WebSecur
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.security.web.authentication.www.BasicAuthenticationFilter;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
+import org.springframework.web.filter.CorsFilter;
 
 @RequiredArgsConstructor
 @Configuration
@@ -27,17 +31,20 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 
     private final JwtTokenProvider jwtTokenProvider;
     private final JwtExceptionFilter jwtExceptionFilter;
-    private final PrincipalOauth2UserService principalOauth2UserService;
+//    private final PrincipalOauth2UserService principalOauth2UserService;
+    private final CorsFilter corsFilter;
+
+    private final RedisUtil redisUtil;
 
     @Bean
     public BCryptPasswordEncoder encodePassword() {
         return new BCryptPasswordEncoder();
     }
 
-    @Bean
+
     @Override
-    public AuthenticationManager authenticationManagerBean() throws Exception {
-        return super.authenticationManagerBean();
+    protected AuthenticationManager authenticationManager() throws Exception {
+        return super.authenticationManager();
     }
 
     @Override
@@ -50,10 +57,13 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 
     @Override
     protected void configure(HttpSecurity http) throws Exception {
-        http.cors().configurationSource(corsConfigurationSource());
+//        http.cors().configurationSource(corsConfigurationSource());
         // 토큰 인증이므로 세션 사용x
-        http.csrf().disable().sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS);
+        http.csrf().disable().sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+                        .and()
+                        .addFilter(corsFilter);
         http.headers().frameOptions().sameOrigin();
+
 
 
         http.authorizeRequests()
@@ -70,27 +80,30 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
                 .antMatchers("/user/confirmEmail").permitAll()
                 .antMatchers("/wss/chat/**").permitAll()
                 .antMatchers("/api/**").permitAll()
-                .anyRequest().authenticated()
+                .anyRequest().permitAll()
                 // 그 외 어떤 요청이든 '인증'
                 .and()
-                .addFilterBefore(new JwtAuthenticationFilter(jwtTokenProvider), UsernamePasswordAuthenticationFilter.class)
-                .addFilterBefore(jwtExceptionFilter, JwtAuthenticationFilter.class);
+                .addFilterBefore(new JwtAuthenticationFilter(jwtTokenProvider), BasicAuthenticationFilter.class)
+//                .addFilterBefore(new JwtAuthenticationFilter(jwtTokenProvider), UsernamePasswordAuthenticationFilter.class)
+                .addFilterBefore(new FormLoginFilter(authenticationManager(),jwtTokenProvider,redisUtil), UsernamePasswordAuthenticationFilter.class );
+//                .addFilterBefore(jwtExceptionFilter, JwtAuthenticationFilter.class);
 
-        http.authorizeRequests()
-                .and()
-                .oauth2Login()
-                .loginPage("/login")
-                .userInfoEndpoint()
-                .userService(principalOauth2UserService);
+//        http.authorizeRequests()
+//                .and()
+//                .oauth2Login()
+////                .loginPage("/login")
+//                .userInfoEndpoint()
+//                .userService(principalOauth2UserService);
     }
 
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-//        configuration.addAllowedOriginPattern("http://localhost:3000");
+        configuration.addAllowedOriginPattern("http://localhost:3000");
         //이곳에 관련 url 추가 해야합니다 도메인,리액트(?) 등
         configuration.addAllowedMethod("*");
         configuration.addAllowedHeader("*");
+        configuration.addAllowedOrigin("*");
         configuration.addExposedHeader("Authorization");
         configuration.addExposedHeader("RefreshToken");
         configuration.setAllowCredentials(true);

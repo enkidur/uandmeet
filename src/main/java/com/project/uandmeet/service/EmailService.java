@@ -1,20 +1,28 @@
 package com.project.uandmeet.service;
 
 import com.project.uandmeet.dto.CheckAuthNumDto;
+import com.project.uandmeet.model.Member;
 import com.project.uandmeet.redis.RedisUtil;
+import com.project.uandmeet.repository.MemberRepository;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.mail.javamail.JavaMailSenderImpl;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Service;
 import javax.mail.*;
 import javax.mail.internet.MimeMessage;
+import java.io.IOException;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.UUID;
 
 @Service
+@RequiredArgsConstructor
 public class EmailService {
     @Autowired
     private JavaMailSenderImpl mailSender; //Application 에서 빈 등록했기 때문에 주입받을 수 있다.
+
+    private final MemberRepository memberRepository;
     @Autowired
     private RedisUtil redisUtil;
     private String authNumber; // 난수 번호
@@ -35,7 +43,35 @@ public class EmailService {
 
 
     //이메일 보낼 양식
-    public String joinEmail(String email) { // 컨트롤러에서 아이디가 넘어오면서 붙을 스트링값
+    public String joinEmail(String email) throws IOException { // 컨트롤러에서 아이디가 넘어오면서 붙을 스트링값
+
+        String[] emailadress = email.split("@");
+        String id = emailadress[0];
+        String host = emailadress[1];
+//        String pattern = "^[a-zA-Z0-9]*$";
+//        String pattern = "^[a-zA-Z0-9_!#$%&'\\*+/=?{|}~^.-]+@[a-zA-Z0-9.-]+.[a-zA-Z0-9.-]*$";
+//        String idpattern = "^[a-zA-Z0-9_!#$%&'\\*+/=?{|}~^.-]*$";
+//        String hostpattern = "^[a-zA-Z0-9.-]*$";
+//        // email 조건
+//        // ID 영문 대소문자, 숫자, _!#$%&'\*+/=?{|}~^.- 특문허용
+//        // Host 시작전 @, 영문 대소문자, 숫자, .-특문허용
+//
+//        // 회원가입 username 조건
+//        if (username.length() < 10) {
+//            throw new IllegalArgumentException("이메일을 10자 이상 입력하세요");
+//        } else if (!Pattern.matches(idpattern, id)) {
+//            throw new IllegalArgumentException("id에 알파벳 대소문자와 숫자, 특수기호( _!#$%&'\\*+/=?{|}~^.-)로만 입력하세요");
+//        } else if (!Pattern.matches(hostpattern, host)) {
+//            throw new IllegalArgumentException("host에 알파벳 대소문자와 숫자, 특수기호(.-)로만 입력하세요");
+//        } else if (!Pattern.matches(pattern, username)) {
+//            throw new IllegalArgumentException("이메일 규격에 맞게 입력하세요");
+//        } else if (username.contains("script")) {
+//            throw new IllegalArgumentException("xss공격 멈춰주세요.");
+//        }
+
+        // email 중복 확인
+        checkDuplicateEmail(email);
+
         if (emailCnt < 4) {
             makeRandomNumber();
             //인증메일 보내기
@@ -54,6 +90,13 @@ public class EmailService {
             return "인증 번호 :" + authNumber + "남은 횟수 :"+ restCnt;
         }
         return "인증 횟수를 초과하였습니다. 1시간 뒤에 다시 시도해 주세요.";
+    }
+
+    public void checkDuplicateEmail(String username) {
+        Optional<Member> member = memberRepository.findByUsername(username);
+        if (member.isPresent()) {
+            throw new IllegalArgumentException("이미 존재하는 계정입니다.");
+        }
     }
 
         //이메일 전송 메소드

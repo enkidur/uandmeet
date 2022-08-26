@@ -29,9 +29,7 @@ public class SearchService {
 
             Pageable pageable = PageRequest.of(page, size, Sort.by("id").descending());
 
-
             QBoard qBoard = QBoard.board;
-
 
             BooleanBuilder builder = new BooleanBuilder();
 
@@ -49,7 +47,6 @@ public class SearchService {
                     Board board1 = boardRepository.findById(id).orElseThrow(() -> new NullPointerException("보드가 없습니다"));
                     // 검색결과에 매칭,정보가 모두 포함되기에 나눠줌
                     SearchResponseDto responseDto = new SearchResponseDto(board1);
-
 //                    // 게시판 종류가 매칭 게시판일때 && 검색 결과중 BoardType이 matching인 것만 긁어온다.
 //                    if(boardType.equals("matching") && board1.getBoardType().equals("matching")){ // 게시판 종류가 매칭 게시판일 경우
 //                        SearchResponseDto responseDto = new SearchResponseDto(board1);

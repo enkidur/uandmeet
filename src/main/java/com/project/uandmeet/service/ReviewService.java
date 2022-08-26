@@ -8,7 +8,7 @@ import com.project.uandmeet.model.Board;
 import com.project.uandmeet.model.Member;
 import com.project.uandmeet.model.Review;
 import com.project.uandmeet.repository.BoardRepository;
-import com.project.uandmeet.repository.MemberRepostiory;
+import com.project.uandmeet.repository.MemberRepository;
 import com.project.uandmeet.repository.ReviewRepository;
 import com.project.uandmeet.security.UserDetailsImpl;
 import lombok.RequiredArgsConstructor;
@@ -20,7 +20,7 @@ import org.springframework.stereotype.Service;
 @RequiredArgsConstructor
 public class ReviewService {
     private final ReviewRepository reviewRepository;
-    private final MemberRepostiory memberRepostiory;
+    private final MemberRepository memberRepostiory;
     private final BoardRepository boardRepository;
 
     public ReviewResponseDto review(String nickname, String otherNick) {

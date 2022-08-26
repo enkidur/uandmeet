@@ -1,7 +1,8 @@
 package com.project.uandmeet.security.jwt;
 
+import io.jsonwebtoken.JwtException;
 import org.springframework.http.HttpStatus;
-import org.springframework.security.oauth2.jwt.JwtException;
+//import org.springframework.security.oauth2.jwt.JwtException;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.GenericFilterBean;
 

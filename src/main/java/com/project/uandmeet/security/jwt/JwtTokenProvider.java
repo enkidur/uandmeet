@@ -15,6 +15,7 @@ import io.jsonwebtoken.security.Keys;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpHeaders;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -61,6 +62,8 @@ public class JwtTokenProvider {
                 //signature에 들어갈 secret값 세팅
                 .compact();
 
+        HttpHeaders headers = new HttpHeaders();
+        headers.set(JwtProperties.HEADER_ACCESS, JwtProperties.TOKEN_PREFIX + token);
         response.addHeader(HEADER_ACCESS, TOKEN_PREFIX + token);
         return token;
     }
@@ -72,6 +75,9 @@ public class JwtTokenProvider {
                 .setExpiration(new Date(now.getTime() + REFRESH_EXPIRATION_TIME))
                 .signWith( key, SignatureAlgorithm.HS256)
                 .compact();
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.set(JwtProperties.HEADER_REFRESH, JwtProperties.TOKEN_PREFIX + refreshToken);
         response.addHeader("RefreshToken","Bearer " + refreshToken);
         return refreshToken;
     }

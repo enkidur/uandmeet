@@ -12,6 +12,8 @@ import com.project.uandmeet.security.jwt.JwtProperties;
 import com.project.uandmeet.security.jwt.JwtTokenProvider;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -19,6 +21,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.util.*;
+import java.util.concurrent.TimeUnit;
 import java.util.regex.Pattern;
 
 @Transactional
@@ -35,7 +38,6 @@ public class MemberService {
 
     // 난수 생성
     public void makeRandomNumber() {
-
         String checkNum = UUID.randomUUID().toString().substring(0, 6);
         System.out.println("임시 비밀번호 : " + checkNum);
         authNumber = checkNum;
@@ -46,7 +48,7 @@ public class MemberService {
         String[] emailadress = username.split("@");
         String id = emailadress[0];
         String host = emailadress[1];
-////        String pattern = "^[a-zA-Z0-9]*$";
+//        String pattern = "^[a-zA-Z0-9]*$";
 //        String pattern = "^[a-zA-Z0-9_!#$%&'\\*+/=?{|}~^.-]+@[a-zA-Z0-9.-]+.[a-zA-Z0-9.-]*$";
 //        String idpattern = "^[a-zA-Z0-9_!#$%&'\\*+/=?{|}~^.-]*$";
 //        String hostpattern = "^[a-zA-Z0-9.-]*$";
@@ -131,6 +133,13 @@ public class MemberService {
         }
         return "회원탈퇴 완료";
     }
+
+//    public void accessAndRefreshTokenProcess(String username) {
+//        String refreshToken = jwtTokenProvider.createRefreshToken();
+//        redisUtil.setValues(refreshToken, username);
+//        redisUtil.setExpire(refreshToken, 7 * 24 * 60 * 60 * 1000L, TimeUnit.MILLISECONDS);
+//        jwtTokenProvider.createToken(username);
+//    }
 
     public Map<String, String> refresh(HttpServletRequest request, HttpServletResponse response) {
 
@@ -336,9 +345,29 @@ public class MemberService {
 
     public void join(MemberRequestDto requestDto) {
         Member member = requestDto.register();
-        member.setPassword(passwordEncoder.encode(requestDto.getPassword()));
+        member.setPassword(passwordEncoder.encode("{noop}"+requestDto.getPassword()));
         memberRepository.save(member);
     }
 
+    // 로그인
+    @Transactional
+    public String login(LoginRequestDto requestDto) {
+        Member member = memberRepository.findByUsername(requestDto.getUsername()).orElseThrow(
+                () -> new NullPointerException("해당 유저를 찾을 수 없습니다.")
+        );
+
+        if (!passwordEncoder.matches(requestDto.getPassword(), member.getPassword())) {
+            throw new IllegalArgumentException("비밀번호를 확인해 주세요");
+        }
+
+        //
+        accessAndRefreshTokenProcess(member.getUsername());
+        return "완료";
+    }
+    public void accessAndRefreshTokenProcess(String username) {
+        String refreshToken = jwtTokenProvider.createRefreshToken();
+        redisUtil.setDataExpire(username,refreshToken,JwtProperties.REFRESH_EXPIRATION_TIME);
+        jwtTokenProvider.createToken(username);
+    }
 }
 
