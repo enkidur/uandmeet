@@ -75,7 +75,7 @@ public class EmailService {
         if (emailCnt < 4) {
             makeRandomNumber();
             //인증메일 보내기
-            String setFrom = "wjdgns5488@naver.com"; // email-config에 설정한 자신의 이메일 주소를 입력
+            String setFrom = "zkraudcka@naver.com"; // email-config에 설정한 자신의 이메일 주소를 입력
             String toMail = email;
             String title = "회원 가입 인증 이메일 입니다."; // 이메일 제목
             String content =

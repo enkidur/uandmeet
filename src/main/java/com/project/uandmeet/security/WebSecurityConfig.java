@@ -1,8 +1,11 @@
 package com.project.uandmeet.security;
 
 //import com.project.uandmeet.oauth.PrincipalOauth2UserService;
+import com.project.uandmeet.oauth.OAuth2SuccessHandler;
+import com.project.uandmeet.oauth.PrincipalOauth2UserService;
 import com.project.uandmeet.security.jwt.JwtAuthenticationFilter;
 //import com.project.uandmeet.security.jwt.JwtExceptionFilter;
+import com.project.uandmeet.security.jwt.JwtExceptionFilter;
 import com.project.uandmeet.security.jwt.JwtTokenProvider;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,6 +20,7 @@ import org.springframework.security.config.annotation.web.configuration.EnableWe
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.oauth2.client.web.OAuth2LoginAuthenticationFilter;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.security.web.authentication.www.BasicAuthenticationFilter;
 import org.springframework.web.cors.CorsConfiguration;
@@ -39,8 +43,10 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 
     private final CorsFilter corsFilter;
 
+    private final OAuth2SuccessHandler successHandler;
+
     private final JwtTokenProvider jwtTokenProvider;
-//    private final PrincipalOauth2UserService principalOauth2UserService;
+    private final PrincipalOauth2UserService principalOauth2UserService;
 
     @Bean
     @Override
@@ -92,9 +98,18 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 //        http.authorizeRequests()
 //                .and()
 //                .oauth2Login()
-//                .loginPage("/login")
+//                .loginPage("/login/google")
 //                .userInfoEndpoint()
 //                .userService(principalOauth2UserService);
+
+        // 추가 예정
+
+//        http.oauth2Login()
+//                .successHandler(successHandler)
+//                .userInfoEndpoint()
+//                .userService(principalOauth2UserService);
+
+
     }
 
     @Bean

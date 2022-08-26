@@ -34,7 +34,7 @@ public class BoardService {
     @Transactional
     public CustomException boardNew(BoardRequestDto.createAndCheck boardRequestDto, UserDetailsImpl userDetails) {
         //로그인 유저 정보.
-        Member memberTemp = memberRepostiory.findById(userDetails.getMember().getId())
+        Member memberTemp = memberRepostiory.findByUsername(userDetails.getUsername())
                 .orElseThrow(()->new CustomException(ErrorCode.EMPTY_CONTENT));
 
         Category category = categoryRepository.findByCategory(boardRequestDto.getCategory())
@@ -55,8 +55,11 @@ public class BoardService {
     @Transactional
     public List<BoardResponseDto> boardAllInquiry(String boardType, String categoryName) {
 
+        Category category = categoryRepository.findByCategory(categoryName).orElseThrow(()
+                        -> new CustomException(ErrorCode.EMPTY_CONTENT));
+
         //개시판 정보 추출
-        List<Board> boards = boardRepository.findAllByBoardTypeAndCategory(boardType, categoryName);
+        List<Board> boards = boardRepository.findAllByBoardTypeAndCategory(boardType, category);
 
         // 찾으 정보를 Dto로 변환 한다.
         List<BoardResponseDto> boardResponseDtos = new ArrayList<>();
@@ -64,7 +67,7 @@ public class BoardService {
             for (Board boardTemp : boards) {
                 //작성자 간이 닉네임 생성.
                 MemberSimpleDto memberSimpleDto = new MemberSimpleDto(boardTemp.getMember().getNickname(),
-                        boardTemp.getMember().getEmail(), boardTemp.getMember().getProfile());
+                        boardTemp.getMember().getUsername(), boardTemp.getMember().getProfile());
 
                 BoardResponseDto boardResponseDto = new BoardResponseDto(memberSimpleDto,boardTemp);
                 boardResponseDtos.add(boardResponseDto);

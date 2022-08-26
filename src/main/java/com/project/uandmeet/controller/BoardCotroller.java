@@ -18,28 +18,30 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.validation.Valid;
+import java.sql.SQLOutput;
 import java.util.List;
 
-@Controller
+@RestController
 @RequiredArgsConstructor
 public class BoardCotroller {
     private final BoardService boardService;
-
     private final SearchService searchService;
-
     //게시물 작성
     @PostMapping("/api/board/create")
     private CustomException boardNew(@RequestBody BoardRequestDto.createAndCheck boardRequestDto,
                                      @AuthenticationPrincipal UserDetailsImpl userDetails) {
-        System.out.println(userDetails.getMember());
+        System.out.println(userDetails.getMember().getUsername());
         return boardService.boardNew(boardRequestDto, userDetails);
     }
 
+
     //게시물 전체 조회
-    @GetMapping("/api/boards/{board_type}/{category_name}")
-    private List<BoardResponseDto> boardAllInquiry(@PathVariable("board_type") String boardType,
-                                                   @PathVariable("category_name") String categoryName) {
-        List<BoardResponseDto> boardAllInquiry = boardService.boardAllInquiry(boardType, categoryName);
+    @GetMapping("/api/boards/{board_Type}/{cate_gory}")
+    private List<BoardResponseDto> boardAllInquiry(@PathVariable String board_Type,
+                                                   @PathVariable String cate_gory) {
+        System.out.println(cate_gory);
+        System.out.println(board_Type);
+        List<BoardResponseDto> boardAllInquiry = boardService.boardAllInquiry(board_Type, cate_gory);
 
         if (boardAllInquiry.size() == 0) {
             throw new CustomException(ErrorCode.CAN_NOT_CREATE_ROOM);

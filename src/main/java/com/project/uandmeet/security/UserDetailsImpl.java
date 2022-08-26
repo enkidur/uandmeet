@@ -6,6 +6,7 @@ import lombok.Getter;
 import lombok.Setter;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.oauth2.core.user.OAuth2User;
 //import org.springframework.security.oauth2.core.user.OAuth2User;
 
 import java.util.ArrayList;
@@ -22,33 +23,33 @@ import java.util.Map;
 
 @Getter
 @Setter
-//public class UserDetailsImpl implements UserDetails, OAuth2User {
-    public class UserDetailsImpl implements UserDetails {
+public class UserDetailsImpl implements UserDetails, OAuth2User {
+//    public class UserDetailsImpl implements UserDetails {
 
     private Member member; // 컴포지션
 //    private KakaoMember kakaoMember;
 
-//    private Map<String,Object> attributes; // OAuth2
+    private Map<String,Object> attributes; // OAuth2
 
     public UserDetailsImpl(Member member) {
         this.member = member;
     }
 
-//    // OAuth로그인
-//    public UserDetailsImpl(Member member,Map<String,Object>attributes) {
-//        this.member=member;
-//        this.attributes =attributes;
-//    }
+    // OAuth로그인
+    public UserDetailsImpl(Member member,Map<String,Object>attributes) {
+        this.member=member;
+        this.attributes =attributes;
+    }
 
-//    // OAuth2 오버라이드 메소드
-//   @Override
-//    public Map<String, Object> getAttributes() {
-//        return attributes;
-//    }
-//    @Override
-//    public String getName() {
-//        return null;
-//    }
+//     OAuth2 오버라이드 메소드
+   @Override
+    public Map<String, Object> getAttributes() {
+        return attributes;
+    }
+    @Override
+    public String getName() {
+        return null;
+    }
 
     // 해당 User 의 권한의 리턴
     @Override
