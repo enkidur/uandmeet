@@ -61,6 +61,7 @@ public class BoardCotroller {
             return boardChoiceInquiry;
     }
 
+
     //개시물 수정
     @PutMapping("/api/board/{id}")
     private CustomException boardUpdate(@PathVariable("id") Long id,
