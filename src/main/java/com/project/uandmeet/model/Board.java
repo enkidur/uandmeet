@@ -4,7 +4,6 @@ import com.project.uandmeet.dto.boardDtoGroup.BoardRequestDto;
 import lombok.*;
 
 import javax.persistence.*;
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -14,7 +13,7 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
-public class Board {
+public class Board extends BaseTime{
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -22,7 +21,8 @@ public class Board {
     //정보공유 : information,  매칭:matching 둘중 하나.
     private String boardType;
     private String title;
-    private String centent;
+    private String content;
+    private String endDateAt;
 
     //좋아요 수
     @Column(nullable = false)
@@ -33,10 +33,6 @@ public class Board {
     //댓글 수
     @Column(nullable = false)
     private Long commentCount = 0L;
-
-    private LocalDateTime createdAt;
-
-    private LocalDateTime modifiedAt;
 
     private String city;
     private String gu;
@@ -74,25 +70,31 @@ public class Board {
         this.category = category;
         this.boardType = boardRequestDto.getBoardType();
         this.title = boardRequestDto.getTitle();
-        this.centent = boardRequestDto.getCentent();
+        this.content = boardRequestDto.getContent();
         this.boardimage = boardRequestDto.getBoardimage();
+        this.endDateAt =boardRequestDto.getEndDateAt();
         this.city = boardRequestDto.getCity();
         this.gu = boardRequestDto.getGu();
         this.lat = boardRequestDto.getLat();
         this.lng = boardRequestDto.getLng();
     }
 
-    public Board(Board board, BoardRequestDto.createAndCheck boardRequestUpdateDto)
+    //매칭 업데이트
+    public Board(Board board, BoardRequestDto.updateMatching boardRequestUpdateDto)
     {
         this.member = board.getMember();
-        this.category = board.getCategory();
-        this.boardType = board.getBoardType();
         this.title = boardRequestUpdateDto.getTitle();
-        this.centent = boardRequestUpdateDto.getCentent();
+        this.content = boardRequestUpdateDto.getContent();
         this.boardimage = boardRequestUpdateDto.getBoardimage();
-        this.city = boardRequestUpdateDto.getCity();
-        this.gu = boardRequestUpdateDto.getGu();
-        this.lat = boardRequestUpdateDto.getLat();
-        this.lng = boardRequestUpdateDto.getLng();
+        this.endDateAt = boardRequestUpdateDto.getEndDateAt();
+    }
+
+    //공유 업데이트
+    public Board(Board board, BoardRequestDto.updateInfo boardRequestUpdateDto)
+    {
+        this.member = board.getMember();
+        this.title = boardRequestUpdateDto.getTitle();
+        this.content = boardRequestUpdateDto.getContent();
+        this.boardimage = boardRequestUpdateDto.getBoardimage();
     }
 }

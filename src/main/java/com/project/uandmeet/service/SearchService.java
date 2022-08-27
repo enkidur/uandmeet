@@ -77,7 +77,7 @@ public class SearchService {
 
             BooleanExpression exTitle = qBoard.title.contains(keyword);
 
-            BooleanExpression exContent = qBoard.centent.contains(keyword);
+            BooleanExpression exContent = qBoard.content.contains(keyword);
 
             BooleanExpression exAll = exTitle.or(exContent);
 

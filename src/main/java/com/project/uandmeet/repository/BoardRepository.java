@@ -17,7 +17,7 @@ public  interface BoardRepository extends JpaRepository<Board, Long>, QuerydslPr
 
     Board findBoardById(Long boardId);
 
-    Page<Board> findAllByBoardTypeAndCategory(String boardType, String categoryName, Pageable pageable);
+    Page<Board> findAllByBoardTypeAndCategory(String boardType, String Category, Pageable pageable);
 
     Page<Board> findAllByBoardType(String boardType, Pageable pageable);
 }

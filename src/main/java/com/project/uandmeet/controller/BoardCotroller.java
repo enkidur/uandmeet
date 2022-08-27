@@ -26,6 +26,12 @@ import java.util.List;
 public class BoardCotroller {
     private final BoardService boardService;
     private final SearchService searchService;
+
+    @PostMapping("/api/categoryset/{category}")
+    private CustomException categoryNew(@PathVariable("category") String category) {
+        return boardService.categoryNew(category);
+    }
+
     //게시물 작성
     @PostMapping("/api/board/create")
     private CustomException boardNew(@RequestBody BoardRequestDto.createAndCheck boardRequestDto,
@@ -34,39 +40,26 @@ public class BoardCotroller {
         return boardService.boardNew(boardRequestDto, userDetails);
     }
 
-/*
-    //게시물 전체 조회
-    @GetMapping("/api/boards/{board_Type}/{cate_gory}")
-    private List<BoardResponseDto> boardAllInquiry(@PathVariable String board_Type,
-                                                   @PathVariable String cate_gory) {
-        System.out.println(cate_gory);
-        System.out.println(board_Type);
-        List<BoardResponseDto> boardAllInquiry = boardService.boardAllInquiry(board_Type, cate_gory);
 
-        if (boardAllInquiry.size() == 0) {
-            throw new CustomException(ErrorCode.CAN_NOT_CREATE_ROOM);
-        } else
-            return boardAllInquiry;
-    }*/
-
-    @GetMapping("/api/boards")
-    private ResponseEntity<BoardResponseFinalDto> boardAllInquiry(@RequestParam String type,
+    //매칭 게시물 전체 조회 (카테고리별 전체 조회)
+    @GetMapping("/api/boards/matching")
+    private ResponseEntity<BoardResponseFinalDto> boardMatchingAllInquiry(
                                                                   @RequestParam String cate,
                                                                   @RequestParam Integer page,
                                                                   @RequestParam Integer amount,
                                                                   @RequestParam String city,
                                                                   @RequestParam String gu) {
-        BoardResponseFinalDto boardAllInquiry = boardService.boardAllInquiry(type, cate,page,amount,city,gu);
+        BoardResponseFinalDto boardMatchingAllInquiry = boardService.boardMatchingAllInquiry("matching",cate,page,amount,city,gu);
 
-        if (boardAllInquiry == null) {
+        if (boardMatchingAllInquiry == null) {
             throw new CustomException(ErrorCode.CAN_NOT_CREATE_ROOM);
         } else
             return ResponseEntity.status(HttpStatus.CREATED)
-                    .body(boardAllInquiry);
+                    .body(boardMatchingAllInquiry);
     }
 
-    //게시물 상세 조회
-    @GetMapping("/api/boards/{id}")
+    //매칭 게시물 상세 조회
+    @GetMapping("/api/boards/matching/{id}")
     private BoardResponseDto boardChoiceInquiry(@PathVariable("id") Long id) {
         BoardResponseDto boardChoiceInquiry = null;
         boardChoiceInquiry = boardService.boardChoiceInquiry(id);
@@ -77,12 +70,46 @@ public class BoardCotroller {
     }
 
 
-    //개시물 수정
-    @PutMapping("/api/board/{id}")
+    //매칭 개시물 수정
+    @PutMapping("/api/board/matching/{id}")
     private CustomException boardUpdate(@PathVariable("id") Long id,
-                                        @RequestBody BoardRequestDto.createAndCheck boardRequestDto,
+                                        @RequestBody BoardRequestDto.updateMatching boardRequestDto,
                                         @AuthenticationPrincipal UserDetailsImpl userDetails) {
         return boardService.boardUpdate(id, boardRequestDto, userDetails);
+    }
+
+    //공유 게시물 전체 조회 (카테고리별 전체 조회)
+    @GetMapping("/api/boards/info")
+    private ResponseEntity<BoardResponseFinalDto> boardInfoAllInquiry(
+                                                                  @RequestParam String cate,
+                                                                  @RequestParam Integer page,
+                                                                  @RequestParam Integer amount) {
+        BoardResponseFinalDto boardInfoAllInquiry = boardService.boardInfoAllInquiry("information", cate,page,amount);
+
+        if (boardInfoAllInquiry == null) {
+            throw new CustomException(ErrorCode.CAN_NOT_CREATE_ROOM);
+        } else
+            return ResponseEntity.status(HttpStatus.CREATED)
+                    .body(boardInfoAllInquiry);
+    }
+
+    //공유 게시물 상세 조회
+    @GetMapping("/api/boards/information/{id}")
+    private BoardResponseDto boardChoiceInfoInquiry(@PathVariable("id") Long id) {
+        BoardResponseDto boardChoiceInfoInquiry = null;
+        boardChoiceInfoInquiry = boardService.boardChoiceInfoInquiry(id);
+        if (boardChoiceInfoInquiry == null) {
+            throw new CustomException(ErrorCode.CAN_NOT_CREATE_ROOM);
+        } else
+            return boardChoiceInfoInquiry;
+    }
+
+    //공유 개시물 수정
+    @PutMapping("/api/board/information/{id}")
+    private CustomException boardInfoUpdate(@PathVariable("id") Long id,
+                                        @RequestBody BoardRequestDto.updateInfo boardRequestDto,
+                                        @AuthenticationPrincipal UserDetailsImpl userDetails) {
+        return boardService.boardInfoUpdate(id, boardRequestDto, userDetails);
     }
 
     //게시물 삭제.
@@ -157,13 +184,3 @@ public class BoardCotroller {
 
     }
 }
-
-
-
-/*
-    @PostMapping("/board/{id}/matchingentry")
-    private ResponseEntity<Long> matchingJoin(@PathVariable("id") Long id,
-                                              @AuthenticationPrincipal UserDetailsImpl userDetails){
-        return boardService.matchingJoin(id,userDetails);
-
-    }*/
