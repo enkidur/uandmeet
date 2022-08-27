@@ -60,15 +60,15 @@ public class BoardService {
         }
     }
 
-    //게시물 전체 조회
+    //매칭 게시물 전체 조회 (카테고리별 전체 조회)
     @Transactional
-    public BoardResponseFinalDto boardAllInquiry(String type, String cate, Integer page, Integer amount, String city, String gu) {
-        Sort sort = Sort.by("id").ascending();
+    public BoardResponseFinalDto boardMatchingAllInquiry(String type, String cate, Integer page, Integer amount, String city, String gu) {
+        Sort sort = Sort.by("createdAt").descending();
         PageRequest pageRequest = PageRequest.of(page, amount, sort);
         Page<Board> boardPage;
 
         //개시판 정보 추출
-        if (cate.equals("all")) {
+        if (cate.equals("all") || cate.equals("ALL")) {
             boardPage = boardRepository.findAllByBoardType(type, pageRequest);
 
         } else
@@ -86,13 +86,10 @@ public class BoardService {
                 boardResponseDtos.add(boardResponseDto);
             }
         }
-
-        BoardResponseFinalDto boardResponseFinalDto = new BoardResponseFinalDto(boardResponseDtos,boardPage.getTotalElements());
-
-        return boardResponseFinalDto;
+        return new BoardResponseFinalDto(boardResponseDtos,boardPage.getTotalElements());
     }
 
-    //게시물 상세 조회
+    //매칭 게시물 상세 조회
     @Transactional
     public BoardResponseDto boardChoiceInquiry(Long id) {
 
@@ -137,9 +134,9 @@ public class BoardService {
         }
     }
 
-    //게시물 수정
+    //매칭 게시물 수정
     @Transactional
-    public CustomException boardUpdate(Long id, BoardRequestDto.createAndCheck boardRequestUdateDto,
+    public CustomException boardUpdate(Long id, BoardRequestDto.updateMatching boardRequestMatchingUpdateDto,
                                        UserDetailsImpl userDetails) {
 
         //로그인 유저 정보.
@@ -151,7 +148,7 @@ public class BoardService {
 
         //본인이 아니면 예외처리
         if (board.getMember().getEmail().equals(memberTemp.getEmail())) {
-            Board boardUpdate = new Board(board, boardRequestUdateDto);
+            Board boardUpdate = new Board(board, boardRequestMatchingUpdateDto);
             try {
                 boardRepository.save(boardUpdate);
                 return new CustomException(ErrorCode.COMPLETED_OK);
@@ -348,6 +345,96 @@ public class BoardService {
             try {
                 boardRepository.deleteById(boardId);
                 return new CustomException(ErrorCode.COMPLETED_OK);
+            } catch (Exception e) {
+                System.out.println(e);
+                return new CustomException(ErrorCode.INTERNAL_SERVER_ERROR);
+            }
+        } else {
+            return new CustomException(ErrorCode.INVALID_AUTHORITY);
+        }
+    }
+
+    public CustomException categoryNew(String category) {
+        Category category1 = new Category(category);
+
+        try {
+            categoryRepository.save(category1);
+            return new CustomException(ErrorCode.COMPLETED_OK);
+        } catch (Exception e) {
+            System.out.println(e);
+            return new CustomException(ErrorCode.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    //공유 게시물 전체 조회 (카테고리별 전체 조회)
+    @Transactional
+    public BoardResponseFinalDto boardInfoAllInquiry(String type, String cate, Integer page, Integer amount) {
+        Sort sortInfo = Sort.by("createdAt").descending();
+        PageRequest pageRequest = PageRequest.of(page, amount, sortInfo);
+        Page<Board> boardPage;
+
+        //개시판 정보 추출
+        if (cate.equals("all") || cate.equals("ALL")) {
+            boardPage = boardRepository.findAllByBoardType(type, pageRequest);
+
+        } else
+            boardPage = boardRepository.findAllByBoardTypeAndCategory(type, cate, pageRequest);
+
+        // 찾으 정보를 Dto로 변환 한다.
+        List<BoardResponseDto> boardResponseDtos = new ArrayList<>();
+        if (boardPage != null) {
+            for (Board boardTemp : boardPage) {
+                //작성자 간이 닉네임 생성.
+                MemberSimpleDto memberSimpleDto = new MemberSimpleDto(boardTemp.getMember().getNickname(),
+                        boardTemp.getMember().getEmail(), boardTemp.getMember().getProfile());
+
+                BoardResponseDto boardResponseDto = new BoardResponseDto(boardTemp,memberSimpleDto);
+                boardResponseDtos.add(boardResponseDto);
+            }
+        }
+        return new BoardResponseFinalDto(boardResponseDtos,boardPage.getTotalElements());
+    }
+
+    //공유 게시물 상세 조회
+    @Transactional
+    public BoardResponseDto boardChoiceInfoInquiry(Long id) {
+
+        //개시판 정보 추출
+        Board boards = boardRepository.findById(id)
+                .orElseThrow(() -> new CustomException(ErrorCode.EMPTY_CONTENT));
+
+        // 찾으 정보를 Dto로 변환 한다.
+        BoardResponseDto boardResponseDto = null;
+
+        if (boards != null) {
+            //작성자 간이 닉네임 생성.
+            MemberSimpleDto memberSimpleDto = new MemberSimpleDto(boards.getMember().getNickname(),
+                    boards.getMember().getEmail(), boards.getMember().getProfile());
+
+            boardResponseDto = new BoardResponseDto(boards,memberSimpleDto);
+            return boardResponseDto;
+        } else return null;
+    }
+
+    //공유 게시물 수정
+    @Transactional
+    public CustomException boardInfoUpdate(Long id, BoardRequestDto.updateInfo boardRequestInfoUpdateDto,
+                                       UserDetailsImpl userDetails) {
+
+        //로그인 유저 정보.
+        Member memberTemp = memberRepostiory.findById(userDetails.getMember().getId())
+                .orElseThrow(() -> new CustomException(ErrorCode.EMPTY_CONTENT));
+
+        Board board = boardRepository.findById(id)
+                .orElseThrow(() -> new CustomException(ErrorCode.EMPTY_CONTENT));
+
+        //본인이 아니면 예외처리
+        if (board.getMember().getEmail().equals(memberTemp.getEmail())) {
+            Board boardUpdate = new Board(board, boardRequestInfoUpdateDto);
+            try {
+                boardRepository.save(boardUpdate);
+                return new CustomException(ErrorCode.COMPLETED_OK);
+
             } catch (Exception e) {
                 System.out.println(e);
                 return new CustomException(ErrorCode.INTERNAL_SERVER_ERROR);

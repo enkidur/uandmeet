@@ -21,4 +21,8 @@ public class Category {
 
     @OneToMany(fetch = FetchType.LAZY,mappedBy = "category",cascade = CascadeType.ALL)
     private List<Board> boardList = new ArrayList<>();
+
+    public Category(String category) {
+        this.category = category;
+    }
 }
