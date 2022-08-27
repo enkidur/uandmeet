@@ -4,6 +4,9 @@ import com.project.uandmeet.dto.SearchResponseDto;
 import com.project.uandmeet.dto.boardDtoGroup.BoardRequestDto;
 import com.project.uandmeet.dto.boardDtoGroup.BoardResponseDto;
 import com.project.uandmeet.dto.boardDtoGroup.LikeDto;
+import com.project.uandmeet.dto.commentsDtoGroup.CommentsInquiryDto;
+import com.project.uandmeet.dto.commentsDtoGroup.CommentsReponseDto;
+import com.project.uandmeet.dto.commentsDtoGroup.CommentsRequestDto;
 import com.project.uandmeet.exception.CustomException;
 import com.project.uandmeet.exception.ErrorCode;
 import com.project.uandmeet.security.UserDetailsImpl;
@@ -78,25 +81,52 @@ public class BoardCotroller {
         return boardService.boardDel(id, userDetails);
     }
 
-//    //좋아요 유무
-//    @PostMapping("/board/likes")
-//    private ResponseEntity<Long> likeClick(LikeDto likeDto,
-//                                           @AuthenticationPrincipal UserDetailsImpl userDetails) {
-//        return boardService.likeClick(likeDto, userDetails);
-//    }
+    //좋아요 유무
+    @PostMapping("/board/likes")
+    private ResponseEntity<Long> likeClick(LikeDto likeDto,
+                                           @AuthenticationPrincipal UserDetailsImpl userDetails) {
+        return boardService.likeClick(likeDto, userDetails);
 
-    // 좋아요 유무
-    @PostMapping("/board/{id}/likes")
-    private Boolean likeClick(@PathVariable Long id,
-                              @AuthenticationPrincipal UserDetailsImpl userDetails) {
-        return boardService.information(userDetails,id);
     }
 
-    // 매칭하기 버튼
+    //매칭참여
     @PostMapping("/board/{id}/matchingentry")
-    public Boolean matching(@PathVariable Long id,
-                            @AuthenticationPrincipal UserDetailsImpl userDetails){
-        return boardService.matchinig(userDetails,id);
+    private ResponseEntity<Long> matchingJoin(@PathVariable("id") Long id,
+                                              @AuthenticationPrincipal UserDetailsImpl userDetails) {
+        return boardService.matchingJoin(id, userDetails);
+
+    }
+
+    //매칭취소
+    @PostMapping("/board/{id}/matchingentrycancel")
+    private ResponseEntity<Long> matchingCancel(@PathVariable("id") Long id,
+                                                @AuthenticationPrincipal UserDetailsImpl userDetails) {
+        return boardService.matchingCancel(id, userDetails);
+
+    }
+
+    //댓글작성
+    @PostMapping("/api/board/{id}/comments")
+    private CommentsReponseDto commentsNew(@PathVariable("id") Long id,
+                                           CommentsRequestDto commentsRequestDto,
+                                           @AuthenticationPrincipal UserDetailsImpl userDetails) {
+        return boardService.commentsNew(id,commentsRequestDto,userDetails);
+    }
+
+    //댓글 전체 조회
+    @GetMapping("/api/board/{id}/comments")
+    private List<CommentsInquiryDto> commentInquiry(@PathVariable("id") Long id) {
+        return boardService.commentInquiry(id);
+    }
+
+    //댓글 삭제
+    @DeleteMapping("/api/board/{boardId}/comments/{commentId}")
+    private CustomException commentDel(@PathVariable("boardId") Long boardId,
+                                       @PathVariable("commentId") Long commentId,
+                                       @AuthenticationPrincipal UserDetailsImpl userDetails)
+    {
+        return boardService.commentDel(boardId,commentId, userDetails);
+
     }
 
     @GetMapping("/board/search")

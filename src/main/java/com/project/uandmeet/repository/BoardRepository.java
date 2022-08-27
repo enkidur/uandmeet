@@ -12,7 +12,5 @@ import java.util.List;
 public  interface BoardRepository extends JpaRepository<Board, Long>, QuerydslPredicateExecutor<Board> {
     List<Board> findAllByBoardTypeAndCategory(String boardType, Category category);
 
-
-
     Board findBoardById(Long boardId);
 }
