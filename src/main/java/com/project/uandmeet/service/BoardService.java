@@ -1,5 +1,6 @@
 package com.project.uandmeet.service;
 
+import com.project.uandmeet.dto.boardDtoGroup.BoardResponseFinalDto;
 import com.project.uandmeet.dto.commentsDtoGroup.CommentsInquiryDto;
 import com.project.uandmeet.dto.commentsDtoGroup.CommentsReponseDto;
 import com.project.uandmeet.dto.commentsDtoGroup.CommentsRequestDto;
@@ -13,6 +14,9 @@ import com.project.uandmeet.model.*;
 import com.project.uandmeet.repository.*;
 import com.project.uandmeet.security.UserDetailsImpl;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -58,27 +62,34 @@ public class BoardService {
 
     //게시물 전체 조회
     @Transactional
-    public List<BoardResponseDto> boardAllInquiry(String boardType, String categoryName) {
-
-        Category category = categoryRepository.findByCategory(categoryName).orElseThrow(()
-                -> new CustomException(ErrorCode.EMPTY_CONTENT));
+    public BoardResponseFinalDto boardAllInquiry(String type, String cate, Integer page, Integer amount, String city, String gu) {
+        Sort sort = Sort.by("id").ascending();
+        PageRequest pageRequest = PageRequest.of(page, amount, sort);
+        Page<Board> boardPage;
 
         //개시판 정보 추출
-        List<Board> boards = boardRepository.findAllByBoardTypeAndCategory(boardType, category);
+        if (cate.equals("all")) {
+            boardPage = boardRepository.findAllByBoardType(type, pageRequest);
+
+        } else
+            boardPage = boardRepository.findAllByBoardTypeAndCategory(type, cate, pageRequest);
 
         // 찾으 정보를 Dto로 변환 한다.
         List<BoardResponseDto> boardResponseDtos = new ArrayList<>();
-        if (boards != null) {
-            for (Board boardTemp : boards) {
+        if (boardPage != null) {
+            for (Board boardTemp : boardPage) {
                 //작성자 간이 닉네임 생성.
                 MemberSimpleDto memberSimpleDto = new MemberSimpleDto(boardTemp.getMember().getNickname(),
-                        boardTemp.getMember().getUsername(), boardTemp.getMember().getProfile());
+                        boardTemp.getMember().getEmail(), boardTemp.getMember().getProfile());
 
                 BoardResponseDto boardResponseDto = new BoardResponseDto(memberSimpleDto, boardTemp);
                 boardResponseDtos.add(boardResponseDto);
             }
         }
-        return boardResponseDtos;
+
+        BoardResponseFinalDto boardResponseFinalDto = new BoardResponseFinalDto(boardResponseDtos,boardPage.getTotalElements());
+
+        return boardResponseFinalDto;
     }
 
     //게시물 상세 조회

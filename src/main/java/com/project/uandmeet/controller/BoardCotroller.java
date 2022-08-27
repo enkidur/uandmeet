@@ -3,6 +3,7 @@ package com.project.uandmeet.controller;
 import com.project.uandmeet.dto.SearchResponseDto;
 import com.project.uandmeet.dto.boardDtoGroup.BoardRequestDto;
 import com.project.uandmeet.dto.boardDtoGroup.BoardResponseDto;
+import com.project.uandmeet.dto.boardDtoGroup.BoardResponseFinalDto;
 import com.project.uandmeet.dto.boardDtoGroup.LikeDto;
 import com.project.uandmeet.dto.commentsDtoGroup.CommentsInquiryDto;
 import com.project.uandmeet.dto.commentsDtoGroup.CommentsReponseDto;
@@ -16,13 +17,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.security.core.userdetails.User;
-import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.multipart.MultipartFile;
 
-import javax.validation.Valid;
-import java.sql.SQLOutput;
 import java.util.List;
 
 @RestController
@@ -38,7 +34,7 @@ public class BoardCotroller {
         return boardService.boardNew(boardRequestDto, userDetails);
     }
 
-
+/*
     //게시물 전체 조회
     @GetMapping("/api/boards/{board_Type}/{cate_gory}")
     private List<BoardResponseDto> boardAllInquiry(@PathVariable String board_Type,
@@ -51,6 +47,22 @@ public class BoardCotroller {
             throw new CustomException(ErrorCode.CAN_NOT_CREATE_ROOM);
         } else
             return boardAllInquiry;
+    }*/
+
+    @GetMapping("/api/boards")
+    private ResponseEntity<BoardResponseFinalDto> boardAllInquiry(@RequestParam String type,
+                                                                  @RequestParam String cate,
+                                                                  @RequestParam Integer page,
+                                                                  @RequestParam Integer amount,
+                                                                  @RequestParam String city,
+                                                                  @RequestParam String gu) {
+        BoardResponseFinalDto boardAllInquiry = boardService.boardAllInquiry(type, cate,page,amount,city,gu);
+
+        if (boardAllInquiry == null) {
+            throw new CustomException(ErrorCode.CAN_NOT_CREATE_ROOM);
+        } else
+            return ResponseEntity.status(HttpStatus.CREATED)
+                    .body(boardAllInquiry);
     }
 
     //게시물 상세 조회

@@ -19,6 +19,7 @@ public class Liked {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    private Boolean isLike;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "member_id")
@@ -28,14 +29,9 @@ public class Liked {
     @JoinColumn(name = "board_id")
     private Board board;
 
-//    public Liked(LikeDto likeDto, Member memberTemp, Board board) {
-//        this.member = memberTemp;
-//        this.board = board;
-//        this.isLike = likeDto.getIsLike();
-//    }
-
-    public Liked(Board board, Member member) {
-        this.member = member;
+    public Liked(LikeDto likeDto, Member memberTemp, Board board) {
+        this.member = memberTemp;
         this.board = board;
+        this.isLike = likeDto.getIsLike();
     }
 }

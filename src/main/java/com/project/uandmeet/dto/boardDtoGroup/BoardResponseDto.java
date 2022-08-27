@@ -44,5 +44,4 @@ public class BoardResponseDto {
         this.maxEntry = board.getMaxEntry();
         this.currentEntry = board.getCurrentEntry();
     }
-
 }
