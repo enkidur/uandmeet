@@ -13,6 +13,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.userdetails.User;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -76,12 +77,27 @@ public class BoardCotroller {
         return boardService.boardDel(id, userDetails);
     }
 
-    //좋아요 유무
-    @PostMapping("/board/likes")
-    private ResponseEntity<Long> likeClick(LikeDto likeDto,
-                                           @AuthenticationPrincipal UserDetailsImpl userDetails) {
-        return boardService.likeClick(likeDto, userDetails);
+//    //좋아요 유무
+//    @PostMapping("/board/likes")
+//    private ResponseEntity<Long> likeClick(LikeDto likeDto,
+//                                           @AuthenticationPrincipal UserDetailsImpl userDetails) {
+//        return boardService.likeClick(likeDto, userDetails);
+//    }
+
+    // 좋아요 유무
+    @PostMapping("/board/{id}/likes")
+    private Boolean likeClick(@PathVariable Long id,
+                              @AuthenticationPrincipal UserDetailsImpl userDetails) {
+        return boardService.information(userDetails,id);
     }
+
+    // 매칭하기 버튼
+    @PostMapping("/board/{id}/matchingentry")
+    public Boolean matching(@PathVariable Long id,
+                            @AuthenticationPrincipal UserDetailsImpl userDetails){
+        return boardService.matchinig(userDetails,id);
+    }
+
     @GetMapping("/board/search")
     public ResponseEntity<List<SearchResponseDto>> search(@RequestParam(value = "page") int page,
                                                           @RequestParam(value = "amount") int size,

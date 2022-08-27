@@ -1,7 +1,7 @@
 package com.project.uandmeet.security;
 
-//import com.project.uandmeet.oauth.PrincipalOauth2UserService;
-import com.project.uandmeet.oauth.OAuth2SuccessHandler;
+import com.project.uandmeet.oauth.PrincipalOauth2UserService;
+
 import com.project.uandmeet.oauth.PrincipalOauth2UserService;
 import com.project.uandmeet.security.jwt.JwtAuthenticationFilter;
 //import com.project.uandmeet.security.jwt.JwtExceptionFilter;
@@ -42,8 +42,6 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
     private AuthenticationManager authenticationManager;
 
     private final CorsFilter corsFilter;
-
-    private final OAuth2SuccessHandler successHandler;
 
     private final JwtTokenProvider jwtTokenProvider;
     private final PrincipalOauth2UserService principalOauth2UserService;
