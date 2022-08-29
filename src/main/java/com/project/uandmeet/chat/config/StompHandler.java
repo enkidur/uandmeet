@@ -1,15 +1,7 @@
 package com.project.uandmeet.chat.config;
 
-import com.project.uandmeet.chat.model.ChatRoom;
-import com.project.uandmeet.chat.model.ChatRoomMember;
-import com.project.uandmeet.chat.repository.ChatRoomMemberRepository;
-import com.project.uandmeet.chat.repository.ChatRoomRepository;
 import com.project.uandmeet.chat.service.ChatMessageService;
 import com.project.uandmeet.chat.service.ChatRoomService;
-import com.project.uandmeet.exception.CustomException;
-import com.project.uandmeet.exception.ErrorCode;
-import com.project.uandmeet.model.Member;
-import com.project.uandmeet.repository.MemberRepository;
 import com.project.uandmeet.security.jwt.JwtTokenProvider;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -20,7 +12,6 @@ import org.springframework.messaging.simp.stomp.StompHeaderAccessor;
 import org.springframework.messaging.support.ChannelInterceptor;
 import org.springframework.stereotype.Component;
 
-import java.util.List;
 import java.util.Optional;
 
 @Slf4j
@@ -28,13 +19,10 @@ import java.util.Optional;
 @Component
 public class StompHandler implements ChannelInterceptor {
 
-    private final JwtTokenProvider jwtDecoder;
+    private final JwtTokenProvider jwtTokenProvider;
     private final ChatRoomService chatRoomService;
-    private final ChatMessageService chatMessageService;
-    private final MemberRepository memberRepository;
-    private final ChatRoomMemberRepository chatRoomMemberRepository;
+    private final ChatMessageService chatService;
 
-    private final ChatRoomRepository chatRoomRepository;
 
     //Controller에 가기전에 이곳을 먼저 들리게 된다. 그것이 인터셉터의 역할
     @Override
@@ -49,18 +37,15 @@ public class StompHandler implements ChannelInterceptor {
         if (StompCommand.CONNECT == accessor.getCommand()) { // websocket 연결요청
             // 토큰의 값만 확인 (로그인 여부를 확인하기 위함)
             // 헤더의 토큰값을 빼오기
-            String jwtToken = accessor.getFirstNativeHeader("token").substring(7);
-            if (jwtDecoder.decodeUsername(jwtToken)==null){
-                throw new CustomException(ErrorCode.MEMBER_NOT_FOUND);
-            }
+            String jwtToken = accessor.getFirstNativeHeader("token");
+            jwtTokenProvider.decodeUsername(jwtToken);
         }
 
         //만약 COMMAND가 SUBSCRIBE 즉 메세지를 주고 받기전 구독하는 것이라면
         else if (StompCommand.SUBSCRIBE == accessor.getCommand()) { // 채팅룸 구독요청
             // header정보에서 구독 destination정보를 얻고, roomId를 추출한다.
             // roomId를 URL로 전송해주고 있어 추출 필요
-            String roomId = chatMessageService.getRoomId(Optional.ofNullable((String) message.getHeaders().get("simpDestination")).orElse("InvalidRoomId"));
-            System.out.println("룸아이디는"+roomId);
+            String roomId = chatService.getRoomId(Optional.ofNullable((String) message.getHeaders().get("simpDestination")).orElse("InvalidRoomId"));
 //
 //            // 채팅방에 들어온 클라이언트 sessionId를 roomId와 맵핑해 놓는다.(나중에 특정 세션이 어떤 채팅방에 들어가 있는지 알기 위함)
 //            // sessionId는 현재들어와있는 유저를 확인하기 위함이다.
@@ -70,38 +55,11 @@ public class StompHandler implements ChannelInterceptor {
 
             // 구독했다는 것은 처음 입장했다는 것이므로 입장 메시지를 발송한다.
             // 클라이언트 입장 메시지를 채팅방에 발송한다.(redis publish)
-            String jwtToken = accessor.getFirstNativeHeader("token").substring(7);
-            String username = jwtDecoder.decodeUsername(jwtToken);
-            Member member = memberRepository.findMemberByUsername(username);
-            ChatRoom chatRoom = chatRoomRepository.findChatRoomById(Long.valueOf(roomId));
-            System.out.println(chatRoom.getId());
+            String jwtToken = accessor.getFirstNativeHeader("token");
+            String name = jwtTokenProvider.decodeUsername(jwtToken);
+//            chatService.sendChatMessage(ChatMessage.builder().type(ChatMessage.MessageType.ENTER).roomId(roomId).sender(name).build());
 
-//            Optional<ChatRoomUser> chatRoomUser1 = chatRoomUserRepository.findAllByUser_Id(user.getId());
-//            if (chatRoomUser1.isPresent()){
-//                chatRoomUserRepository.delete(chatRoomUser1.get());
-//            }
-
-            List<ChatRoomMember> chatRoomMembers1 = chatRoomMemberRepository.findAllByMember_Id(member.getId());
-            for (int i = 0; i < chatRoomMembers1.size(); i++){
-                ChatRoomMember chatRoomMember = chatRoomMembers1.get(i);
-                chatRoomMemberRepository.delete(chatRoomMember);
-            }
-
-            List<ChatRoomMember> chatRoomMembers = chatRoomMemberRepository.findAllByChatRoom(chatRoom);
-            if (chatRoomMembers.size() > 7){
-                throw new CustomException(ErrorCode.MEMBER_HAS_FULL);
-            }
-
-            ChatRoomMember chatRoomMember = new ChatRoomMember(member,chatRoom);
-            chatRoomMemberRepository.save(chatRoomMember);
-            List<ChatRoomMember> chatRoomMembers2 = chatRoomMemberRepository.findAllByMember_Id(member.getId());
-            for (int i = 0; i < chatRoomMembers2.size(); i++){
-                if (chatRoomMembers2.size() != 1){
-                    ChatRoomMember chatRoomMember1 = chatRoomMembers2.get(0);
-                    chatRoomMemberRepository.delete(chatRoomMember1);
-                }
-            }
-            log.info("SUBSCRIBED {}, {}", username, roomId);
+            log.info("SUBSCRIBED {}, {}", name, roomId);
         }
 
         //룸을 이동하게 된다면 -> DISCONNET 시킨다 ->
@@ -112,27 +70,17 @@ public class StompHandler implements ChannelInterceptor {
             String sessionId = (String) message.getHeaders().get("simpSessionId");
             //나갈떄 redis 맵에서 roomId와 sessionId의 매핑을 끊어줘야 하기때문에 roomId찾고
             String roomId = chatRoomService.getUserEnterRoomId(sessionId);
-            System.out.println(roomId);
 
-            String token = Optional.ofNullable(accessor.getFirstNativeHeader("token").substring(7)).orElse("UnknownUser");
-            String username = jwtDecoder.decodeUsername(token);
-            Member member = memberRepository.findMemberByUsername(username);
-            List<ChatRoomMember> chatRoomMembers1 = chatRoomMemberRepository.findAllByMember_Id(member.getId());
-            for (int i = 0; i < chatRoomMembers1.size(); i++){
-                ChatRoomMember chatRoomMember = chatRoomMembers1.get(i);
-                chatRoomMemberRepository.delete(chatRoomMember);
-            }
-//            chatRoomMemberRepository.deleteByMember_Id(member.getId());
+            // 클라이언트 퇴장 메시지를 채팅방에 발송한다.(redis publish)
+            String token = Optional.ofNullable(accessor.getFirstNativeHeader("token")).orElse("UnknownUser");
 
-            ChatRoom chatRoom = chatRoomRepository.findChatRoomById(Long.valueOf(roomId));
-            Optional<ChatRoomMember> chatRoomMembers = chatRoomMemberRepository.findAllByChatRoom_Id(chatRoom.getId());
-            if (!(chatRoomMembers.isPresent())){
-                chatRoomRepository.delete(chatRoom);
+            if(accessor.getFirstNativeHeader("token") != null) {
+                String name = jwtTokenProvider.decodeUsername(token);
+//                chatService.sendChatMessage(ChatMessage.builder().type(ChatMessage.MessageType.QUIT).roomId(roomId).sender(name).build());
             }
 
             // 퇴장한 클라이언트의 roomId 맵핑 정보를 삭제한다.
             chatRoomService.removeUserEnterInfo(sessionId);
-
             log.info("DISCONNECT {}, {}", sessionId, roomId);
         }
         return message;

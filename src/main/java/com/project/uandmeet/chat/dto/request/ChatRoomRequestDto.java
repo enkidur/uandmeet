@@ -1,4 +1,4 @@
-package com.project.uandmeet.chat.dto;
+package com.project.uandmeet.chat.dto.request;
 
 import lombok.Getter;
 import lombok.Setter;
