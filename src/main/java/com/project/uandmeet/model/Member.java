@@ -42,6 +42,10 @@ public class Member {
     @Column
     private String profile; // 이미지
 
+    @Column(nullable = false)
+    private Boolean isOwner = false;
+
+
     @OneToMany(mappedBy = "member", fetch = FetchType.LAZY)
     private List<Concern> concern;
 

@@ -16,4 +16,6 @@ public interface LikedRepository extends JpaRepository<Liked, Long> {
     Long countByBoard(Long Board_id);  //BoardId의 갯수를 센다.
 
     void deleteByMemberAndBoard(Long Member_id, Long Board_id);
+
+    void deleteByBoardId(Long boardId);
 }

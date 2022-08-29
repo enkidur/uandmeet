@@ -1,59 +1,48 @@
 package com.project.uandmeet.chat.model;
 
-import com.project.uandmeet.chat.dto.ChatMessageRequestDto;
-import com.project.uandmeet.model.Member;
-import lombok.*;
+import com.project.uandmeet.chat.dto.request.MessageRequestDto;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 import javax.persistence.*;
 
-@Entity
-@Getter
-@Setter
 @NoArgsConstructor
-@AllArgsConstructor
+@Getter @Setter
+@Entity
 public class ChatMessage {
-
-    public enum MessageType {
-        STAMP, TALK, RESULT, ISSUE
-    }
-    //ENTER를 STAMP로 QUIT-> RESULT
-
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column
-    private Long id;
+    private Long messageId;
+
+    @ManyToOne
+    private ChatRoom chatroom; // 방번호
 
     @Column
-    private MessageType type;
+    private MessageType messageType;
 
     @Column
-    private String roomId;
-
-    // Redis MessageListener 로 뒙소켓을 통해 바로 채팅방에 메시지를 전달해주기 위한 값을 따로 설정해주었다
-    @Column
-    private String nickname;
+    private String message; // 메시지
 
     @Column
-    private String sender;
-
-    @Column
-    private String message;
-
-    @Column
-    private String profileUrl;
+    private Long senderId;
 
     @Column
     private String createdAt;
 
 
+    // 메시지 타입 : 입장, 채팅
+    public enum MessageType {
+        ENTER, TALK, QUIT
+    }
+
     @Builder
-    public ChatMessage(ChatMessageRequestDto chatMessageRequestDto, Member member, String createdAt) {
-        this.type = chatMessageRequestDto.getType();
-        this.roomId = chatMessageRequestDto.getRoomId();
-        this.nickname = chatMessageRequestDto.getNickname();
-        this.sender = chatMessageRequestDto.getSender();
-        this.message = chatMessageRequestDto.getMessage();
-        this.profileUrl = member.getProfile();
+    public ChatMessage(ChatRoom chatRoom, Long senderId, MessageRequestDto message, String createdAt){
+        this.senderId = senderId;
+        this.chatroom = chatRoom;
+        this.message = message.getMessage();
+        this.messageType = message.getType();
         this.createdAt = createdAt;
     }
 }

@@ -3,8 +3,10 @@ package com.project.uandmeet.chat.repository;
 import com.project.uandmeet.chat.model.ChatRoom;
 import org.springframework.data.jpa.repository.JpaRepository;
 
-public interface ChatRoomRepository extends JpaRepository<ChatRoom, Long> {
+import java.util.Optional;
 
-    ChatRoom findChatRoomById(Long roomId);
+public interface ChatRoomRepository extends JpaRepository<ChatRoom, Long> {
+    Optional<ChatRoom> findByChatRoomId(String chatRoomId);
+    Optional<ChatRoom> deleteByChatRoomId(String chatRoomId);
 
 }
