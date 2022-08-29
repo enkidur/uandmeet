@@ -1,6 +1,7 @@
 package com.project.uandmeet.model;
 
 
+import com.project.uandmeet.api.nameChange;
 import lombok.AllArgsConstructor;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -29,6 +30,9 @@ public class Siarea {
     //한글명
     private String ctpKorNm;
 
+    //한글명 약어
+    private String ctpKorNmAbbreviation;
+
     //시도번호
     private String Info;
 
@@ -41,5 +45,6 @@ public class Siarea {
         this.ctpEngNm = (String) jsonPropertiesProperties.get("ctp_eng_nm");
         this.ctpRvnCd = (String) jsonPropertiesProperties.get("ctprvn_cd");
         this.ctpKorNm = (String) jsonPropertiesProperties.get("ctp_kor_nm");
+        this.ctpKorNmAbbreviation = nameChange.nameChange((String) jsonPropertiesProperties.get("ctp_kor_nm"));
     }
 }

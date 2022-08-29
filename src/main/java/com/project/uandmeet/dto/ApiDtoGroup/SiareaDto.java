@@ -1,5 +1,6 @@
 package com.project.uandmeet.dto.ApiDtoGroup;
 
+import com.project.uandmeet.api.nameChange;
 import lombok.Getter;
 import lombok.Setter;
 import org.json.simple.JSONObject;
@@ -20,6 +21,9 @@ public class SiareaDto {
     //시도번호
     private String Info;
 
+    //한글명 약어
+    private String ctpKorNmAbbreviation;
+
     public SiareaDto(JSONObject jsonProperties,
                   JSONObject jsonPropertiesProperties)
     {
@@ -27,5 +31,6 @@ public class SiareaDto {
         this.ctpEngNm = (String) jsonPropertiesProperties.get("ctp_eng_nm");
         this.ctpRvnCd = (String) jsonPropertiesProperties.get("ctprvn_cd");
         this.ctpKorNm = (String) jsonPropertiesProperties.get("ctp_kor_nm");
+        this.ctpKorNmAbbreviation = nameChange.nameChange((String) jsonPropertiesProperties.get("ctp_kor_nm"));
     }
 }

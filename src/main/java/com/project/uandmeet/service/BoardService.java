@@ -37,6 +37,8 @@ public class BoardService {
 
     private final CommentRepository commentRepository;
 
+    private final SiareaRepostiory siareaRepostiory;
+    private final GuareaRepostiory guareaRepostiory;
 
 
     //게시판 생성
@@ -67,13 +69,52 @@ public class BoardService {
         PageRequest pageRequest = PageRequest.of(page, amount, sort);
         Page<Board> boardPage;
 
+        //페이지 번호 변경
+        if(page > 0)
+            page = page - 1;
+        else if(page <= 0)
+            page = 0;
+
+        //들어온 문자열 제차 확인
+        try {
+            if(!type.equals("matching"))
+                throw new ResponseStatusException(HttpStatus.NOT_FOUND, "요청한 내용이 없습니다.");
+
+            Category category= categoryRepository.findByCategory(cate)
+                    .orElseThrow(() -> new CustomException(ErrorCode.EMPTY_CONTENT));
+
+            Siarea siarea = siareaRepostiory.findByCtpKorNmAbbreviation(city)
+                    .orElseThrow(() -> new CustomException(ErrorCode.EMPTY_CONTENT));
+            Guarea guarea = guareaRepostiory.findBySigKorNm(gu)
+                    .orElseThrow(() -> new CustomException(ErrorCode.EMPTY_CONTENT));
+
+        }catch (Exception e)
+        {
+            System.out.println(e);
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "요청한 내용이 없습니다.");
+        }
+
         //개시판 정보 추출
-        if (cate.equals("all") || cate.equals("ALL")) {
-            boardPage = boardRepository.findAllByBoardType(type, pageRequest);
-
+        if(cate.equals("all")||cate.equals("ALL")) {
+            if(city.equals("all") || city.equals("ALL"))
+                boardPage = boardRepository.findAllByBoardType(type, pageRequest);
+            else {
+                if(gu.equals("all") || gu.equals("All"))
+                    boardPage = boardRepository.findAllByBoardTypeAndCity(type, pageRequest, city);
+                else
+                    boardPage = boardRepository.findAllByBoardTypeAndCityAndGu(type, pageRequest, city, gu);
+            }
         } else
-            boardPage = boardRepository.findAllByBoardTypeAndCategory(type, cate, pageRequest);
-
+        {
+            if(city.equals("all") || city.equals("ALL"))
+                boardPage = boardRepository.findAllByBoardTypeAndCategory(type, cate, pageRequest);
+            else {
+                if (gu.equals("all") || gu.equals("All"))
+                    boardPage = boardRepository.findAllByBoardTypeAndCategoryAndCity(type, cate, pageRequest, city);
+                else
+                    boardPage = boardRepository.findAllByBoardTypeAndCategoryAndCityAndGu(type, cate, pageRequest, city, gu);
+            }
+        }
         // 찾으 정보를 Dto로 변환 한다.
         List<BoardResponseDto> boardResponseDtos = new ArrayList<>();
         if (boardPage != null) {
