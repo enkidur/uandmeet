@@ -1,5 +1,6 @@
 package com.project.uandmeet.service;
 
+import com.project.uandmeet.dto.ImageDto;
 import com.project.uandmeet.dto.boardDtoGroup.BoardResponseFinalDto;
 import com.project.uandmeet.dto.commentsDtoGroup.CommentsInquiryDto;
 import com.project.uandmeet.dto.commentsDtoGroup.CommentsReponseDto;
@@ -13,6 +14,7 @@ import com.project.uandmeet.dto.boardDtoGroup.LikeDto;
 import com.project.uandmeet.model.*;
 import com.project.uandmeet.repository.*;
 import com.project.uandmeet.security.UserDetailsImpl;
+import com.project.uandmeet.service.S3.S3Uploader;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -22,6 +24,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
+
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -34,14 +38,15 @@ public class BoardService {
     private final CategoryRepository categoryRepository;
     private final LikedRepository likedRepository;
     private final EntryRepository entryRepository;
-
     private final CommentRepository commentRepository;
+    private final S3Uploader s3Uploader;
+    private final String POST_IMAGE_DIR = "static";
 
 
 
     //게시판 생성
     @Transactional
-    public CustomException boardNew(BoardRequestDto.createAndCheck boardRequestDto, UserDetailsImpl userDetails) {
+    public CustomException boardNew(BoardRequestDto.createAndCheck boardRequestDto, UserDetailsImpl userDetails) throws IOException {
         //로그인 유저 정보.
         Member memberTemp = memberRepostiory.findByUsername(userDetails.getUsername())
                 .orElseThrow(() -> new CustomException(ErrorCode.EMPTY_CONTENT));
@@ -49,10 +54,48 @@ public class BoardService {
         Category category = categoryRepository.findByCategory(boardRequestDto.getCategory())
                 .orElseThrow(() -> new CustomException(ErrorCode.EMPTY_CONTENT));
 
-        Board board = new Board(memberTemp, category, boardRequestDto);
+
+        if (boardRequestDto.getData() != null) {
+            String uploadImage = String.valueOf(s3Uploader.upload(boardRequestDto.getData(), POST_IMAGE_DIR));
+
+//            Board board = new Board(memberTemp, category, boardRequestDto);
+            Board board = Board.builder()
+                    .member(memberTemp)
+                    .content(boardRequestDto.getContent())
+                    .boardimage(uploadImage)
+                    .category(category)
+                    .boardType(boardRequestDto.getBoardType())
+                    .title(boardRequestDto.getTitle())
+                    .content(boardRequestDto.getContent())
+                    .boardimage(boardRequestDto.getBoardimage())
+                    .endDateAt(boardRequestDto.getEndDateAt())
+                    .city(boardRequestDto.getCity())
+                    .gu(boardRequestDto.getGu())
+                    .lat(boardRequestDto.getLat())
+                    .lng(boardRequestDto.getLng())
+                    .build();
+
+            boardRepository.save(board);
+        } else {
+            Board board = Board.builder()
+                    .member(memberTemp)
+                    .content(boardRequestDto.getContent())
+                    .category(category)
+                    .boardType(boardRequestDto.getBoardType())
+                    .title(boardRequestDto.getTitle())
+                    .content(boardRequestDto.getContent())
+                    .boardimage(boardRequestDto.getBoardimage())
+                    .endDateAt(boardRequestDto.getEndDateAt())
+                    .city(boardRequestDto.getCity())
+                    .gu(boardRequestDto.getGu())
+                    .lat(boardRequestDto.getLat())
+                    .lng(boardRequestDto.getLng())
+                    .build();
+
+            boardRepository.save(board);
+        }
 
         try {
-            boardRepository.save(board);
             return new CustomException(ErrorCode.COMPLETED_OK);
         } catch (Exception e) {
             System.out.println(e);

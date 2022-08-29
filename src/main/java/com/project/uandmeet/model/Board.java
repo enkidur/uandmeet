@@ -79,6 +79,7 @@ public class Board extends BaseTime{
         this.lng = boardRequestDto.getLng();
     }
 
+
     //매칭 업데이트
     public Board(Board board, BoardRequestDto.updateMatching boardRequestUpdateDto)
     {
