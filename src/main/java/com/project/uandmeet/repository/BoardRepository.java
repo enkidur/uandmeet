@@ -2,6 +2,8 @@ package com.project.uandmeet.repository;
 
 import com.project.uandmeet.model.Board;
 import com.project.uandmeet.model.Category;
+import com.project.uandmeet.model.Guarea;
+import com.project.uandmeet.model.Siarea;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
@@ -17,11 +19,11 @@ public  interface BoardRepository extends JpaRepository<Board, Long>, QuerydslPr
 
     Board findBoardById(Long boardId);
 
-    Page<Board> findAllByBoardTypeAndCategory(String boardType, String Category, Pageable pageable);
-    Page<Board> findAllByBoardTypeAndCategoryAndCity(String boardType, String Category, Pageable pageable,String City);
-    Page<Board> findAllByBoardTypeAndCategoryAndCityAndGu(String boardType, String Category, Pageable pageable,String City, String Gu);
+    Page<Board> findAllByBoardTypeAndCategory(String boardType, Category Category, Pageable pageable);
+    Page<Board> findAllByBoardTypeAndCategoryAndCity(String boardType, Category category, Siarea city, Pageable pageable);
+    Page<Board> findAllByBoardTypeAndCategoryAndCityAndGu(String boardType, Category Category, Pageable pageable,Siarea City, Guarea Gu);
 
     Page<Board> findAllByBoardType(String boardType, Pageable pageable);
-    Page<Board> findAllByBoardTypeAndCity(String boardType, Pageable pageable,String City);
-    Page<Board> findAllByBoardTypeAndCityAndGu(String boardType, Pageable pageable,String City, String Gu);
+    Page<Board> findAllByBoardTypeAndCity(String boardType, Pageable pageable,Siarea City);
+    Page<Board> findAllByBoardTypeAndCityAndGu(String boardType, Pageable pageable,Siarea City, Guarea Gu);
 }

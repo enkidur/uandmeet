@@ -24,6 +24,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 @Service
 @RequiredArgsConstructor //생성자 미리 생성.
@@ -48,10 +49,20 @@ public class BoardService {
         Member memberTemp = memberRepostiory.findByUsername(userDetails.getUsername())
                 .orElseThrow(() -> new CustomException(ErrorCode.EMPTY_CONTENT));
 
-        Category category = categoryRepository.findByCategory(boardRequestDto.getCategory())
+  //      List<Category> category1 = categoryRepository.findAll();
+
+
+        Category category = categoryRepository.findAllByCategory(boardRequestDto.getCategory())
                 .orElseThrow(() -> new CustomException(ErrorCode.EMPTY_CONTENT));
 
-        Board board = new Board(memberTemp, category, boardRequestDto);
+
+        Siarea siarea = siareaRepostiory.findByCtpKorNmAbbreviation(boardRequestDto.getCity())
+                .orElseThrow(() -> new CustomException(ErrorCode.EMPTY_CONTENT));
+
+        Guarea guarea = guareaRepostiory.findBySigKorNmAndSiarea(boardRequestDto.getGu(),siarea.getId())
+                .orElseThrow(() -> new CustomException(ErrorCode.EMPTY_CONTENT));
+
+        Board board = new Board(memberTemp, category, boardRequestDto,siarea,guarea);
 
         try {
             boardRepository.save(board);
@@ -76,23 +87,14 @@ public class BoardService {
             page = 0;
 
         //들어온 문자열 제차 확인
-        try {
-            if(!type.equals("matching"))
-                throw new ResponseStatusException(HttpStatus.NOT_FOUND, "요청한 내용이 없습니다.");
+        Category category= categoryRepository.findAllByCategory(cate)
+                .orElseThrow(() -> new CustomException(ErrorCode.EMPTY_CONTENT));
 
-            Category category= categoryRepository.findByCategory(cate)
-                    .orElseThrow(() -> new CustomException(ErrorCode.EMPTY_CONTENT));
+        Siarea siarea = siareaRepostiory.findByCtpKorNmAbbreviation(city)
+                .orElseThrow(() -> new CustomException(ErrorCode.EMPTY_CONTENT));
 
-            Siarea siarea = siareaRepostiory.findByCtpKorNmAbbreviation(city)
-                    .orElseThrow(() -> new CustomException(ErrorCode.EMPTY_CONTENT));
-            Guarea guarea = guareaRepostiory.findBySigKorNm(gu)
-                    .orElseThrow(() -> new CustomException(ErrorCode.EMPTY_CONTENT));
-
-        }catch (Exception e)
-        {
-            System.out.println(e);
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "요청한 내용이 없습니다.");
-        }
+        Guarea guarea = guareaRepostiory.findBySigKorNmAndSiarea(gu, siarea.getId())
+                .orElseThrow(() -> new CustomException(ErrorCode.EMPTY_CONTENT));
 
         //개시판 정보 추출
         if(cate.equals("all")||cate.equals("ALL")) {
@@ -100,19 +102,19 @@ public class BoardService {
                 boardPage = boardRepository.findAllByBoardType(type, pageRequest);
             else {
                 if(gu.equals("all") || gu.equals("All"))
-                    boardPage = boardRepository.findAllByBoardTypeAndCity(type, pageRequest, city);
+                    boardPage = boardRepository.findAllByBoardTypeAndCity(type, pageRequest, siarea);
                 else
-                    boardPage = boardRepository.findAllByBoardTypeAndCityAndGu(type, pageRequest, city, gu);
+                    boardPage = boardRepository.findAllByBoardTypeAndCityAndGu(type, pageRequest, siarea, guarea);
             }
         } else
         {
             if(city.equals("all") || city.equals("ALL"))
-                boardPage = boardRepository.findAllByBoardTypeAndCategory(type, cate, pageRequest);
+                boardPage = boardRepository.findAllByBoardTypeAndCategory(type, category, pageRequest);
             else {
                 if (gu.equals("all") || gu.equals("All"))
-                    boardPage = boardRepository.findAllByBoardTypeAndCategoryAndCity(type, cate, pageRequest, city);
+                    boardPage = boardRepository.findAllByBoardTypeAndCategoryAndCity(type, category, siarea, pageRequest);
                 else
-                    boardPage = boardRepository.findAllByBoardTypeAndCategoryAndCityAndGu(type, cate, pageRequest, city, gu);
+                    boardPage = boardRepository.findAllByBoardTypeAndCategoryAndCityAndGu(type, category, pageRequest, siarea, guarea);
             }
         }
         // 찾으 정보를 Dto로 변환 한다.
@@ -396,10 +398,15 @@ public class BoardService {
     }
 
     public CustomException categoryNew(String category) {
-        Category category1 = new Category(category);
 
+        String[] TEMP = new String[]{"all", "gym", "running", "ridding", "badminton", "tennis", "golf", "hiking", "ballet", "climing", "pilates", "swiming", "boxing", "bowling",
+                "crossfit", "gymnastics", "skateboard", "skate", "pocketball", "ski", "futsal", "pingpong", "basketball", "baseball", "soccer", "volleyball", "etc"};
         try {
-            categoryRepository.save(category1);
+            for (String s : TEMP) {
+                Category category1 = new Category(s);
+                categoryRepository.save(category1);
+            }
+
             return new CustomException(ErrorCode.COMPLETED_OK);
         } catch (Exception e) {
             System.out.println(e);
@@ -414,12 +421,22 @@ public class BoardService {
         PageRequest pageRequest = PageRequest.of(page, amount, sortInfo);
         Page<Board> boardPage;
 
+        //페이지 번호 변경
+        if(page > 0)
+            page = page - 1;
+        else if(page <= 0)
+            page = 0;
+
+        //들어온 문자열 제차 확인
+        Category category= categoryRepository.findAllByCategory(cate)
+                .orElseThrow(() -> new CustomException(ErrorCode.EMPTY_CONTENT));
+
         //개시판 정보 추출
         if (cate.equals("all") || cate.equals("ALL")) {
             boardPage = boardRepository.findAllByBoardType(type, pageRequest);
 
         } else
-            boardPage = boardRepository.findAllByBoardTypeAndCategory(type, cate, pageRequest);
+            boardPage = boardRepository.findAllByBoardTypeAndCategory(type, category, pageRequest);
 
         // 찾으 정보를 Dto로 변환 한다.
         List<BoardResponseDto> boardResponseDtos = new ArrayList<>();
@@ -433,7 +450,7 @@ public class BoardService {
                 boardResponseDtos.add(boardResponseDto);
             }
         }
-        return new BoardResponseFinalDto(boardResponseDtos,boardPage.getTotalElements());
+        return new BoardResponseFinalDto(boardResponseDtos, Objects.requireNonNull(boardPage).getTotalElements());
     }
 
     //공유 게시물 상세 조회

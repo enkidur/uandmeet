@@ -7,7 +7,7 @@ public class nameChange {
             subChar = ctpKorNm.substring(0, 2);
         else if (ctpKorNm.contains("도")) {
             if (ctpKorNm.length() < 4)
-                subChar = ctpKorNm;
+                subChar = ctpKorNm.substring(0, 2);
             else {
                 subChar = ctpKorNm.substring(0, 1) + ctpKorNm.substring(2,3);
             }

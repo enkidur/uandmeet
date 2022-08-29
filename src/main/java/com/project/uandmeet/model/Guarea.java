@@ -1,13 +1,17 @@
 package com.project.uandmeet.model;
 
 import lombok.AllArgsConstructor;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.json.simple.JSONObject;
 
 import javax.persistence.*;
+import java.util.ArrayList;
+import java.util.List;
 
 @Setter
+@Getter
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
@@ -30,6 +34,9 @@ public class Guarea {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "siarea_id")
     private Siarea siarea;
+
+    @OneToMany(fetch = FetchType.LAZY,mappedBy = "gu",cascade = CascadeType.ALL)
+    private List<Board> boardList = new ArrayList<>();
 
     public Guarea(JSONObject jsonProperties,
                      JSONObject jsonPropertiesProperties)

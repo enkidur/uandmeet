@@ -3,6 +3,7 @@ package com.project.uandmeet.model;
 
 import com.project.uandmeet.api.nameChange;
 import lombok.AllArgsConstructor;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.json.simple.JSONObject;
@@ -12,6 +13,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Setter
+@Getter
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
@@ -36,8 +38,12 @@ public class Siarea {
     //시도번호
     private String Info;
 
+    @OneToMany(fetch = FetchType.LAZY,mappedBy = "city",cascade = CascadeType.ALL)
+    private List<Board> boardList = new ArrayList<>();
+
     @OneToMany(fetch = FetchType.LAZY,mappedBy = "siarea",cascade = CascadeType.ALL)
     private List<Guarea> guareas = new ArrayList<>();
+
     public Siarea(JSONObject jsonProperties,
                   JSONObject jsonPropertiesProperties)
     {
