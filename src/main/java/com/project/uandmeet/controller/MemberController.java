@@ -179,8 +179,8 @@ public class MemberController {
 
     // 활동페이지 -> concern 수정
     @PutMapping("/api/mypage/actionedit/concern")
-    public ResponseEntity<MypageDto> concernedit(@AuthenticationPrincipal UserDetailsImpl userDetails, List<Concern> concern) {
-        return ResponseEntity.ok(memberService.concernedit(userDetails, concern));
+    public ResponseEntity<MypageDto> concernedit(@AuthenticationPrincipal UserDetailsImpl userDetails, ConcernDto requestDto) {
+        return ResponseEntity.ok(memberService.concernedit(userDetails, requestDto.getConcern()));
     }
 
     //myInfo 페이지

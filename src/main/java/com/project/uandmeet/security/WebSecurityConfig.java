@@ -1,6 +1,6 @@
 package com.project.uandmeet.security;
 
-import com.project.uandmeet.oauth.PrincipalOauth2UserService;
+
 
 //import com.project.uandmeet.security.jwt.JwtExceptionFilter;
 import com.project.uandmeet.redis.RedisUtil;
@@ -41,7 +41,7 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 
     private final JwtTokenProvider jwtTokenProvider;
     private final RedisUtil redisUtil;
-    private final PrincipalOauth2UserService principalOauth2UserService;
+//    private final PrincipalOauth2UserService principalOauth2UserService;
 
     @Bean
     @Override
