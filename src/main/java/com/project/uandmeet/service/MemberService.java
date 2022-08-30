@@ -14,8 +14,6 @@ import com.project.uandmeet.security.jwt.JwtProperties;
 import com.project.uandmeet.security.jwt.JwtTokenProvider;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -23,8 +21,6 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.util.*;
-import java.util.concurrent.TimeUnit;
-import java.util.regex.Pattern;
 
 @Transactional
 @RequiredArgsConstructor
@@ -239,7 +235,7 @@ public class MemberService {
                 () -> new RuntimeException("볼수 없는 정보입니다")
         );
         String nickname = member.getNickname();
-        List<Concern> concern = member.getConcern();
+        List<Concern> concern = member.getConcerns();
         List<JoinCnt> joinCnt = member.getJoinCnt();
         MypageDto mypageDto = new MypageDto(nickname, concern, joinCnt);
         return mypageDto;
@@ -253,7 +249,7 @@ public class MemberService {
         );
         String nickname = member.getNickname(); // 고민중
         List<JoinCnt> joinCnt = member.getJoinCnt();
-        member.setConcern(concern);
+        member.setConcerns(concern);
         MypageDto mypageDto = new MypageDto(nickname, concern, joinCnt);
         return mypageDto;
     }
@@ -264,7 +260,7 @@ public class MemberService {
         Member member = memberRepository.findByUsername(username).orElseThrow(
                 () -> new RuntimeException("수정 권한이 없습니다.")
         );
-        List<Concern> concern = member.getConcern();
+        List<Concern> concern = member.getConcerns();
         List<JoinCnt> joinCnt = member.getJoinCnt();
         member.setNickname(nickname);
         MypageDto mypageDto = new MypageDto(nickname, concern, joinCnt);

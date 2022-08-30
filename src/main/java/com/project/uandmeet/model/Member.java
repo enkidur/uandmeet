@@ -42,8 +42,9 @@ public class Member {
     @Column
     private String profile; // 이미지
 
-    @OneToMany(mappedBy = "member", fetch = FetchType.LAZY)
-    private List<Concern> concern;
+    @OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    @JoinColumn(name = "MEMBER_ID")
+    private List<Concern> concerns;
 
     @OneToMany(mappedBy = "member", fetch = FetchType.LAZY)
     private List<JoinCnt> joinCnt;
