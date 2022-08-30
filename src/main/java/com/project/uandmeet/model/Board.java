@@ -45,13 +45,8 @@ public class Board extends BaseTime{
 
     private Long currentEntry;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "siarea_id")
-    private Siarea city;
-
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "guarea_id")
-    private Guarea gu;
+    private String city;
+    private String gu;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "category_id")
@@ -70,21 +65,34 @@ public class Board extends BaseTime{
     @OneToMany(fetch = FetchType.LAZY,mappedBy = "board",cascade = CascadeType.ALL)
     private List<Comment> commentList = new ArrayList<>();
 
-    public Board(Member member, Category category, BoardRequestDto.createAndCheck boardRequestDto, Siarea siarea, Guarea guarea)
+    public Board(Member member, Category category, BoardRequestDto.createAndCheck boardRequestDto, String uploadImage)
     {
         this.member = member;
         this.category = category;
-        this.city = siarea;
-        this.gu = guarea;
         this.boardType = boardRequestDto.getBoardType();
         this.title = boardRequestDto.getTitle();
         this.content = boardRequestDto.getContent();
-        this.boardimage = boardRequestDto.getBoardimage();
+        this.boardimage = uploadImage;
         this.endDateAt =boardRequestDto.getEndDateAt();
+        this.city = boardRequestDto.getCity();
+        this.gu = boardRequestDto.getGu();
         this.lat = boardRequestDto.getLat();
         this.lng = boardRequestDto.getLng();
     }
 
+    public Board(Member member, Category category, BoardRequestDto.createAndCheck boardRequestDto)
+    {
+        this.member = member;
+        this.category = category;
+        this.boardType = boardRequestDto.getBoardType();
+        this.title = boardRequestDto.getTitle();
+        this.content = boardRequestDto.getContent();
+        this.endDateAt =boardRequestDto.getEndDateAt();
+        this.city = boardRequestDto.getCity();
+        this.gu = boardRequestDto.getGu();
+        this.lat = boardRequestDto.getLat();
+        this.lng = boardRequestDto.getLng();
+    }
 
     //매칭 업데이트
     public Board(Board board, BoardRequestDto.updateMatching boardRequestUpdateDto)

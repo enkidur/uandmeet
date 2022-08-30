@@ -51,46 +51,18 @@ public class BoardService {
         Member memberTemp = memberRepostiory.findByUsername(userDetails.getUsername())
                 .orElseThrow(() -> new CustomException(ErrorCode.EMPTY_CONTENT));
 
-        Category category = categoryRepository.findByCategory(boardRequestDto.getCategory())
+        Category category = categoryRepository.findAllByCategory(boardRequestDto.getCategory())
                 .orElseThrow(() -> new CustomException(ErrorCode.EMPTY_CONTENT));
 
 
         if (boardRequestDto.getData() != null) {
             String uploadImage = String.valueOf(s3Uploader.upload(boardRequestDto.getData(), POST_IMAGE_DIR));
 
-//            Board board = new Board(memberTemp, category, boardRequestDto);
-            Board board = Board.builder()
-                    .member(memberTemp)
-                    .content(boardRequestDto.getContent())
-                    .boardimage(uploadImage)
-                    .category(category)
-                    .boardType(boardRequestDto.getBoardType())
-                    .title(boardRequestDto.getTitle())
-                    .content(boardRequestDto.getContent())
-                    .boardimage(boardRequestDto.getBoardimage())
-                    .endDateAt(boardRequestDto.getEndDateAt())
-                    .city(boardRequestDto.getCity())
-                    .gu(boardRequestDto.getGu())
-                    .lat(boardRequestDto.getLat())
-                    .lng(boardRequestDto.getLng())
-                    .build();
+            Board board = new Board(memberTemp, category, boardRequestDto, uploadImage);
 
             boardRepository.save(board);
         } else {
-            Board board = Board.builder()
-                    .member(memberTemp)
-                    .content(boardRequestDto.getContent())
-                    .category(category)
-                    .boardType(boardRequestDto.getBoardType())
-                    .title(boardRequestDto.getTitle())
-                    .content(boardRequestDto.getContent())
-                    .boardimage(boardRequestDto.getBoardimage())
-                    .endDateAt(boardRequestDto.getEndDateAt())
-                    .city(boardRequestDto.getCity())
-                    .gu(boardRequestDto.getGu())
-                    .lat(boardRequestDto.getLat())
-                    .lng(boardRequestDto.getLng())
-                    .build();
+            Board board = new Board(memberTemp, category, boardRequestDto);
 
             boardRepository.save(board);
         }
