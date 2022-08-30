@@ -49,18 +49,21 @@ public class BoardService {
         Member memberTemp = memberRepostiory.findByUsername(userDetails.getUsername())
                 .orElseThrow(() -> new CustomException(ErrorCode.EMPTY_CONTENT));
 
-  //      List<Category> category1 = categoryRepository.findAll();
-
-
         Category category = categoryRepository.findAllByCategory(boardRequestDto.getCategory())
                 .orElseThrow(() -> new CustomException(ErrorCode.EMPTY_CONTENT));
-
 
         Siarea siarea = siareaRepostiory.findByCtpKorNmAbbreviation(boardRequestDto.getCity())
                 .orElseThrow(() -> new CustomException(ErrorCode.EMPTY_CONTENT));
 
-        Guarea guarea = guareaRepostiory.findBySigKorNmAndSiarea(boardRequestDto.getGu(),siarea.getId())
-                .orElseThrow(() -> new CustomException(ErrorCode.EMPTY_CONTENT));
+        Guarea guarea = null;
+        try {
+            guarea = guareaRepostiory.findAllBySiareaAndSigKorNm(siarea,boardRequestDto.getGu())
+                    .orElseThrow(() -> new CustomException(ErrorCode.EMPTY_CONTENT));
+        }
+        catch (Exception e) {
+            System.out.println(e);
+            throw new CustomException(ErrorCode.EMPTY_CONTENT);
+        }
 
         Board board = new Board(memberTemp, category, boardRequestDto,siarea,guarea);
 
@@ -76,10 +79,12 @@ public class BoardService {
     //매칭 게시물 전체 조회 (카테고리별 전체 조회)
     @Transactional
     public BoardResponseFinalDto boardMatchingAllInquiry(String type, String cate, Integer page, Integer amount, String city, String gu) {
-        Sort sort = Sort.by("createdAt").descending();
+        Sort sort = Sort.by("createdAt").ascending();
         PageRequest pageRequest = PageRequest.of(page, amount, sort);
         Page<Board> boardPage;
-
+        Category category =null;
+        Siarea siarea = null;
+        Guarea guarea = null;
         //페이지 번호 변경
         if(page > 0)
             page = page - 1;
@@ -87,14 +92,21 @@ public class BoardService {
             page = 0;
 
         //들어온 문자열 제차 확인
-        Category category= categoryRepository.findAllByCategory(cate)
-                .orElseThrow(() -> new CustomException(ErrorCode.EMPTY_CONTENT));
+        if(!(cate.equals("all")||cate.equals("ALL"))) {
 
-        Siarea siarea = siareaRepostiory.findByCtpKorNmAbbreviation(city)
-                .orElseThrow(() -> new CustomException(ErrorCode.EMPTY_CONTENT));
+            category = categoryRepository.findAllByCategory(cate)
+                    .orElseThrow(() -> new CustomException(ErrorCode.EMPTY_CONTENT));
+        }
 
-        Guarea guarea = guareaRepostiory.findBySigKorNmAndSiarea(gu, siarea.getId())
-                .orElseThrow(() -> new CustomException(ErrorCode.EMPTY_CONTENT));
+        if(!(city.equals("all") || city.equals("ALL"))){
+            siarea = siareaRepostiory.findByCtpKorNmAbbreviation(city)
+                    .orElseThrow(() -> new CustomException(ErrorCode.EMPTY_CONTENT));
+        }
+
+        if(!(gu.equals("all") || gu.equals("All"))) {
+            guarea = guareaRepostiory.findAllBySiareaAndSigKorNm(siarea, gu)
+                    .orElseThrow(() -> new CustomException(ErrorCode.EMPTY_CONTENT));
+        }
 
         //개시판 정보 추출
         if(cate.equals("all")||cate.equals("ALL")) {
@@ -117,6 +129,7 @@ public class BoardService {
                     boardPage = boardRepository.findAllByBoardTypeAndCategoryAndCityAndGu(type, category, pageRequest, siarea, guarea);
             }
         }
+
         // 찾으 정보를 Dto로 변환 한다.
         List<BoardResponseDto> boardResponseDtos = new ArrayList<>();
         if (boardPage != null) {
@@ -399,7 +412,7 @@ public class BoardService {
 
     public CustomException categoryNew(String category) {
 
-        String[] TEMP = new String[]{"all", "gym", "running", "ridding", "badminton", "tennis", "golf", "hiking", "ballet", "climing", "pilates", "swiming", "boxing", "bowling",
+        String[] TEMP = new String[]{"gym", "running", "ridding", "badminton", "tennis", "golf", "hiking", "ballet", "climing", "pilates", "swiming", "boxing", "bowling",
                 "crossfit", "gymnastics", "skateboard", "skate", "pocketball", "ski", "futsal", "pingpong", "basketball", "baseball", "soccer", "volleyball", "etc"};
         try {
             for (String s : TEMP) {
@@ -420,7 +433,7 @@ public class BoardService {
         Sort sortInfo = Sort.by("createdAt").descending();
         PageRequest pageRequest = PageRequest.of(page, amount, sortInfo);
         Page<Board> boardPage;
-
+        Category category = null;
         //페이지 번호 변경
         if(page > 0)
             page = page - 1;
@@ -428,13 +441,14 @@ public class BoardService {
             page = 0;
 
         //들어온 문자열 제차 확인
-        Category category= categoryRepository.findAllByCategory(cate)
-                .orElseThrow(() -> new CustomException(ErrorCode.EMPTY_CONTENT));
+        if((cate.equals("all") || cate.equals("ALL"))) {
+            category = categoryRepository.findAllByCategory(cate)
+                    .orElseThrow(() -> new CustomException(ErrorCode.EMPTY_CONTENT));
+        }
 
         //개시판 정보 추출
         if (cate.equals("all") || cate.equals("ALL")) {
             boardPage = boardRepository.findAllByBoardType(type, pageRequest);
-
         } else
             boardPage = boardRepository.findAllByBoardTypeAndCategory(type, category, pageRequest);
 

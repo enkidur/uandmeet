@@ -19,6 +19,7 @@ public class BoardRequestDto {
         private String endDateAt;
         private String city;
         private String gu;
+        private String maxEntry;
 
         //경도
         private double lat;

@@ -39,12 +39,13 @@ public class Guarea {
     private List<Board> boardList = new ArrayList<>();
 
     public Guarea(JSONObject jsonProperties,
-                     JSONObject jsonPropertiesProperties)
+                  JSONObject jsonPropertiesProperties, Siarea siareatemp)
     {
         this.Info = (String) jsonProperties.get("id");
         this.sigCd =(String) jsonPropertiesProperties.get("sig_cd");
         this.fullNm = (String) jsonPropertiesProperties.get("full_nm");
         this.sigEngNm = (String) jsonPropertiesProperties.get("sig_eng_nm");
         this.sigKorNm = (String) jsonPropertiesProperties.get("sig_kor_nm");
+        this.siarea = siareatemp;
     }
 }
