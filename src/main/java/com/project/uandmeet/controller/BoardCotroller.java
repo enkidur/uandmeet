@@ -45,11 +45,11 @@ public class BoardCotroller {
     //매칭 게시물 전체 조회 (카테고리별 전체 조회)
     @GetMapping("/api/boards/matching")
     private ResponseEntity<BoardResponseFinalDto> boardMatchingAllInquiry(
-                                                                  @RequestParam String cate,
-                                                                  @RequestParam Integer page,
+                                                                  @RequestParam String cate,          //카테고리
+                                                                  @RequestParam Integer page,        //페이지번호
                                                                   @RequestParam Integer amount,
-                                                                  @RequestParam String city,
-                                                                  @RequestParam String gu) {
+                                                                  @RequestParam String city,        //시
+                                                                  @RequestParam String gu) {        //군
         BoardResponseFinalDto boardMatchingAllInquiry = boardService.boardMatchingAllInquiry("matching",cate,page,amount,city,gu);
 
         if (boardMatchingAllInquiry == null) {

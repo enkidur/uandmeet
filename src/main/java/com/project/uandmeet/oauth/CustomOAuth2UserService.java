@@ -1,7 +1,5 @@
 package com.project.uandmeet.oauth;
 
-import com.auth0.jwt.JWT;
-import com.auth0.jwt.algorithms.Algorithm;
 import com.project.uandmeet.model.Member;
 import com.project.uandmeet.redis.RedisUtil;
 import com.project.uandmeet.repository.MemberRepository;
@@ -17,13 +15,12 @@ import org.springframework.security.oauth2.core.OAuth2AuthenticationException;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.stereotype.Service;
 
-import java.util.Date;
 import java.util.UUID;
 
 //현재 서비스 클래스는 Securityconfig에서 불러와지고 있음
 @RequiredArgsConstructor
 @Service
-public class PrincipalOauth2UserService extends DefaultOAuth2UserService {
+public class CustomOAuth2UserService extends DefaultOAuth2UserService {
 
     private final MemberRepository memberRepository;
     private final BCryptPasswordEncoder passwordEncoder;
@@ -50,7 +47,6 @@ public class PrincipalOauth2UserService extends DefaultOAuth2UserService {
 
         Member memberEntity = memberRepository.findByUsername(email).orElse(null);
 
-
         if(memberEntity == null){
             memberEntity = Member.builder()
                     .username(email)
@@ -62,6 +58,21 @@ public class PrincipalOauth2UserService extends DefaultOAuth2UserService {
             System.out.println("패스워드"+memberEntity.getPassword());
             memberRepository.save(memberEntity);
 
+            String accessToken = jwtTokenProvider.createToken(memberEntity.getUsername());
+            String refreshToken = jwtTokenProvider.createRefreshToken();
+
+            // redis 에 token 저장
+            redisUtil.setDataExpire(memberEntity.getUsername(),refreshToken,JwtProperties.REFRESH_EXPIRATION_TIME);
+
+            // token 을 Header 에 발급
+            // 재발급떼문에 set 사용
+            HttpHeaders headers = new HttpHeaders();
+            headers.set(JwtProperties.HEADER_ACCESS, JwtProperties.TOKEN_PREFIX + accessToken);
+            headers.set(JwtProperties.HEADER_REFRESH, JwtProperties.TOKEN_PREFIX + refreshToken);
+            System.out.println("OAuth2 Service의 AccessToken:"+accessToken);
+            System.out.println("OAuth2 Service의 RefreshToken:"+refreshToken);
+        }
+        else{
 
             String accessToken = jwtTokenProvider.createToken(memberEntity.getUsername());
             String refreshToken = jwtTokenProvider.createRefreshToken();
@@ -69,12 +80,12 @@ public class PrincipalOauth2UserService extends DefaultOAuth2UserService {
             // redis 에 token 저장
             redisUtil.setDataExpire(memberEntity.getUsername(),refreshToken,JwtProperties.REFRESH_EXPIRATION_TIME);
 
-
-            // token 을 Header 에 발급
-            // 재발급떼문에 set 사용
             HttpHeaders headers = new HttpHeaders();
             headers.set(JwtProperties.HEADER_ACCESS, JwtProperties.TOKEN_PREFIX + accessToken);
             headers.set(JwtProperties.HEADER_REFRESH, JwtProperties.TOKEN_PREFIX + refreshToken);
+            System.out.println("OAuth2 Service의 AccessToken:"+accessToken);
+            System.out.println("OAuth2 Service의 RefreshToken:"+refreshToken);
+
         }
 
         return new UserDetailsImpl(memberEntity, oAuth2User.getAttributes());  // 리턴될때 authentication 에 저장됨

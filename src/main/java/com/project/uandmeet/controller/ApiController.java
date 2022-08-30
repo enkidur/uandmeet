@@ -7,6 +7,7 @@ import com.project.uandmeet.api.OpenApiResponseParams;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.json.simple.parser.ParseException;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -22,7 +23,14 @@ public class ApiController {
     @PostMapping("/allow_info/basic")
     public List<OpenApiResponseParams> fetch() throws UnsupportedEncodingException, ParseException {
         return openApiManager.fetch();
-
     }
+
+    @GetMapping("/allow_info/dataRequest")
+    public List<OpenApiResponseParams> dataRequest() {
+        return openApiManager.dataRequest();
+    }
+
+
+
 }
 

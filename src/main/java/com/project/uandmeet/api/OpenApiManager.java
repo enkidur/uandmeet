@@ -130,27 +130,34 @@ public class OpenApiManager {
                 }
             }
 
-            OpenApiResponseParams openApiResponseParamsTemp = new OpenApiResponseParams(nameChange(siareaDto.getCtpKorNm()), guNameGroup);
+            OpenApiResponseParams openApiResponseParamsTemp = new OpenApiResponseParams(siareaDto.getCtpKorNmAbbreviation(), guNameGroup);
             openApiResponseParams.add(openApiResponseParamsTemp);
-
         }
 
         //구에 관한 내용.
         return openApiResponseParams;
     }
 
-    private String nameChange(String ctpKorNm) {
-        String subChar = null;
-        if (ctpKorNm.contains("특별") || ctpKorNm.contains("광역"))
-            subChar = ctpKorNm.substring(0, 2);
-        else if (ctpKorNm.contains("도")) {
-            if (ctpKorNm.length() < 4)
-                subChar = ctpKorNm;
-            else {
-                subChar = ctpKorNm.substring(0, 1) + ctpKorNm.substring(2,3);
+    public List<OpenApiResponseParams> dataRequest() {
+
+        List<Siarea> siareas = siareaRepostiory.findAll();
+        List<Guarea> guareas = guareaRepostiory.findAll();
+
+        List<OpenApiResponseParams> openApiResponseParams = new ArrayList<>();
+        for (Siarea siarea : siareas) {
+            List<String> guNameGroup = new ArrayList<>();
+            for (Guarea guarea : guareas) {
+                if (guarea.getFullNm().contains(siarea.getCtpKorNm())) {
+                    guNameGroup.add(guarea.getSigKorNm());
+                }
             }
+
+            OpenApiResponseParams openApiResponseParamsTemp = new OpenApiResponseParams(siarea.getCtpKorNmAbbreviation(), guNameGroup);
+            openApiResponseParams.add(openApiResponseParamsTemp);
         }
-        return subChar;
+
+        //구에 관한 내용.
+        return openApiResponseParams;
     }
 }
 
