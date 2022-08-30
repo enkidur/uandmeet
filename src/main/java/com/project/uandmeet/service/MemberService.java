@@ -8,6 +8,7 @@ import com.project.uandmeet.model.JoinCnt;
 import com.project.uandmeet.model.Member;
 import com.project.uandmeet.model.Star;
 import com.project.uandmeet.redis.RedisUtil;
+import com.project.uandmeet.repository.EntryRepository;
 import com.project.uandmeet.repository.MemberRepository;
 import com.project.uandmeet.security.UserDetailsImpl;
 import com.project.uandmeet.security.jwt.JwtProperties;
@@ -31,6 +32,7 @@ import java.util.regex.Pattern;
 @Service
 public class MemberService {
     private final MemberRepository memberRepository;
+    private final EntryRepository entryRepository;
     private final BCryptPasswordEncoder passwordEncoder;
     private final EmailService emailService;
     private final RedisUtil redisUtil;
@@ -47,33 +49,36 @@ public class MemberService {
 
     // 회원 가입 1. emali check
     public String checkemail(String username) throws IOException {
-        String[] emailadress = username.split("@");
-        String id = emailadress[0];
-        String host = emailadress[1];
-//        String pattern = "^[a-zA-Z0-9]*$";
-//        String pattern = "^[a-zA-Z0-9_!#$%&'\\*+/=?{|}~^.-]+@[a-zA-Z0-9.-]+.[a-zA-Z0-9.-]*$";
-//        String idpattern = "^[a-zA-Z0-9_!#$%&'\\*+/=?{|}~^.-]*$";
-//        String hostpattern = "^[a-zA-Z0-9.-]*$";
-//        // email 조건
-//        // ID 영문 대소문자, 숫자, _!#$%&'\*+/=?{|}~^.- 특문허용
-//        // Host 시작전 @, 영문 대소문자, 숫자, .-특문허용
-//
-//        // 회원가입 username 조건
-//        if (username.length() < 10) {
-//            throw new IllegalArgumentException("이메일을 10자 이상 입력하세요");
-//        } else if (!Pattern.matches(idpattern, id)) {
-//            throw new IllegalArgumentException("id에 알파벳 대소문자와 숫자, 특수기호( _!#$%&'\\*+/=?{|}~^.-)로만 입력하세요");
-//        } else if (!Pattern.matches(hostpattern, host)) {
-//            throw new IllegalArgumentException("host에 알파벳 대소문자와 숫자, 특수기호(.-)로만 입력하세요");
-//        } else if (!Pattern.matches(pattern, username)) {
-//            throw new IllegalArgumentException("이메일 규격에 맞게 입력하세요");
-//        } else if (username.contains("script")) {
-//            throw new IllegalArgumentException("xss공격 멈춰주세요.");
-//        }
+        checkEmail(username);
 
         // email 중복 확인
         checkDuplicateEmail(username);
         return "email check";
+    }
+
+    private void checkEmail(String username) {
+        String[] emailadress = username.split("@");
+        String id = emailadress[0];
+        String host = emailadress[1];
+        String pattern = "^[a-zA-Z0-9_!#$%&'\\*+/=?{|}~^.-]+@[a-zA-Z0-9.-]+.[a-zA-Z0-9.-]*$";
+        String idpattern = "^[a-zA-Z0-9_!#$%&'\\*+/=?{|}~^.-]*$";
+        String hostpattern = "^[a-zA-Z0-9.-]*$";
+        // email 조건
+        // ID 영문 대소문자, 숫자, _!#$%&'\*+/=?{|}~^.- 특문허용
+        // Host 시작전 @, 영문 대소문자, 숫자, .-특문허용
+
+        // 회원가입 username 조건
+        if (username.length() < 10) {
+            throw new IllegalArgumentException("이메일을 10자 이상 입력하세요");
+        } else if (!Pattern.matches(idpattern, id)) {
+            throw new IllegalArgumentException("id에 알파벳 대소문자와 숫자, 특수기호( _!#$%&'\\*+/=?{|}~^.-)로만 입력하세요");
+        } else if (!Pattern.matches(hostpattern, host)) {
+            throw new IllegalArgumentException("host에 알파벳 대소문자와 숫자, 특수기호(.-)로만 입력하세요");
+        } else if (!Pattern.matches(pattern, username)) {
+            throw new IllegalArgumentException("이메일 규격에 맞게 입력하세요");
+        } else if (username.contains("script")) {
+            throw new IllegalArgumentException("xss공격 멈춰주세요.");
+        }
     }
 
 
@@ -98,14 +103,19 @@ public class MemberService {
         String username = requestDto.getUsername();
         String[] emailadress = username.split("@");
         String id = emailadress[0];
-
-        checkemail(requestDto.getUsername());
+        String uuid = UUID.randomUUID().toString().substring(0,3);
+        String uniqueId = id + uuid;
+        // 이메일 패턴 체크
+        checkEmail(username);
+        // 이메일 중복 체크
+        checkDuplicateEmail(username);
         checkPassword(requestDto.getPassword(), requestDto.getPasswordCheck());
         Member member = requestDto.register();
         member.setPassword(passwordEncoder.encode(requestDto.getPassword()));
         // login 구별
         member.setLoginto("normal");
-        member.setNickname(id);
+        // 초기 닉네임
+        member.setNickname(uniqueId);
 
         // 프로필 이미지 추가
 //        if (requestDto.getUserProfileImage() != null) {
@@ -266,7 +276,10 @@ public class MemberService {
         );
         List<Concern> concern = member.getConcern();
         List<JoinCnt> joinCnt = member.getJoinCnt();
-        member.setNickname(nickname);
+        Member usingnickname = memberRepository.findByNickname(nickname).orElse(null);
+        if (usingnickname == null) {
+            member.setNickname(nickname);
+        } else { throw new RuntimeException("이미 존재하는 닉네임입니다.");}
         MypageDto mypageDto = new MypageDto(nickname, concern, joinCnt);
         return mypageDto;
     }

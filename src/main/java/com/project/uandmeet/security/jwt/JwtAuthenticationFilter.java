@@ -1,99 +1,126 @@
 package com.project.uandmeet.security.jwt;
 
-import com.auth0.jwt.JWT;
-import com.auth0.jwt.algorithms.Algorithm;
-import com.project.uandmeet.model.Member;
-import com.project.uandmeet.repository.MemberRepository;
+import java.io.IOException;
+import javax.servlet.FilterChain;
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import com.project.uandmeet.dto.LoginRequestDto;
+import com.project.uandmeet.redis.RedisUtil;
 import com.project.uandmeet.security.UserDetailsImpl;
-import io.jsonwebtoken.JwtException;
-import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
-//import org.springframework.security.oauth2.jwt.JwtException;
-import org.springframework.security.web.AuthenticationEntryPoint;
-import org.springframework.security.web.authentication.www.BasicAuthenticationFilter;
-import org.springframework.web.filter.GenericFilterBean;
+import org.springframework.security.core.AuthenticationException;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import lombok.RequiredArgsConstructor;
 
-import javax.servlet.FilterChain;
-import javax.servlet.ServletException;
-import javax.servlet.ServletRequest;
-import javax.servlet.ServletResponse;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import java.io.IOException;
+// Security 에서 UsernamePasswordAuthenticationFilter가 있음
+// 해당 필터는 /login 요청해서 username, password 를 전송하면 (post) 작동
+// but .fromLoin().disable() 때문에 UsernamePasswordAuthenticationFilter 작동을 안함
+// 따라서 해당 filter 를 작동시키기 위해 securityConfig 에 등록
+// UsernamePasswordAuthenticationFilter 는 AuthenticationManager 를 통해 login 진행 하기 때문에 AuthenticationManager 파라미터 필요
 
-@RequiredArgsConstructor
-public class JwtAuthenticationFilter extends GenericFilterBean {
+@RequiredArgsConstructor // final 생성자 자동 생성
+//@AllArgsConstructor
+public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilter{
 
+    private final AuthenticationManager authenticationManager;
+    //    private final MemberService memberService;
+    private final RedisUtil redisUtil;
     private final JwtTokenProvider jwtTokenProvider;
 
+    // Authentication 객체 만들어서 리턴 => 의존 : AuthenticationManager
+    // 인증 요청시에 실행되는 함수 => /login
     @Override
-    public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain) throws IOException, ServletException {
-//        response.setContentType("application/json");
-//        response.setCharacterEncoding("utf-8");
-        // 헤더에서 jwt 토큰 받아옴
-        String token = jwtTokenProvider.resolveToken((HttpServletRequest) request);
+    public Authentication attemptAuthentication(HttpServletRequest request, HttpServletResponse response)
+            throws AuthenticationException {
 
-        // 유효한 토큰인지 확인
-        if (token != null && jwtTokenProvider.validateToken(token)) {
-            // 토큰이 유효하면 토큰으로부터 유저 정보를 받아와서 저장
-            Authentication authentication = jwtTokenProvider.getAuthentication(token);
-            SecurityContextHolder.getContext().setAuthentication(authentication);
-        } else if(token != null && !jwtTokenProvider.validateToken(token)){
-            String result = jwtTokenProvider.resolveRefreshToken((HttpServletRequest) request);
-
-            if(result == null){
-                throw new JwtException("access token 이 만료 되었습니다.");
-            }
-        }
-        chain.doFilter(request, response);
-    }
-}
-// 인가
-// Security Filter 의 BasicAuthenticationFilter 는 상시 실행되나
-// 권한이나 인증이 필요한 주소를 요청했을 때 token 의 유무를 검사
-//public class JwtAuthenticationFilter extends BasicAuthenticationFilter {
+        System.out.println("JwtAuthenticationFilter : 진입");
+        // 1. request에 있는 username과 password를 파싱해서 자바 Object로 받기
+        ObjectMapper om = new ObjectMapper();
+        LoginRequestDto loginRequestDto = null;
+        try {
+            // x-www.form-urlencoded 방식
+//            BufferedReader br = request.getReader();
 //
-//    @Autowired
-//    private JwtTokenProvider jwtTokenProvider;
-//
-//    public JwtAuthenticationFilter(AuthenticationManager authenticationManager) {
-//        super(authenticationManager);
-//    }
-//
-//
-//    // 인증이나 권한이 필요한 요청이 있을 때 해당 filter 를 실행
-//    @Override
-//    protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain chain)
-//            throws IOException, ServletException {
-//        String header = request.getHeader(JwtProperties.HEADER_ACCESS);
-//        // 로그인, 리프레시 요청이라면 토큰 검사하지 않음
-//        if (request.getServletPath().equals("/login") || request.getServletPath().equals("/refresh")) {
-//            chain.doFilter(request, response);
-//        }
-//
-//        if(header == null || !header.startsWith(JwtProperties.TOKEN_PREFIX)) {
-//            chain.doFilter(request, response);
-//            return;
-//        }
-//        // 헤더에서 jwt 토큰 받아옴
-//        String token = jwtTokenProvider.resolveToken(request);
-//
-//        // 유효한 토큰인지 확인
-//        if (token != null && jwtTokenProvider.validateToken(token)) {
-//            // 토큰이 유효하면 토큰으로부터 유저 정보를 받아와서 저장
-//            Authentication authentication = jwtTokenProvider.getAuthentication(token);
-//            SecurityContextHolder.getContext().setAuthentication(authentication);
-//        } else if(token != null && !jwtTokenProvider.validateToken(token)){
-//            String result = jwtTokenProvider.resolveRefreshToken(request);
-//
-//            if(result == null){
-//                throw new JwtException("access token 이 만료 되었습니다.");
+//            String input = null;
+//            while ((input = br.readLine()) != null) {
+//                System.out.println(input);
 //            }
-//        }
-//        chain.doFilter(request, response);
-//    }
-//}
+            // json 방식
+            loginRequestDto = om.readValue(request.getInputStream(), LoginRequestDto.class);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        System.out.println("JwtAuthenticationFilter : "+loginRequestDto);
+
+        // 유저네임패스워드 토큰 생성
+        // token 생성 -> formLogin에서 자동 실행되나 disable 때문에 직접 생성
+        // 해당 token 은 db 내용과 일치하는지 확인을 위한 인증 token
+        UsernamePasswordAuthenticationToken authenticationToken =
+                new UsernamePasswordAuthenticationToken(
+                        loginRequestDto.getUsername(),
+                        loginRequestDto.getPassword());
+
+        System.out.println("JwtAuthenticationFilter : 토큰생성완료");
+
+        // authenticate() 함수가 호출 되면 인증 프로바이더가 유저 디테일 서비스의
+        // loadUserByUsername(토큰의 첫번째 파라메터) 를 호출하고
+        // UserDetails를 리턴받아서 토큰의 두번째 파라메터(credential)과
+        // UserDetails(DB값)의 getPassword()함수로 비교해서 동일하면
+        // Authentication 객체를 만들어서 필터체인으로 리턴해준다.
+
+        // Tip: 인증 프로바이더의 디폴트 서비스는 UserDetailsService 타입
+        // Tip: 인증 프로바이더의 디폴트 암호화 방식은 BCryptPasswordEncoder
+        // 결론은 인증 프로바이더에게 알려줄 필요가 없음.
+
+
+        // 2. 정상인지 AuthenticationManager 로 login 시도하여 PrincipalDetailsService 호출되어 loadUserByUsername 메서드 실행
+        // 값이 정상이라면 authentication 리턴 -> db 의 username, password 와 일치
+        // Authentication 에는 user 의 login 정보가 담김
+        // 정상적으로 생성된 Authentication
+        Authentication authentication =
+                authenticationManager.authenticate(authenticationToken);
+
+        UserDetailsImpl userDetailsImpl = (UserDetailsImpl) authentication.getPrincipal();
+        System.out.println("Authentication : "+userDetailsImpl.getMember().getUsername());
+
+        // 3. PrincipalDetails 에 session 을 담음 (권한 관리를 위해 Session에 담음)
+        // 굳이 Jwt 를 사용하면서 session 을 만들 필요 없지만, 권한 처리를 위해
+        // 세션아이디를 응답하지 않는 STATELESS 정책을 사용해도 괜찮은 이유는 세션영역은 임시 저장의 용도로만 사용
+        // authentication 객체가 session 영역에 저장 (리턴을 통해 저장)
+        return authentication;
+    }
+
+    // attemptAuthentication 에서 인증이 성공했다면 실행
+    // JWT Token 생성해서 response에 담아주기
+    @Override
+    protected void successfulAuthentication(HttpServletRequest request,
+                                            HttpServletResponse response,
+                                            FilterChain chain,
+                                            Authentication authResult)
+            throws IOException, ServletException {
+
+        // 해당 principalDetails 정보를 통해 Jwt token 생성
+        UserDetailsImpl userDetailsImpl = (UserDetailsImpl) authResult.getPrincipal();
+
+        // Hash 방식
+        String accessToken = jwtTokenProvider.createToken(userDetailsImpl.getUsername());
+
+        String refreshToken = jwtTokenProvider.createRefreshToken();
+
+        // Refresh Token DB에 저장
+//        memberService.updateRefreshToken(userDetailsImpl.getUsername(), refreshToken);
+        // Refresh Token Redis 에 저장
+        redisUtil.setDataExpire(userDetailsImpl.getUsername(), refreshToken, JwtProperties.REFRESH_EXPIRATION_TIME);
+
+        // token 을 Header 에 발급
+        // 재발급떼문에 setHeader 사용
+        response.setHeader(JwtProperties.HEADER_ACCESS, JwtProperties.TOKEN_PREFIX + accessToken);
+        response.setHeader(JwtProperties.HEADER_REFRESH, JwtProperties.TOKEN_PREFIX + refreshToken);
+    }
+
+}
