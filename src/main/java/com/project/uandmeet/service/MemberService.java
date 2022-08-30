@@ -1,6 +1,8 @@
 package com.project.uandmeet.service;
 
 import com.project.uandmeet.dto.*;
+import com.project.uandmeet.exception.CustomException;
+import com.project.uandmeet.exception.ErrorCode;
 import com.project.uandmeet.model.Concern;
 import com.project.uandmeet.model.JoinCnt;
 import com.project.uandmeet.model.Member;
@@ -368,6 +370,14 @@ public class MemberService {
         redisUtil.setDataExpire(requestDto.getUsername(),refreshToken,JwtProperties.REFRESH_EXPIRATION_TIME);
         jwtTokenProvider.createToken(requestDto.getUsername());
         return "완료";
+    }
+
+    //채팅회원관련
+    public Member findByNickname(String nickname) {
+        Member member = memberRepository.findByNickname(nickname).orElseThrow(
+                ()-> new CustomException(ErrorCode.MEMBER_NOT_FOUND)
+        );
+        return member;
     }
 }
 
