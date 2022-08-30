@@ -1,7 +1,8 @@
 package com.project.uandmeet.chat.model;
 
-import com.project.uandmeet.chat.dto.ChatMessageRequestDto;
+import com.project.uandmeet.chat.dto.request.ChatMessageRequestDto;
 import com.project.uandmeet.model.Member;
+import com.project.uandmeet.service.MemberService;
 import lombok.*;
 
 import javax.persistence.*;
@@ -14,9 +15,8 @@ import javax.persistence.*;
 public class ChatMessage {
 
     public enum MessageType {
-        STAMP, TALK, RESULT, ISSUE
+        ENTER, TALK, QUIT
     }
-    //ENTER를 STAMP로 QUIT-> RESULT
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -29,6 +29,10 @@ public class ChatMessage {
     @Column
     private String roomId;
 
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "member_id_joined")
+    private Member member;
+
     // Redis MessageListener 로 뒙소켓을 통해 바로 채팅방에 메시지를 전달해주기 위한 값을 따로 설정해주었다
     @Column
     private String nickname;
@@ -40,20 +44,17 @@ public class ChatMessage {
     private String message;
 
     @Column
-    private String profileUrl;
-
-    @Column
     private String createdAt;
 
 
     @Builder
-    public ChatMessage(ChatMessageRequestDto chatMessageRequestDto, Member member, String createdAt) {
+    public ChatMessage(ChatMessageRequestDto chatMessageRequestDto, MemberService memberService) {
         this.type = chatMessageRequestDto.getType();
         this.roomId = chatMessageRequestDto.getRoomId();
+        this.member = memberService.findByNickname(chatMessageRequestDto.getNickname());
         this.nickname = chatMessageRequestDto.getNickname();
         this.sender = chatMessageRequestDto.getSender();
         this.message = chatMessageRequestDto.getMessage();
-        this.profileUrl = member.getProfile();
         this.createdAt = createdAt;
     }
 }
