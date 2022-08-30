@@ -51,7 +51,6 @@ public class BoardService {
 
   //      List<Category> category1 = categoryRepository.findAll();
 
-
         Category category = categoryRepository.findAllByCategory(boardRequestDto.getCategory())
                 .orElseThrow(() -> new CustomException(ErrorCode.EMPTY_CONTENT));
 
@@ -269,7 +268,6 @@ public class BoardService {
         return responseEntity;
     }
 
-
     //매칭 참여
     @Transactional
     public ResponseEntity<Long> matchingJoin(Long id, UserDetailsImpl userDetails) {
@@ -297,7 +295,6 @@ public class BoardService {
                 throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "서버에서 요청사항을 수행할 수 없습니다.");
             }
         }
-
         return responseEntity;
     }
 
