@@ -37,7 +37,7 @@ public class MemberController {
 
     // 회원가입 1. emali check
     @PostMapping("/api/checkemail")
-    public ResponseEntity<String> checkemail(@RequestBody String username) throws IOException {
+    public ResponseEntity<String> checkemail(@RequestBody EmailDto requestDto) throws IOException {
 //        // 헤더에 전달
 //        HttpHeaders headers = new HttpHeaders();
 //        headers.set("level","1");
@@ -46,7 +46,7 @@ public class MemberController {
 //                                     .body(memberService.checkemail(username));
 //        log.info(String.valueOf(res.getHeaders()));
 //         redis 에 저장
-        ResponseEntity<String> res = ResponseEntity.ok(memberService.checkemail(username));
+        ResponseEntity<String> res = ResponseEntity.ok(memberService.checkemail(requestDto.getUsername()));
 //        redisUtil.setDataExpire(username + "level", "1", 300L);
         // 해당 정보를 client 에서 처리하게 좋을지 서버에서 처리하는게 좋을지
         // client 에 저장하면 이동 시 노출위험 -> 암호화 필수 but 서버 부담 감소
@@ -75,9 +75,9 @@ public class MemberController {
 
     // 회원가입 3. Email 인증번호 확인
     @PostMapping("/api/checkAuthNum")
-    public @ResponseBody ResponseEntity<String> checkAuthNum(@RequestBody String authNum) {
+    public @ResponseBody ResponseEntity<String> checkAuthNum(@RequestBody AuthNumDto requestDto) {
 //        String level = redisUtil.getData(username + "level");
-        ResponseEntity<String> res = ResponseEntity.ok(emailService.checkAuthNum(authNum));
+        ResponseEntity<String> res = ResponseEntity.ok(emailService.checkAuthNum(requestDto.getAuthNum()));
 //        int val = Integer.parseInt(level);
 //        if (val < 2) {
 //            return ResponseEntity.ok("잘못된 접근입니다.");
@@ -88,9 +88,9 @@ public class MemberController {
 
     // 회원가입 4. password check
     @PostMapping("/api/checkpassword")
-    public ResponseEntity<String> checkPassword(@RequestBody String password, @RequestBody String passwordCheck, String username) {
+    public ResponseEntity<String> checkPassword(@RequestBody PasswordDto passwordDto) {
 //        String level = redisUtil.getData(username + "level");
-        ResponseEntity<String> res = ResponseEntity.ok(memberService.checkPassword(password, passwordCheck));
+        ResponseEntity<String> res = ResponseEntity.ok(memberService.checkPassword(passwordDto.getPassword(), passwordDto.getPasswordCheck()));
 //        int val = Integer.parseInt(level);
 //        if (val < 3) {
 //            return ResponseEntity.ok("잘못된 접근입니다.");
@@ -121,8 +121,9 @@ public class MemberController {
 
     // 회원 탈퇴
     @DeleteMapping("/api/withdraw")
-    public ResponseEntity<String> withdraw(@AuthenticationPrincipal UserDetailsImpl userDetails, String password) {
-        return ResponseEntity.ok(memberService.withdraw(userDetails, password));
+    public ResponseEntity<String> withdraw(@AuthenticationPrincipal UserDetailsImpl userDetails,
+                                           @RequestBody PasswordDto requestDto) {
+        return ResponseEntity.ok(memberService.withdraw(userDetails, requestDto.getPassword()));
     }
 
     // 1. 클라이언트에서 로그인한다.
@@ -149,8 +150,8 @@ public class MemberController {
 
     // password 찾기 2. password 인증번호 확인
     @PostMapping("/api/findCheck")
-    public ResponseEntity<String> findCheck(@RequestBody String authNum) {
-        memberService.findCheck(authNum);
+    public ResponseEntity<String> findCheck(@RequestBody AuthNumDto requestDto) {
+        memberService.findCheck(requestDto.getAuthNum());
         return ResponseEntity.ok("인증 완료");
     }
 
@@ -170,9 +171,10 @@ public class MemberController {
 
     // 활동페이지 -> nickname 수정
     @PutMapping("/api/mypage/actionedit/nickname")
-    public ResponseEntity<MypageDto> nicknameedit(@AuthenticationPrincipal UserDetailsImpl userDetails, String nickname) {
+    public ResponseEntity<MypageDto> nicknameedit(@AuthenticationPrincipal UserDetailsImpl userDetails,
+                                                  @RequestBody NicknameDto requestDto) {
         log.info(userDetails.getUsername());
-        return ResponseEntity.ok(memberService.nicknameedit(userDetails, nickname));
+        return ResponseEntity.ok(memberService.nicknameedit(userDetails, requestDto.getNickname()));
     }
 
     // 활동페이지 -> concern 수정
@@ -191,14 +193,14 @@ public class MemberController {
     // myinfo -> gender 수정
     @PutMapping("/api/mypage/infoedit/gender")
     public ResponseEntity<MyPageInfoDto> genderedit(@AuthenticationPrincipal UserDetailsImpl userDetails,
-                                                    InfoeditRequestDto requestDto) {
+                                                    @RequestBody InfoeditRequestDto requestDto) {
         return ResponseEntity.ok(memberService.genderedit(userDetails, requestDto));
     }
 
     // myinfo -> birth 수정
     @PutMapping("/api/mypage/infoedit/birth")
     public ResponseEntity<MyPageInfoDto> birthedit(@AuthenticationPrincipal UserDetailsImpl userDetails,
-                                                   InfoeditRequestDto requestDto) {
+                                                   @RequestBody InfoeditRequestDto requestDto) {
         return ResponseEntity.ok(memberService.birthedit(userDetails, requestDto));
     }
 
@@ -211,7 +213,7 @@ public class MemberController {
     // profile 수정
     @PutMapping("/api/mypage/profile")
     public ResponseEntity<ProfileDto> profileedit(@AuthenticationPrincipal UserDetailsImpl userDetails,
-                                                  ProfileEditRequestDto requestDto) {
+                                                  @RequestBody ProfileEditRequestDto requestDto) {
         return ResponseEntity.ok(memberService.profileedit(userDetails, requestDto));
     }
 

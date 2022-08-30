@@ -17,8 +17,6 @@ public class Concern {
     private Long id;
     @Column
     private String concern;
-    @Column
-    private int Count;
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "member_id")
     private Member member;
