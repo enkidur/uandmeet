@@ -23,12 +23,14 @@ public class ApiController {
     @PostMapping("/allow_info/basic")
     public List<OpenApiResponseParams> fetch() throws UnsupportedEncodingException, ParseException {
         return openApiManager.fetch();
-
     }
 
     @GetMapping("/allow_info/dataRequest")
     public List<OpenApiResponseParams> dataRequest() {
         return openApiManager.dataRequest();
     }
+
+
+
 }
 

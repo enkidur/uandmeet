@@ -52,6 +52,7 @@ public class BoardService {
         Category category = categoryRepository.findAllByCategory(boardRequestDto.getCategory())
                 .orElseThrow(() -> new CustomException(ErrorCode.EMPTY_CONTENT));
 
+
         Siarea siarea = siareaRepostiory.findByCtpKorNmAbbreviation(boardRequestDto.getCity())
                 .orElseThrow(() -> new CustomException(ErrorCode.EMPTY_CONTENT));
 

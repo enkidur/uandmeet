@@ -251,9 +251,9 @@ public class MemberController {
         return "user";
     }
 
-    @PostMapping("/login/google")
-    public String tem(){
-        return "login.html";
-    }
+//    @GetMapping("/login/google")
+//    public String tem(){
+//        return "redirect:login.html";
+//    }
 
 }

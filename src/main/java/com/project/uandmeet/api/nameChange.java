@@ -5,7 +5,7 @@ public class nameChange {
         String subChar = null;
         if (ctpKorNm.contains("특별") || ctpKorNm.contains("광역"))
             subChar = ctpKorNm.substring(0, 2);
-        else if (ctpKorNm.contains("도")) {
+        else if (ctpKorNm.contains("도")) { // 경기도
             if (ctpKorNm.length() < 4)
                 subChar = ctpKorNm.substring(0, 2);
             else {

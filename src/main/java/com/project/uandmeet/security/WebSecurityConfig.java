@@ -1,11 +1,10 @@
 package com.project.uandmeet.security;
 
-import com.project.uandmeet.oauth.PrincipalOauth2UserService;
+import com.project.uandmeet.oauth.OAuth2SuccessHandler;
+import com.project.uandmeet.oauth.CustomOAuth2UserService;
 
-import com.project.uandmeet.oauth.PrincipalOauth2UserService;
 import com.project.uandmeet.security.jwt.JwtAuthenticationFilter;
 //import com.project.uandmeet.security.jwt.JwtExceptionFilter;
-import com.project.uandmeet.security.jwt.JwtExceptionFilter;
 import com.project.uandmeet.security.jwt.JwtTokenProvider;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,8 +18,6 @@ import org.springframework.security.config.annotation.web.builders.WebSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.config.http.SessionCreationPolicy;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-import org.springframework.security.oauth2.client.web.OAuth2LoginAuthenticationFilter;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.security.web.authentication.www.BasicAuthenticationFilter;
 import org.springframework.web.cors.CorsConfiguration;
@@ -44,7 +41,8 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
     private final CorsFilter corsFilter;
 
     private final JwtTokenProvider jwtTokenProvider;
-    private final PrincipalOauth2UserService principalOauth2UserService;
+    private final CustomOAuth2UserService principalOauth2UserService;
+    private final OAuth2SuccessHandler oAuth2SuccessHandler;
 
     @Bean
     @Override
@@ -93,13 +91,11 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
                 .addFilterBefore(new JwtAuthenticationFilter(jwtTokenProvider), UsernamePasswordAuthenticationFilter.class)
                 .addFilterBefore(new JwtAuthenticationFilter(jwtTokenProvider), BasicAuthenticationFilter.class);
 
-//        http.authorizeRequests()
-//                .and()
-//                .oauth2Login()
-//                .loginPage("/login/google")
-//                .userInfoEndpoint()
-//                .userService(principalOauth2UserService);
-
+        http.oauth2Login()
+              .successHandler(oAuth2SuccessHandler)
+              .userInfoEndpoint()
+              .userService(principalOauth2UserService);
+    }
         // 추가 예정
 
 //        http.oauth2Login()
@@ -108,7 +104,7 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 //                .userService(principalOauth2UserService);
 
 
-    }
+
 
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
