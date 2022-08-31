@@ -3,7 +3,6 @@ package com.project.uandmeet.model;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import org.hibernate.annotations.DynamicUpdate;
 
 import javax.persistence.*;
 
@@ -12,13 +11,14 @@ import javax.persistence.*;
 @NoArgsConstructor
 @Entity
 public class Concern {
+
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+
     @Column
     private String concern;
-    @Column
-    private int Count;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "member_id")
     private Member member;

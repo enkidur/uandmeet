@@ -1,4 +1,4 @@
-package com.project.uandmeet.chat.dto;
+package com.project.uandmeet.chat.dto.request;
 
 import com.project.uandmeet.chat.model.ChatMessage;
 import lombok.Getter;
@@ -13,4 +13,6 @@ public class ChatMessageRequestDto {
     private String nickname;
     private String sender;
     private String message;
+    private String createdAt;
 }
+

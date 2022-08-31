@@ -19,6 +19,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
+import java.io.IOException;
 import java.util.List;
 
 @RestController
@@ -34,8 +35,8 @@ public class BoardCotroller {
 
     //게시물 작성
     @PostMapping("/api/board/create")
-    private CustomException boardNew(@RequestBody BoardRequestDto.createAndCheck boardRequestDto,
-                                     @AuthenticationPrincipal UserDetailsImpl userDetails) {
+    private CustomException boardNew(@ModelAttribute BoardRequestDto.createAndCheck boardRequestDto,
+                                     @AuthenticationPrincipal UserDetailsImpl userDetails) throws IOException {
         System.out.println(userDetails.getMember().getUsername());
         return boardService.boardNew(boardRequestDto, userDetails);
     }

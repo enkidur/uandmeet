@@ -1,5 +1,6 @@
 package com.project.uandmeet.service;
 
+import com.project.uandmeet.dto.ImageDto;
 import com.project.uandmeet.dto.boardDtoGroup.BoardResponseFinalDto;
 import com.project.uandmeet.dto.commentsDtoGroup.CommentsInquiryDto;
 import com.project.uandmeet.dto.commentsDtoGroup.CommentsReponseDto;
@@ -13,6 +14,7 @@ import com.project.uandmeet.dto.boardDtoGroup.LikeDto;
 import com.project.uandmeet.model.*;
 import com.project.uandmeet.repository.*;
 import com.project.uandmeet.security.UserDetailsImpl;
+import com.project.uandmeet.service.S3.S3Uploader;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -21,7 +23,10 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
+
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -35,8 +40,9 @@ public class BoardService {
     private final CategoryRepository categoryRepository;
     private final LikedRepository likedRepository;
     private final EntryRepository entryRepository;
-
     private final CommentRepository commentRepository;
+    private final S3Uploader s3Uploader;
+    private final String POST_IMAGE_DIR = "static";
 
     private final SiareaRepostiory siareaRepostiory;
     private final GuareaRepostiory guareaRepostiory;
@@ -44,36 +50,51 @@ public class BoardService {
 
     //게시판 생성
     @Transactional
-    public CustomException boardNew(BoardRequestDto.createAndCheck boardRequestDto, UserDetailsImpl userDetails) {
+    public CustomException boardNew(BoardRequestDto.createAndCheck boardRequestDto, UserDetailsImpl userDetails) throws IOException {
         //로그인 유저 정보.
         Member memberTemp = memberRepostiory.findByUsername(userDetails.getUsername())
                 .orElseThrow(() -> new CustomException(ErrorCode.EMPTY_CONTENT));
 
-        Category category = categoryRepository.findAllByCategory(boardRequestDto.getCategory())
-                .orElseThrow(() -> new CustomException(ErrorCode.EMPTY_CONTENT));
-
-
-        Siarea siarea = siareaRepostiory.findByCtpKorNmAbbreviation(boardRequestDto.getCity())
-                .orElseThrow(() -> new CustomException(ErrorCode.EMPTY_CONTENT));
-
-        Guarea guarea = null;
-        try {
-            guarea = guareaRepostiory.findAllBySiareaAndSigKorNm(siarea,boardRequestDto.getGu())
+            Category category = categoryRepository.findAllByCategory(boardRequestDto.getCategory())
                     .orElseThrow(() -> new CustomException(ErrorCode.EMPTY_CONTENT));
-        }
-        catch (Exception e) {
-            System.out.println(e);
-            throw new CustomException(ErrorCode.EMPTY_CONTENT);
+
+        if(boardRequestDto.getBoardType().equals("matching")) {
+            Siarea siarea = siareaRepostiory.findByCtpKorNmAbbreviation(boardRequestDto.getCity())
+                    .orElseThrow(() -> new CustomException(ErrorCode.EMPTY_CONTENT));
+
+            Guarea guarea = null;
+            try {
+                guarea = guareaRepostiory.findAllBySiareaAndSigKorNm(siarea, boardRequestDto.getGu())
+                        .orElseThrow(() -> new CustomException(ErrorCode.EMPTY_CONTENT));
+            } catch (Exception e) {
+                System.out.println(e);
+                throw new CustomException(ErrorCode.EMPTY_CONTENT);
+            }
         }
 
-        Board board = new Board(memberTemp, category, boardRequestDto,siarea,guarea);
+        if (boardRequestDto.getUrlImage() != null) {
 
-        try {
-            boardRepository.save(board);
-            return new CustomException(ErrorCode.COMPLETED_OK);
-        } catch (Exception e) {
-            System.out.println(e);
-            return new CustomException(ErrorCode.INTERNAL_SERVER_ERROR);
+            ImageDto uploadImage = s3Uploader.upload(boardRequestDto.getUrlImage(), POST_IMAGE_DIR);
+
+            try {
+                Board board = new Board(memberTemp, category, boardRequestDto, uploadImage.getImageUrl());
+                boardRepository.save(board);
+                return new CustomException(ErrorCode.COMPLETED_OK);
+            } catch (Exception e) {
+                System.out.println(e);
+                return new CustomException(ErrorCode.INTERNAL_SERVER_ERROR);
+            }
+        } else {
+            Board board = new Board(memberTemp, category, boardRequestDto);
+
+            try {
+                boardRepository.save(board);
+                return new CustomException(ErrorCode.COMPLETED_OK);
+
+            } catch (Exception e) {
+                System.out.println(e);
+                return new CustomException(ErrorCode.INTERNAL_SERVER_ERROR);
+            }
         }
     }
 

@@ -44,53 +44,47 @@ public class EmailService {
 
     //이메일 보낼 양식
     public String joinEmail(String email) throws IOException { // 컨트롤러에서 아이디가 넘어오면서 붙을 스트링값
-
-        String[] emailadress = email.split("@");
-        String id = emailadress[0];
-        String host = emailadress[1];
-//        String pattern = "^[a-zA-Z0-9]*$";
-//        String pattern = "^[a-zA-Z0-9_!#$%&'\\*+/=?{|}~^.-]+@[a-zA-Z0-9.-]+.[a-zA-Z0-9.-]*$";
-//        String idpattern = "^[a-zA-Z0-9_!#$%&'\\*+/=?{|}~^.-]*$";
-//        String hostpattern = "^[a-zA-Z0-9.-]*$";
-//        // email 조건
-//        // ID 영문 대소문자, 숫자, _!#$%&'\*+/=?{|}~^.- 특문허용
-//        // Host 시작전 @, 영문 대소문자, 숫자, .-특문허용
-//
-//        // 회원가입 username 조건
-//        if (username.length() < 10) {
-//            throw new IllegalArgumentException("이메일을 10자 이상 입력하세요");
-//        } else if (!Pattern.matches(idpattern, id)) {
-//            throw new IllegalArgumentException("id에 알파벳 대소문자와 숫자, 특수기호( _!#$%&'\\*+/=?{|}~^.-)로만 입력하세요");
-//        } else if (!Pattern.matches(hostpattern, host)) {
-//            throw new IllegalArgumentException("host에 알파벳 대소문자와 숫자, 특수기호(.-)로만 입력하세요");
-//        } else if (!Pattern.matches(pattern, username)) {
-//            throw new IllegalArgumentException("이메일 규격에 맞게 입력하세요");
-//        } else if (username.contains("script")) {
-//            throw new IllegalArgumentException("xss공격 멈춰주세요.");
-//        }
-
-        // email 중복 확인
-        checkDuplicateEmail(email);
-
         if (emailCnt < 4) {
+            emailCnt += 1;
+            int restCnt = 3 - emailCnt;
             makeRandomNumber();
             //인증메일 보내기
-            String setFrom = "zkraudcka@naver.com"; // email-config에 설정한 자신의 이메일 주소를 입력
+            String setFrom = "wkraudcka@naver.com"; // email-config에 설정한 자신의 이메일 주소를 입력
             String toMail = email;
             String title = "회원 가입 인증 이메일 입니다."; // 이메일 제목
             String content =
-                    "홈페이지를 방문해주셔서 감사합니다." +    //html 형식으로 작성 !
-                            "<br><br>" +
-                            "인증 번호는 " + authNumber + "입니다." +
-                            "<br>" +
-                            "해당 인증번호를 인증번호 확인란에 기입하여 주세요."; //이메일 내용 삽입
+//                    "홈페이지를 방문해주셔서 감사합니다." +   //html 형식으로 작성 !
+//                            "<br><br>" +
+//                            "인증 번호는 " + authNumber + "입니다." +
+//                            "<br>" +
+//                            "해당 인증번호를 인증번호 확인란에 기입하여 주세요."; //이메일 내용 삽입
+            " <div" 																																																	+
+                    "	style=\"font-family: 'Apple SD Gothic Neo', 'sans-serif' !important; width: 400px; height: 600px; border-top: 4px solid #00CFFF; margin: 100px auto; padding: 30px 0; box-sizing: border-box;\">"		+
+                    "	<h1 style=\"margin: 0; padding: 0 5px; font-size: 28px; font-weight: 400;\">"																															+
+                    "		<span style=\"font-size: 15px; margin: 0 0 10px 3px;\">너나만나</span><br />"																													+
+                    "		<span style=\"color: #00CFFF\">메일인증</span> 안내입니다."																																				+
+                    "	</h1>\n"																																																+
+                    "	<p style=\"font-size: 16px; line-height: 26px; margin-top: 50px; padding: 0 5px;\">"																													+
+                    toMail																																																+
+                    "		님 안녕하세요.<br />"																																													+
+                    "		너나만나에 가입해 주셔서 진심으로 감사드립니다.<br />"																																						+
+                    "		아래 <b style=\"color: #00CFFF\">'인증 번호'</b> 를 입력하여 회원가입을 완료해 주세요.<br />"																													+
+                    "		감사합니다."																																															+
+                    "	</p>"																																																	+
+					"          <div style=\"text-align: center;\"><h1><b style=\"color: #00CFFF\" >" + authNumber + "<br /><h1></div>"																																										+
+                    "	<div style=\"border-top: 1px solid #DDD; padding: 5px;\"></div>"																																		+
+                    "<br>" +
+                    "남은 인증 횟수 : " + restCnt +
+                    " </div>";
+
             mailSend(setFrom, toMail, title, content);
-            emailCnt += 1;
-            int restCnt = 3 - emailCnt;
+
             return "인증 번호 :" + authNumber + "남은 횟수 :"+ restCnt;
         }
         return "인증 횟수를 초과하였습니다. 1시간 뒤에 다시 시도해 주세요.";
     }
+
+
 
     public void checkDuplicateEmail(String username) {
         Optional<Member> member = memberRepository.findByUsername(username);
@@ -116,7 +110,7 @@ public class EmailService {
             }
 
             // 유효 시간(3분)동안 {fromEmail, authKey} 저장
-            redisUtil.setDataExpire(authNumber, setFrom, 60 * 3L);
+            redisUtil.setDataExpire(authNumber, setFrom, 60 * 5L);
             // 횟수
             redisUtil.setDataExpire("Cnt" + authNumber, String.valueOf(emailCnt),60 * 60L);
             // 유효 시간(1시간)동안 {toEmail, emailCnt} 저장
