@@ -213,7 +213,7 @@ public class MemberController {
     // profile 수정
     @PutMapping("/api/mypage/profile")
     public ResponseEntity<ProfileDto> profileedit(@AuthenticationPrincipal UserDetailsImpl userDetails,
-                                                  @RequestBody ProfileEditRequestDto requestDto) {
+                                                  @RequestBody ProfileEditRequestDto requestDto) throws IOException {
         return ResponseEntity.ok(memberService.profileedit(userDetails, requestDto));
     }
 

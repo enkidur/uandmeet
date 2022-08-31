@@ -1,6 +1,7 @@
 package com.project.uandmeet.service;
 
 import com.project.uandmeet.dto.*;
+import com.project.uandmeet.dto.boardDtoGroup.BoardRequestDto;
 import com.project.uandmeet.exception.CustomException;
 import com.project.uandmeet.exception.ErrorCode;
 import com.project.uandmeet.model.Concern;
@@ -13,6 +14,7 @@ import com.project.uandmeet.repository.MemberRepository;
 import com.project.uandmeet.security.UserDetailsImpl;
 import com.project.uandmeet.security.jwt.JwtProperties;
 import com.project.uandmeet.security.jwt.JwtTokenProvider;
+import com.project.uandmeet.service.S3.S3Uploader;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -37,6 +39,8 @@ public class MemberService {
     private final EmailService emailService;
     private final RedisUtil redisUtil;
     private final JwtTokenProvider jwtTokenProvider;
+    private final S3Uploader s3Uploader;
+    private final String POST_IMAGE_DIR = "static";
     private String authNumber; // 난수 번호
     private int emailCnt; // email 인증 횟수
 
@@ -263,7 +267,7 @@ public class MemberService {
         );
         String nickname = member.getNickname(); // 고민중
         List<JoinCnt> joinCnt = member.getJoinCnt();
-        member.setConcern(concern);
+
         MypageDto mypageDto = new MypageDto(nickname, concern, joinCnt);
         return mypageDto;
     }
@@ -336,16 +340,16 @@ public class MemberService {
     }
 
     // profile 수정
-    public ProfileDto profileedit(UserDetailsImpl userDetails, ProfileEditRequestDto requestDto) {
+    public ProfileDto profileedit(UserDetailsImpl userDetails, ProfileEditRequestDto requestDto) throws IOException {
         String username = userDetails.getUsername();
         Member member = memberRepository.findByUsername(username).orElseThrow(
                 () -> new RuntimeException("볼수 없는 정보입니다")
         );
         String nickname = member.getNickname();
         List<Star> star = member.getStar();
-        String profile = requestDto.getProfile();
-        member.setProfile(profile);
-        ProfileDto profileDto = new ProfileDto(nickname, star, profile);
+        String uploadImage = String.valueOf(s3Uploader.upload(requestDto.getData(), POST_IMAGE_DIR));
+        member.setProfile(uploadImage);
+        ProfileDto profileDto = new ProfileDto(nickname, star, uploadImage);
         return profileDto;
     }
 
