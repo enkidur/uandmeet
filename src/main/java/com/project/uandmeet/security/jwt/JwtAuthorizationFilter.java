@@ -37,7 +37,7 @@ public class JwtAuthorizationFilter extends BasicAuthenticationFilter {
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain chain)
             throws IOException, ServletException {
-        String header = request.getHeader(HttpHeaders.AUTHORIZATION);
+        String header = request.getHeader(JwtProperties.HEADER_ACCESS);
         // 로그인, 리프레시 요청이라면 토큰 검사하지 않음
         if (request.getServletPath().equals("/login") || request.getServletPath().equals("/refresh")) {
             chain.doFilter(request, response);
@@ -48,7 +48,7 @@ public class JwtAuthorizationFilter extends BasicAuthenticationFilter {
             return;
         }
         System.out.println("header : " + header);
-        String token = jwtTokenProvider.setTokenName(request.getHeader(HttpHeaders.AUTHORIZATION));
+        String token = jwtTokenProvider.setTokenName(request.getHeader(JwtProperties.HEADER_ACCESS));
 
 
         // 토큰 검증

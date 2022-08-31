@@ -3,6 +3,8 @@ package com.project.uandmeet.security;
 
 
 //import com.project.uandmeet.security.jwt.JwtExceptionFilter;
+import com.project.uandmeet.oauth.CustomOAuth2UserService;
+import com.project.uandmeet.oauth.OAuth2SuccessHandler;
 import com.project.uandmeet.redis.RedisUtil;
 import com.project.uandmeet.security.jwt.JwtAuthenticationFilter;
 import com.project.uandmeet.security.jwt.JwtAuthorizationFilter;
@@ -41,7 +43,10 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 
     private final JwtTokenProvider jwtTokenProvider;
     private final RedisUtil redisUtil;
-//    private final PrincipalOauth2UserService principalOauth2UserService;
+
+    private final CustomOAuth2UserService customOAuth2UserService;
+
+    private final OAuth2SuccessHandler oAuth2SuccessHandler;
 
     @Bean
     @Override
@@ -101,10 +106,10 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 
         // 추가 예정
 
-//        http.oauth2Login()
-//                .successHandler(successHandler)
-//                .userInfoEndpoint()
-//                .userService(principalOauth2UserService);
+        http.oauth2Login()
+                .successHandler(oAuth2SuccessHandler)
+                .userInfoEndpoint()
+                .userService(customOAuth2UserService);
 
 
     }
