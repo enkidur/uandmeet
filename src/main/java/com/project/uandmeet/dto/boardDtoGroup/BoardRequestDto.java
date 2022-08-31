@@ -1,14 +1,16 @@
 package com.project.uandmeet.dto.boardDtoGroup;
 
 import lombok.*;
+import org.springframework.web.multipart.MultipartFile;
 
 
 public class BoardRequestDto {
     //정보공유 : information,  매칭:matching 둘중 하나.
 
-    @Getter
-    @AllArgsConstructor
+    @ToString
+    @Data
     @NoArgsConstructor
+    @AllArgsConstructor
     public static class createAndCheck {
 
         private String boardType;
@@ -20,11 +22,13 @@ public class BoardRequestDto {
         private String city;
         private String gu;
         private String maxEntry;
+        private MultipartFile urlImage;
+
 
         //경도
-        private double lat;
+        private String lat;
         //위도
-        private double lng;
+        private String lng;
 
     }
 
