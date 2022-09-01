@@ -1,5 +1,6 @@
 package com.project.uandmeet.service;
 
+import com.project.uandmeet.dto.ImageDto;
 import com.project.uandmeet.dto.boardDtoGroup.BoardResponseFinalDto;
 import com.project.uandmeet.dto.commentsDtoGroup.CommentsInquiryDto;
 import com.project.uandmeet.dto.commentsDtoGroup.CommentsReponseDto;
@@ -13,6 +14,7 @@ import com.project.uandmeet.dto.boardDtoGroup.LikeDto;
 import com.project.uandmeet.model.*;
 import com.project.uandmeet.repository.*;
 import com.project.uandmeet.security.UserDetailsImpl;
+import com.project.uandmeet.service.S3.S3Uploader;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -22,9 +24,10 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
+
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 
 @Service
 @RequiredArgsConstructor //생성자 미리 생성.
@@ -35,16 +38,15 @@ public class BoardService {
     private final CategoryRepository categoryRepository;
     private final LikedRepository likedRepository;
     private final EntryRepository entryRepository;
-
     private final CommentRepository commentRepository;
+    private final S3Uploader s3Uploader;
+    private final String POST_IMAGE_DIR = "static";
 
-    private final SiareaRepostiory siareaRepostiory;
-    private final GuareaRepostiory guareaRepostiory;
 
 
     //게시판 생성
     @Transactional
-    public CustomException boardNew(BoardRequestDto.createAndCheck boardRequestDto, UserDetailsImpl userDetails) {
+    public CustomException boardNew(BoardRequestDto.createAndCheck boardRequestDto, UserDetailsImpl userDetails) throws IOException {
         //로그인 유저 정보.
         Member memberTemp = memberRepostiory.findByUsername(userDetails.getUsername())
                 .orElseThrow(() -> new CustomException(ErrorCode.EMPTY_CONTENT));
@@ -53,23 +55,19 @@ public class BoardService {
                 .orElseThrow(() -> new CustomException(ErrorCode.EMPTY_CONTENT));
 
 
-        Siarea siarea = siareaRepostiory.findByCtpKorNmAbbreviation(boardRequestDto.getCity())
-                .orElseThrow(() -> new CustomException(ErrorCode.EMPTY_CONTENT));
+        if (boardRequestDto.getData() != null) {
+            String uploadImage = String.valueOf(s3Uploader.upload(boardRequestDto.getData(), POST_IMAGE_DIR));
 
-        Guarea guarea = null;
-        try {
-            guarea = guareaRepostiory.findAllBySiareaAndSigKorNm(siarea,boardRequestDto.getGu())
-                    .orElseThrow(() -> new CustomException(ErrorCode.EMPTY_CONTENT));
-        }
-        catch (Exception e) {
-            System.out.println(e);
-            throw new CustomException(ErrorCode.EMPTY_CONTENT);
-        }
+            Board board = new Board(memberTemp, category, boardRequestDto, uploadImage);
 
-        Board board = new Board(memberTemp, category, boardRequestDto,siarea,guarea);
-
-        try {
             boardRepository.save(board);
+        } else {
+            Board board = new Board(memberTemp, category, boardRequestDto);
+
+            boardRepository.save(board);
+        }
+
+        try {
             return new CustomException(ErrorCode.COMPLETED_OK);
         } catch (Exception e) {
             System.out.println(e);
@@ -80,56 +78,16 @@ public class BoardService {
     //매칭 게시물 전체 조회 (카테고리별 전체 조회)
     @Transactional
     public BoardResponseFinalDto boardMatchingAllInquiry(String type, String cate, Integer page, Integer amount, String city, String gu) {
-        Sort sort = Sort.by("createdAt").ascending();
+        Sort sort = Sort.by("createdAt").descending();
         PageRequest pageRequest = PageRequest.of(page, amount, sort);
         Page<Board> boardPage;
-        Category category =null;
-        Siarea siarea = null;
-        Guarea guarea = null;
-        //페이지 번호 변경
-        if(page > 0)
-            page = page - 1;
-        else if(page <= 0)
-            page = 0;
-
-        //들어온 문자열 제차 확인
-        if(!(cate.equals("all")||cate.equals("ALL"))) {
-
-            category = categoryRepository.findAllByCategory(cate)
-                    .orElseThrow(() -> new CustomException(ErrorCode.EMPTY_CONTENT));
-        }
-
-        if(!(city.equals("all") || city.equals("ALL"))){
-            siarea = siareaRepostiory.findByCtpKorNmAbbreviation(city)
-                    .orElseThrow(() -> new CustomException(ErrorCode.EMPTY_CONTENT));
-        }
-
-        if(!(gu.equals("all") || gu.equals("All"))) {
-            guarea = guareaRepostiory.findAllBySiareaAndSigKorNm(siarea, gu)
-                    .orElseThrow(() -> new CustomException(ErrorCode.EMPTY_CONTENT));
-        }
 
         //개시판 정보 추출
-        if(cate.equals("all")||cate.equals("ALL")) {
-            if(city.equals("all") || city.equals("ALL"))
-                boardPage = boardRepository.findAllByBoardType(type, pageRequest);
-            else {
-                if(gu.equals("all") || gu.equals("All"))
-                    boardPage = boardRepository.findAllByBoardTypeAndCity(type, pageRequest, siarea);
-                else
-                    boardPage = boardRepository.findAllByBoardTypeAndCityAndGu(type, pageRequest, siarea, guarea);
-            }
+        if (cate.equals("all") || cate.equals("ALL")) {
+            boardPage = boardRepository.findAllByBoardType(type, pageRequest);
+
         } else
-        {
-            if(city.equals("all") || city.equals("ALL"))
-                boardPage = boardRepository.findAllByBoardTypeAndCategory(type, category, pageRequest);
-            else {
-                if (gu.equals("all") || gu.equals("All"))
-                    boardPage = boardRepository.findAllByBoardTypeAndCategoryAndCity(type, category, siarea, pageRequest);
-                else
-                    boardPage = boardRepository.findAllByBoardTypeAndCategoryAndCityAndGu(type, category, pageRequest, siarea, guarea);
-            }
-        }
+            boardPage = boardRepository.findAllByBoardTypeAndCategory(type, cate, pageRequest);
 
         // 찾으 정보를 Dto로 변환 한다.
         List<BoardResponseDto> boardResponseDtos = new ArrayList<>();
@@ -412,15 +370,10 @@ public class BoardService {
     }
 
     public CustomException categoryNew(String category) {
+        Category category1 = new Category(category);
 
-        String[] TEMP = new String[]{"gym", "running", "ridding", "badminton", "tennis", "golf", "hiking", "ballet", "climing", "pilates", "swiming", "boxing", "bowling",
-                "crossfit", "gymnastics", "skateboard", "skate", "pocketball", "ski", "futsal", "pingpong", "basketball", "baseball", "soccer", "volleyball", "etc"};
         try {
-            for (String s : TEMP) {
-                Category category1 = new Category(s);
-                categoryRepository.save(category1);
-            }
-
+            categoryRepository.save(category1);
             return new CustomException(ErrorCode.COMPLETED_OK);
         } catch (Exception e) {
             System.out.println(e);
@@ -434,24 +387,13 @@ public class BoardService {
         Sort sortInfo = Sort.by("createdAt").descending();
         PageRequest pageRequest = PageRequest.of(page, amount, sortInfo);
         Page<Board> boardPage;
-        Category category = null;
-        //페이지 번호 변경
-        if(page > 0)
-            page = page - 1;
-        else if(page <= 0)
-            page = 0;
-
-        //들어온 문자열 제차 확인
-        if((cate.equals("all") || cate.equals("ALL"))) {
-            category = categoryRepository.findAllByCategory(cate)
-                    .orElseThrow(() -> new CustomException(ErrorCode.EMPTY_CONTENT));
-        }
 
         //개시판 정보 추출
         if (cate.equals("all") || cate.equals("ALL")) {
             boardPage = boardRepository.findAllByBoardType(type, pageRequest);
+
         } else
-            boardPage = boardRepository.findAllByBoardTypeAndCategory(type, category, pageRequest);
+            boardPage = boardRepository.findAllByBoardTypeAndCategory(type, cate, pageRequest);
 
         // 찾으 정보를 Dto로 변환 한다.
         List<BoardResponseDto> boardResponseDtos = new ArrayList<>();
@@ -465,7 +407,7 @@ public class BoardService {
                 boardResponseDtos.add(boardResponseDto);
             }
         }
-        return new BoardResponseFinalDto(boardResponseDtos, Objects.requireNonNull(boardPage).getTotalElements());
+        return new BoardResponseFinalDto(boardResponseDtos,boardPage.getTotalElements());
     }
 
     //공유 게시물 상세 조회

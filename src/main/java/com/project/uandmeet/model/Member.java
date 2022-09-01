@@ -31,7 +31,7 @@ public class Member {
     private String phone;
 
     @Column
-    private String birth;
+    private String birth; // yyyy-mm-dd구조
 
     @Column
     private String gender;

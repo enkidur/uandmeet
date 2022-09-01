@@ -33,8 +33,8 @@ public class BoardResponseDto {
     public BoardResponseDto(MemberSimpleDto memberSimpleDto ,Board board)
     {
         this.memberSimpleDto = memberSimpleDto;
-        this.city = board.getCity().getCtpKorNmAbbreviation();
-        this.gu = board.getGu().getSigKorNm();
+        this.city = board.getCity();
+        this.gu = board.getGu();
         this.id = board.getId();
         this.createdAt = board.getCreatedAt().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:SS:ss.SSS"));
         this.category = board.getContent();

@@ -42,12 +42,9 @@ public class JwtTokenProvider {
     public final HttpServletResponse response;
 
     private final UserDetailsService userDetailsService;
-//    private Key key = Keys.secretKeyFor(SignatureAlgorithm.HS256);
 
     @PostConstruct
     protected void init() {
-//        byte[] keyBytes = Decoders.BASE64.decode(secretKey);
-//        this.key = Keys.hmacShaKeyFor(keyBytes);
         secretKey = Base64.getEncoder().encodeToString(secretKey.getBytes());
     }
 

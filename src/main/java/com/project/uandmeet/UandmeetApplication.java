@@ -15,8 +15,8 @@ public class UandmeetApplication {
     public BCryptPasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
     }
-    @Bean
-    public JavaMailSenderImpl mailSender() { return new JavaMailSenderImpl(); }
+//    @Bean
+//    public JavaMailSenderImpl mailSender() { return new JavaMailSenderImpl(); }
 
     public static void main(String[] args) {
         SpringApplication.run(UandmeetApplication.class, args);
