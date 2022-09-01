@@ -19,13 +19,12 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
     //맨처음 설정값이라고 보면 편함
     @Override
     public void configureMessageBroker(MessageBrokerRegistry config) {
-        log.info("/sub 발동");
         config.enableSimpleBroker("/sub"); // prefix /sub 로 수신 메시지 구분
         //여기로 데이터가 들어온 경우 messageMapping 으로 JUMP
-        log.info("/pub 발동");
         config.setApplicationDestinationPrefixes("/pub"); // prefix /pub 로 발행 요청
     }
 
+    // TODO: 2022-09-01 도메인, 아이피만 허용하도록 변경해야함
     @Override
     public void registerStompEndpoints(StompEndpointRegistry registry) {
         WebSocketMessageBrokerConfigurer.super.registerStompEndpoints(registry);

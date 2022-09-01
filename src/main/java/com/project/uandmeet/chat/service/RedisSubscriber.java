@@ -1,7 +1,9 @@
-package com.project.uandmeet.redis;
+package com.project.uandmeet.chat.service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.project.uandmeet.chat.model.ChatMessage;
+import com.project.uandmeet.exception.CustomException;
+import com.project.uandmeet.exception.ErrorCode;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.messaging.simp.SimpMessageSendingOperations;
@@ -24,9 +26,9 @@ public class RedisSubscriber {
             // ChatMessage 객채로 맵핑
             ChatMessage chatMessage = objectMapper.readValue(publishMessage, ChatMessage.class);
             // 채팅방을 구독한 클라이언트에게 메시지 발송
-            messagingTemplate.convertAndSend("/sub/api/chat/rooms/" + chatMessage.getRoomId(), chatMessage);
+            messagingTemplate.convertAndSend("/sub/chat/room/" + chatMessage.getBoardId(), chatMessage);
         } catch (Exception e) {
-            log.error("Exception {}", e);
+            throw new CustomException(ErrorCode.FAILED_MESSAGE);
         }
     }
 }

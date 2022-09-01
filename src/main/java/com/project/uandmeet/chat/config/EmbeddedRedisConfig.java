@@ -1,4 +1,4 @@
-package com.project.uandmeet.redis;
+package com.project.uandmeet.chat.config;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Configuration;
