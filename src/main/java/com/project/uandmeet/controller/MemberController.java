@@ -29,11 +29,6 @@ public class MemberController {
     private final KakaoService kakaoService;
     private final EmailService emailService;
 
-    //로그인
-    @PostMapping("/user/login")
-    public String login(@RequestBody LoginRequestDto requestDto) {
-        return memberService.login(requestDto);
-    }
 
     // 회원가입 1. emali check
     @PostMapping("/api/checkemail")

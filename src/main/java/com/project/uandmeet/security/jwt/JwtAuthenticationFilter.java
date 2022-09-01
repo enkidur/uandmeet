@@ -108,7 +108,7 @@ public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilte
         UserDetailsImpl userDetailsImpl = (UserDetailsImpl) authResult.getPrincipal();
 
         // Hash 방식
-        String accessToken = jwtTokenProvider.createToken(userDetailsImpl.getUsername());
+        String accessToken = jwtTokenProvider.createToken(userDetailsImpl.getUsername(), userDetailsImpl.getMember().getId());
 
         String refreshToken = jwtTokenProvider.createRefreshToken();
 
@@ -121,6 +121,9 @@ public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilte
         // 재발급떼문에 setHeader 사용
         response.setHeader(JwtProperties.HEADER_ACCESS, JwtProperties.TOKEN_PREFIX + accessToken);
         response.setHeader(JwtProperties.HEADER_REFRESH, JwtProperties.TOKEN_PREFIX + refreshToken);
+        response.addHeader("username",userDetailsImpl.getUsername());
+        response.addHeader("nickname", userDetailsImpl.getMember().getNickname());
+        response.addHeader("profile", userDetailsImpl.getMember().getProfile());
     }
 
 }

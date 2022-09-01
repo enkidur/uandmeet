@@ -49,11 +49,12 @@ public class JwtTokenProvider {
     }
 
     // 토큰 생성
-    public String createToken(String userPk) {
+    public String createToken(String userPk, Long userId) {
         Claims claims = Jwts.claims().setSubject(userPk);
         Date now = new Date();
         String token= Jwts.builder()
                 .setClaims(claims)//정보저장
+                .claim("userId", userId)
                 .setIssuedAt(now)//토큰 발행 시간 정보
                 .setExpiration(new Date(now.getTime() + ACCESS_EXPIRATION_TIME))
                 .signWith(SignatureAlgorithm.HS256, secretKey)//사용할 암호화 알고리즘

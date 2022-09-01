@@ -169,8 +169,12 @@ public class MemberService {
         // Refresh Token 유효성 검사
         jwtTokenProvider.validateToken(authorizationHeader);
         String username = jwtTokenProvider.getUserPk(authorizationHeader);
+        Member member = memberRepository.findByUsername(username).orElseThrow(
+                ()->new RuntimeException("사용자를 찾을 수 없습니다.")
+        );
+        Long userId = member.getId();
         // Access Token 재발급
-        String accessToken = jwtTokenProvider.createToken(username);
+        String accessToken = jwtTokenProvider.createToken(username, userId);
 
         Map<String, String> accessTokenResponseMap = new HashMap<>();
 
@@ -234,8 +238,8 @@ public class MemberService {
 
     // 비밀번호 변경
     public String passChange(UserDetailsImpl userDetails, PasswordChangeDto passwordChangeDto) {
-        String username = userDetails.getUsername();
-        Member member = memberRepository.findByUsername(username).orElseThrow(
+        Long userId = userDetails.getMember().getId();
+        Member member = memberRepository.findById(userId).orElseThrow(
                 () -> new RuntimeException("해당 권한이 없습니다.")
         );
         if (!passwordChangeDto.getNewPassword().equals(passwordChangeDto.getNewPasswordCheck())) {
@@ -248,8 +252,8 @@ public class MemberService {
 
     // 활동 내역 조회
     public MypageDto action(UserDetailsImpl userDetails) {
-        String username = userDetails.getUsername();
-        Member member = memberRepository.findByUsername(username).orElseThrow(
+        Long userId = userDetails.getMember().getId();
+        Member member = memberRepository.findById(userId).orElseThrow(
                 () -> new RuntimeException("볼수 없는 정보입니다")
         );
         String nickname = member.getNickname();
@@ -261,8 +265,8 @@ public class MemberService {
 
     // 활동내역 -> 관심사 수정
     public MypageDto concernedit(UserDetailsImpl userDetails, List<Concern> concern) {
-        String username = userDetails.getUsername();
-        Member member = memberRepository.findByUsername(username).orElseThrow(
+        Long userId = userDetails.getMember().getId();
+        Member member = memberRepository.findById(userId).orElseThrow(
                 () -> new RuntimeException("수정 권한이 없습니다.")
         );
         String nickname = member.getNickname(); // 고민중
@@ -274,8 +278,8 @@ public class MemberService {
 
     // 활동 페이지 -> 닉네임 수정
     public MypageDto nicknameedit(UserDetailsImpl userDetails, String nickname) {
-        String username = userDetails.getUsername();
-        Member member = memberRepository.findByUsername(username).orElseThrow(
+        Long userId = userDetails.getMember().getId();
+        Member member = memberRepository.findById(userId).orElseThrow(
                 () -> new RuntimeException("수정 권한이 없습니다.")
         );
         List<Concern> concern = member.getConcern();
@@ -291,7 +295,8 @@ public class MemberService {
     // memberInfo 조회
     public MyPageInfoDto myinfo(UserDetailsImpl userDetails) {
         String username = userDetails.getUsername();
-        Member member = memberRepository.findByUsername(username).orElseThrow(
+        Long userId = userDetails.getMember().getId();
+        Member member = memberRepository.findById(userId).orElseThrow(
                 () -> new RuntimeException("볼 수 없는 정보입니다")
         );
         String gender = member.getGender();
@@ -303,7 +308,8 @@ public class MemberService {
     // info -> gender 수정
     public MyPageInfoDto genderedit(UserDetailsImpl userDetails, InfoeditRequestDto requestDto) {
         String username = userDetails.getUsername();
-        Member member = memberRepository.findByUsername(username).orElseThrow(
+        Long userId = userDetails.getMember().getId();
+        Member member = memberRepository.findById(userId).orElseThrow(
                 () -> new RuntimeException("볼 수 없는 정보입니다")
         );
         String gender = requestDto.getGender();
@@ -316,7 +322,8 @@ public class MemberService {
     // info -> birth 수정
     public MyPageInfoDto birthedit(UserDetailsImpl userDetails, InfoeditRequestDto requestDto) {
         String username = userDetails.getUsername();
-        Member member = memberRepository.findByUsername(username).orElseThrow(
+        Long userId = userDetails.getMember().getId();
+        Member member = memberRepository.findById(userId).orElseThrow(
                 () -> new RuntimeException("볼 수 없는 정보입니다")
         );
         String gender = member.getGender();
@@ -328,8 +335,8 @@ public class MemberService {
 
     // profile 조회
     public ProfileDto profile(UserDetailsImpl userDetails) {
-        String username = userDetails.getUsername();
-        Member member = memberRepository.findByUsername(username).orElseThrow(
+        Long userId = userDetails.getMember().getId();
+        Member member = memberRepository.findById(userId).orElseThrow(
                 () -> new RuntimeException("볼수 없는 정보입니다")
         );
         String nickname = member.getNickname();
@@ -341,8 +348,8 @@ public class MemberService {
 
     // profile 수정
     public ProfileDto profileedit(UserDetailsImpl userDetails, ProfileEditRequestDto requestDto) throws IOException {
-        String username = userDetails.getUsername();
-        Member member = memberRepository.findByUsername(username).orElseThrow(
+        Long userId = userDetails.getMember().getId();
+        Member member = memberRepository.findById(userId).orElseThrow(
                 () -> new RuntimeException("볼수 없는 정보입니다")
         );
         String nickname = member.getNickname();
@@ -355,8 +362,8 @@ public class MemberService {
 
     // password 변경
     public String changepass(UserDetailsImpl userDetails, PasswordChangeDto passwordChangeDto) {
-        String username = userDetails.getUsername();
-        Member member = memberRepository.findByUsername(username).orElseThrow(
+        Long userId = userDetails.getMember().getId();
+        Member member = memberRepository.findById(userId).orElseThrow(
                 () -> new RuntimeException("해당 권한이 없습니다.")
         );
         if (!passwordEncoder.encode(passwordChangeDto.getPasswordCheck()).equals(member.getPassword()) && !passwordChangeDto.getNewPassword().equals(passwordChangeDto.getNewPasswordCheck())) {
@@ -369,24 +376,7 @@ public class MemberService {
 
     public void join(MemberRequestDto requestDto) {
         Member member = new Member(requestDto.getUsername(),passwordEncoder.encode(requestDto.getPassword()));
-//        member.setPassword(passwordEncoder.encode(requestDto.getPassword()));
         memberRepository.save(member);
-    }
-
-    // 로그인
-    @Transactional
-    public String login(LoginRequestDto requestDto) {
-        Member member = memberRepository.findByUsername(requestDto.getUsername()).orElseThrow(
-                () -> new NullPointerException("해당 유저를 찾을 수 없습니다.")
-        );
-
-        if (!passwordEncoder.matches(requestDto.getPassword(), member.getPassword())) {
-            throw new IllegalArgumentException("비밀번호를 확인해 주세요");
-        }
-        String refreshToken = jwtTokenProvider.createRefreshToken();
-        redisUtil.setDataExpire(requestDto.getUsername(),refreshToken,JwtProperties.REFRESH_EXPIRATION_TIME);
-        jwtTokenProvider.createToken(requestDto.getUsername());
-        return "완료";
     }
 
     //채팅회원관련
