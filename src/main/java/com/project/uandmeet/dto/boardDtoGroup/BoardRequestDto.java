@@ -21,17 +21,20 @@ public class BoardRequestDto {
         private String endDateAt;
         private String city;
         private String gu;
-        private MultipartFile data;
+        private String maxEntry;
+        private MultipartFile urlImage;
 
 
         //경도
-        private double lat;
+        private String lat;
         //위도
-        private double lng;
+        private String lng;
 
     }
 
-    @Getter
+    @Data
+    @AllArgsConstructor
+    @NoArgsConstructor
     public static class updateMatching {
 
         private String title;
@@ -39,7 +42,9 @@ public class BoardRequestDto {
         private String boardimage;
         private String endDateAt;
     }
-    @Getter
+    @Data
+    @AllArgsConstructor
+    @NoArgsConstructor
     public static class updateInfo {
 
         private String title;

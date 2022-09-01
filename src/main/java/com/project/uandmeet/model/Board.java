@@ -35,9 +35,9 @@ public class Board extends BaseTime{
     private Long commentCount = 0L;
 
     //경도
-    private double lat;
+    private String lat;
     //위도
-    private double lng;
+    private String lng;
 
     private String boardimage;
 
