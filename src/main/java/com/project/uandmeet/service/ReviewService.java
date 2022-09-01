@@ -41,6 +41,7 @@ public class ReviewService {
         return review;
     }
 
+
     public Review createReview(UserDetailsImpl userDetails, ReviewRequestDto requestDto) {
         Member from = userDetails.getMember();
         Member to = memberRepostiory.findById(requestDto.getToId()).orElseThrow(
@@ -52,4 +53,6 @@ public class ReviewService {
         Review review = new Review(board, from, to, requestDto.getNum(), requestDto.getReview());
         return review;
     }
+
+
 }

@@ -108,7 +108,7 @@ public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilte
         UserDetailsImpl userDetailsImpl = (UserDetailsImpl) authResult.getPrincipal();
 
         // Hash 방식
-        String accessToken = jwtTokenProvider.createToken(userDetailsImpl.getUsername());
+        String accessToken = jwtTokenProvider.createToken(userDetailsImpl.getUsername(), userDetailsImpl.getMember().getId());
 
         String refreshToken = jwtTokenProvider.createRefreshToken();
 

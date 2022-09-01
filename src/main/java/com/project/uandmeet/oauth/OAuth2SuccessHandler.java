@@ -30,7 +30,7 @@ public class OAuth2SuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
 
         UserDetailsImpl userDetails = (UserDetailsImpl) authentication.getPrincipal(); // 구글 이메일
 
-        String accessToken = jwtTokenProvider.createToken(userDetails.getUsername());
+        String accessToken = jwtTokenProvider.createToken(userDetails.getUsername(), userDetails.getMember().getId());
 
         String refreshToken = jwtTokenProvider.createRefreshToken();
 

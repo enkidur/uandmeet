@@ -28,10 +28,10 @@ public class ReviewController {
     // review 별점 작성
     @PostMapping("/api/reviewstar")
     public ResponseEntity<Review> insertScore(@AuthenticationPrincipal UserDetailsImpl userDetails, ReviewStarRequestDto requestDto) {
-
         return ResponseEntity.ok(reviewService.insertScore(userDetails, requestDto));
     }
 
+    // review 내용 작성
     @PostMapping("/api/reivew")
     public ResponseEntity<Review> createReview(@AuthenticationPrincipal UserDetailsImpl userDetails, ReviewRequestDto requestDto) {
         return ResponseEntity.ok(reviewService.createReview(userDetails, requestDto));

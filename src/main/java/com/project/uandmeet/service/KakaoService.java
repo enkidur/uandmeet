@@ -155,7 +155,7 @@ public class KakaoService {
 
     private void createToken(Member member) {
 
-        String accessToken = jwtTokenProvider.createToken(member.getUsername());
+        String accessToken = jwtTokenProvider.createToken(member.getUsername(), member.getId());
         String refreshToken = jwtTokenProvider.createRefreshToken();
 
 //        String accessToken = JWT.create()

@@ -169,8 +169,12 @@ public class MemberService {
         // Refresh Token 유효성 검사
         jwtTokenProvider.validateToken(authorizationHeader);
         String username = jwtTokenProvider.getUserPk(authorizationHeader);
+        Member member = memberRepository.findByUsername(username).orElseThrow(
+                ()->new RuntimeException("존재하지 않는 사용자입니다.")
+        );
+        Long memberId = member.getId();
         // Access Token 재발급
-        String accessToken = jwtTokenProvider.createToken(username);
+        String accessToken = jwtTokenProvider.createToken(username, memberId);
 
         Map<String, String> accessTokenResponseMap = new HashMap<>();
 
@@ -201,21 +205,35 @@ public class MemberService {
             Member member = memberRepository.findByUsername(username).orElseThrow(
                     () -> new IllegalArgumentException("해당 아이디가 없습니다.")
             );
-            member.setPassword(passwordEncoder.encode(authNumber));
+//            member.setPassword(passwordEncoder.encode(authNumber));
+            emailCnt += 1;
+            int restCnt = 3 - emailCnt;
 
             //인증메일 보내기
             String setFrom = "wjdgns5488@naver.com"; // email-config에 설정한 자신의 이메일 주소를 입력
             String toMail = username;
             String title = "비밀번호 찾기 이메일 입니다."; // 이메일 제목
             String content =
-                    "홈페이지를 방문해주셔서 감사합니다." +    //html 형식으로 작성 !
-                            "<br><br>" +
-                            "비밀번호 찾기 인증번호는 " + authNumber + "입니다." +
+                    " <div" 																																																	+
+                            "	style=\"font-family: 'Apple SD Gothic Neo', 'sans-serif' !important; width: 400px; height: 600px; border-top: 4px solid #00CFFF; margin: 100px auto; padding: 30px 0; box-sizing: border-box;\">"		+
+                            "	<h1 style=\"margin: 0; padding: 0 5px; font-size: 28px; font-weight: 400;\">"																															+
+                            "		<span style=\"font-size: 15px; margin: 0 0 10px 3px;\">너나만나</span><br />"																													+
+                            "		<span style=\"color: #00CFFF\">메일인증</span> 안내입니다."																																				+
+                            "	</h1>\n"																																																+
+                            "	<p style=\"font-size: 16px; line-height: 26px; margin-top: 50px; padding: 0 5px;\">"																													+
+                            toMail																																																+
+                            "		님 안녕하세요.<br />"																																													+
+                            "		너나만나의 비밀번호 찾기 이메일입니다.<br />"																																						+
+                            "		아래 <b style=\"color: #00CFFF\">'인증 번호'</b> 를 입력하여 비밀번호 찾기를 완료해 주세요.<br />"																													+
+                            "		감사합니다."																																															+
+                            "	</p>"																																																	+
+                            "          <div style=\"text-align: center;\"><h1><b style=\"color: #00CFFF\" >" + authNumber + "<br /><h1></div>"																																										+
+                            "	<div style=\"border-top: 1px solid #DDD; padding: 5px;\"></div>"																																		+
                             "<br>" +
-                            "인증 후 비밀번호를 변경해 주세요"; //이메일 내용 삽입
+                            "남은 인증 횟수 : " + restCnt +
+                            " </div>";
             emailService.mailSend(setFrom, toMail, title, content);
-            emailCnt += 1;
-            int restCnt = 3 - emailCnt;
+
             // 유효 시간(3분)동안 {fromEmail, authKey} 저장
             redisUtil.setDataExpire(authNumber, setFrom, 60 * 3L);
             // 횟수
@@ -248,8 +266,8 @@ public class MemberService {
 
     // 활동 내역 조회
     public MypageDto action(UserDetailsImpl userDetails) {
-        String username = userDetails.getUsername();
-        Member member = memberRepository.findByUsername(username).orElseThrow(
+        Long memberId = userDetails.getMember().getId();
+        Member member = memberRepository.findById(memberId).orElseThrow(
                 () -> new RuntimeException("볼수 없는 정보입니다")
         );
         String nickname = member.getNickname();
@@ -261,8 +279,8 @@ public class MemberService {
 
     // 활동내역 -> 관심사 수정
     public MypageDto concernedit(UserDetailsImpl userDetails, List<Concern> concern) {
-        String username = userDetails.getUsername();
-        Member member = memberRepository.findByUsername(username).orElseThrow(
+        Long memberId = userDetails.getMember().getId();
+        Member member = memberRepository.findById(memberId).orElseThrow(
                 () -> new RuntimeException("수정 권한이 없습니다.")
         );
         String nickname = member.getNickname(); // 고민중
@@ -274,8 +292,8 @@ public class MemberService {
 
     // 활동 페이지 -> 닉네임 수정
     public MypageDto nicknameedit(UserDetailsImpl userDetails, String nickname) {
-        String username = userDetails.getUsername();
-        Member member = memberRepository.findByUsername(username).orElseThrow(
+        Long memberId = userDetails.getMember().getId();
+        Member member = memberRepository.findById(memberId).orElseThrow(
                 () -> new RuntimeException("수정 권한이 없습니다.")
         );
         List<Concern> concern = member.getConcern();
@@ -291,7 +309,8 @@ public class MemberService {
     // memberInfo 조회
     public MyPageInfoDto myinfo(UserDetailsImpl userDetails) {
         String username = userDetails.getUsername();
-        Member member = memberRepository.findByUsername(username).orElseThrow(
+        Long memberId = userDetails.getMember().getId();
+        Member member = memberRepository.findById(memberId).orElseThrow(
                 () -> new RuntimeException("볼 수 없는 정보입니다")
         );
         String gender = member.getGender();
@@ -303,7 +322,8 @@ public class MemberService {
     // info -> gender 수정
     public MyPageInfoDto genderedit(UserDetailsImpl userDetails, InfoeditRequestDto requestDto) {
         String username = userDetails.getUsername();
-        Member member = memberRepository.findByUsername(username).orElseThrow(
+        Long memberId = userDetails.getMember().getId();
+        Member member = memberRepository.findById(memberId).orElseThrow(
                 () -> new RuntimeException("볼 수 없는 정보입니다")
         );
         String gender = requestDto.getGender();
@@ -316,7 +336,8 @@ public class MemberService {
     // info -> birth 수정
     public MyPageInfoDto birthedit(UserDetailsImpl userDetails, InfoeditRequestDto requestDto) {
         String username = userDetails.getUsername();
-        Member member = memberRepository.findByUsername(username).orElseThrow(
+        Long memberId = userDetails.getMember().getId();
+        Member member = memberRepository.findById(memberId).orElseThrow(
                 () -> new RuntimeException("볼 수 없는 정보입니다")
         );
         String gender = member.getGender();
@@ -328,8 +349,8 @@ public class MemberService {
 
     // profile 조회
     public ProfileDto profile(UserDetailsImpl userDetails) {
-        String username = userDetails.getUsername();
-        Member member = memberRepository.findByUsername(username).orElseThrow(
+        Long memberId = userDetails.getMember().getId();
+        Member member = memberRepository.findById(memberId).orElseThrow(
                 () -> new RuntimeException("볼수 없는 정보입니다")
         );
         String nickname = member.getNickname();
@@ -341,22 +362,28 @@ public class MemberService {
 
     // profile 수정
     public ProfileDto profileedit(UserDetailsImpl userDetails, ProfileEditRequestDto requestDto) throws IOException {
-        String username = userDetails.getUsername();
-        Member member = memberRepository.findByUsername(username).orElseThrow(
+        Long memberId = userDetails.getMember().getId();
+        Member member = memberRepository.findById(memberId).orElseThrow(
                 () -> new RuntimeException("볼수 없는 정보입니다")
         );
         String nickname = member.getNickname();
         List<Star> star = member.getStar();
-        String uploadImage = String.valueOf(s3Uploader.upload(requestDto.getData(), POST_IMAGE_DIR));
-        member.setProfile(uploadImage);
-        ProfileDto profileDto = new ProfileDto(nickname, star, uploadImage);
-        return profileDto;
+        if (requestDto.getData() != null) {
+            String uploadImage = String.valueOf(s3Uploader.upload(requestDto.getData(), POST_IMAGE_DIR));
+            member.setProfile(uploadImage);
+            ProfileDto profileDto = new ProfileDto(nickname, star, uploadImage);
+            return profileDto;
+        } else {
+            String uploadImage = member.getProfile();
+            ProfileDto profileDto = new ProfileDto(nickname, star, uploadImage);
+            return profileDto;
+        }
     }
 
     // password 변경
     public String changepass(UserDetailsImpl userDetails, PasswordChangeDto passwordChangeDto) {
-        String username = userDetails.getUsername();
-        Member member = memberRepository.findByUsername(username).orElseThrow(
+        Long memberId = userDetails.getMember().getId();
+        Member member = memberRepository.findById(memberId).orElseThrow(
                 () -> new RuntimeException("해당 권한이 없습니다.")
         );
         if (!passwordEncoder.encode(passwordChangeDto.getPasswordCheck()).equals(member.getPassword()) && !passwordChangeDto.getNewPassword().equals(passwordChangeDto.getNewPasswordCheck())) {
@@ -373,21 +400,6 @@ public class MemberService {
         memberRepository.save(member);
     }
 
-    // 로그인
-    @Transactional
-    public String login(LoginRequestDto requestDto) {
-        Member member = memberRepository.findByUsername(requestDto.getUsername()).orElseThrow(
-                () -> new NullPointerException("해당 유저를 찾을 수 없습니다.")
-        );
-
-        if (!passwordEncoder.matches(requestDto.getPassword(), member.getPassword())) {
-            throw new IllegalArgumentException("비밀번호를 확인해 주세요");
-        }
-        String refreshToken = jwtTokenProvider.createRefreshToken();
-        redisUtil.setDataExpire(requestDto.getUsername(),refreshToken,JwtProperties.REFRESH_EXPIRATION_TIME);
-        jwtTokenProvider.createToken(requestDto.getUsername());
-        return "완료";
-    }
 
     //채팅회원관련
     public Member findByNickname(String nickname) {

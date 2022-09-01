@@ -29,11 +29,6 @@ public class MemberController {
     private final KakaoService kakaoService;
     private final EmailService emailService;
 
-    //로그인
-    @PostMapping("/user/login")
-    public String login(@RequestBody LoginRequestDto requestDto) {
-        return memberService.login(requestDto);
-    }
 
     // 회원가입 1. emali check
     @PostMapping("/api/checkemail")
@@ -213,7 +208,7 @@ public class MemberController {
     // profile 수정
     @PutMapping("/api/mypage/profile")
     public ResponseEntity<ProfileDto> profileedit(@AuthenticationPrincipal UserDetailsImpl userDetails,
-                                                  @RequestBody ProfileEditRequestDto requestDto) throws IOException {
+                                                  @ModelAttribute ProfileEditRequestDto requestDto) throws IOException {
         return ResponseEntity.ok(memberService.profileedit(userDetails, requestDto));
     }
 

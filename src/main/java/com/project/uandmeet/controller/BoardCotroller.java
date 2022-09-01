@@ -35,7 +35,7 @@ public class BoardCotroller {
 
     //게시물 작성
     @PostMapping("/api/board/create")
-    private CustomException boardNew(@RequestBody BoardRequestDto.createAndCheck boardRequestDto,
+    private CustomException boardNew(@ModelAttribute BoardRequestDto.createAndCheck boardRequestDto,
                                      @AuthenticationPrincipal UserDetailsImpl userDetails) throws IOException {
         System.out.println(userDetails.getMember().getUsername());
         return boardService.boardNew(boardRequestDto, userDetails);
