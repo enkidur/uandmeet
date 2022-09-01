@@ -36,7 +36,9 @@ public class ChatService {
     private final JwtTokenProvider jwtTokenProvider;
     private final RedisTemplate<String, Object> redisTemplate;
     private final MessageRepository messageRepository;
-    public static final String ENTER_INFO = "ENTER_INFO"; // 채팅룸에 입장한 클라이언트의 sessionId 와 채팅룸 id 를 맵핑한 정보 저장
+
+    // 채팅룸에 입장한 클라이언트의 sessionId 와 채팅룸 id 를 맵핑한 정보 저장
+    public static final String ENTER_INFO = "ENTER_INFO";
 
     // destination 정보에서 roomId 추출
     public String getRoomId(String destination) {

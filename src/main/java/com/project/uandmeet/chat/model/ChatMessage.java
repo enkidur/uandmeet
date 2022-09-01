@@ -19,7 +19,7 @@ public class ChatMessage {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    private Long id;    //메시지 고유 id
 
     @Column
     private String boardId; // 게시글 아이디값
@@ -36,7 +36,7 @@ public class ChatMessage {
     private String message; // 메시지
 
     @Column
-    private String createdAt;
+    private String createdAt;   //전송시간
 
 
 }

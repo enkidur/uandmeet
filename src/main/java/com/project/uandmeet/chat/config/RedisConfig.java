@@ -11,6 +11,13 @@ import org.springframework.data.redis.listener.adapter.MessageListenerAdapter;
 import org.springframework.data.redis.serializer.Jackson2JsonRedisSerializer;
 import org.springframework.data.redis.serializer.StringRedisSerializer;
 
+/**
+ * <h1>레디스 설정</h1>
+ * <p>채팅 관련한 레디스 설정을 관리하는 클래스</p>
+ * <p>topic = 구독하는 채팅방 -> board 와 연결</p>
+ * <p>pub = 채팅 발행자</p>
+ * <p>sub = 채팅 수신자 (topic 구독)</p>
+ */
 @Configuration
 public class RedisConfig {
 

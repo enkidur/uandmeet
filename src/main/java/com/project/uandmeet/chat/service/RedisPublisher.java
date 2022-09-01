@@ -46,12 +46,11 @@ public class RedisPublisher {
 
         chatMessageList.add(0,messageDto);
 
-        //redis 의 hashes 자료구조 ---->> key : CHAT_MESSAGE , field : projectId, value : chatMessageList
+        //redis 의 hashes 자료구조 ---->> key : CHAT_MESSAGE , field : boardId, value : chatMessageList
         opsHashChatMessage.put(CHAT_MESSAGE, projectId, chatMessageList);
 
 
         redisTemplate.expire(CHAT_MESSAGE,10, TimeUnit.SECONDS);
-        // redisMessageRepository.save(chatMessage);
 
         redisTemplate.convertAndSend("board", messageDto);
 
