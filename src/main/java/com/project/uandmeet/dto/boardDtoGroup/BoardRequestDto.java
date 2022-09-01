@@ -22,7 +22,7 @@ public class BoardRequestDto {
         private String city;
         private String gu;
         private String maxEntry;
-        private MultipartFile urlImage;
+        private MultipartFile data;
 
 
         //경도

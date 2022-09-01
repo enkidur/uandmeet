@@ -80,7 +80,7 @@ public class BoardCotroller {
     }
 
     //공유 게시물 전체 조회 (카테고리별 전체 조회)
-    @GetMapping("/api/boards/info")
+    @GetMapping("/api/boards/information")
     private ResponseEntity<BoardResponseFinalDto> boardInfoAllInquiry(
                                                                   @RequestParam String cate,
                                                                   @RequestParam Integer page,

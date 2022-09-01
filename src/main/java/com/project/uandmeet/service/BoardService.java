@@ -72,9 +72,9 @@ public class BoardService {
             }
         }
 
-        if (boardRequestDto.getUrlImage() != null) {
+        if (boardRequestDto.getData() != null) {
 
-            ImageDto uploadImage = s3Uploader.upload(boardRequestDto.getUrlImage(), POST_IMAGE_DIR);
+            ImageDto uploadImage = s3Uploader.upload(boardRequestDto.getData(), POST_IMAGE_DIR);
 
             try {
                 Board board = new Board(memberTemp, category, boardRequestDto, uploadImage.getImageUrl());
@@ -101,17 +101,20 @@ public class BoardService {
     //매칭 게시물 전체 조회 (카테고리별 전체 조회)
     @Transactional
     public BoardResponseFinalDto boardMatchingAllInquiry(String type, String cate, Integer page, Integer amount, String city, String gu) {
+
+        //페이지 번호 변경
+        if(page > 0)
+            page = page - 1;
+        else if(page <= 0)
+            page = 0;
+
         Sort sort = Sort.by("createdAt").ascending();
         PageRequest pageRequest = PageRequest.of(page, amount, sort);
         Page<Board> boardPage;
         Category category =null;
         Siarea siarea = null;
         Guarea guarea = null;
-        //페이지 번호 변경
-        if(page > 0)
-            page = page - 1;
-        else if(page <= 0)
-            page = 0;
+
 
         //들어온 문자열 제차 확인
         if(!(cate.equals("all")||cate.equals("ALL"))) {
@@ -452,18 +455,20 @@ public class BoardService {
     //공유 게시물 전체 조회 (카테고리별 전체 조회)
     @Transactional
     public BoardResponseFinalDto boardInfoAllInquiry(String type, String cate, Integer page, Integer amount) {
-        Sort sortInfo = Sort.by("createdAt").descending();
-        PageRequest pageRequest = PageRequest.of(page, amount, sortInfo);
-        Page<Board> boardPage;
-        Category category = null;
-        //페이지 번호 변경
+
         if(page > 0)
             page = page - 1;
         else if(page <= 0)
             page = 0;
 
+        Sort sortInfo = Sort.by("createdAt").ascending();
+        PageRequest pageRequest = PageRequest.of(page, amount, sortInfo);
+        Page<Board> boardPage;
+        Category category = null;
+        //페이지 번호 변경
+
         //들어온 문자열 제차 확인
-        if((cate.equals("all") || cate.equals("ALL"))) {
+        if(!(cate.equals("all") || cate.equals("ALL"))) {
             category = categoryRepository.findAllByCategory(cate)
                     .orElseThrow(() -> new CustomException(ErrorCode.EMPTY_CONTENT));
         }
@@ -476,6 +481,8 @@ public class BoardService {
 
         // 찾으 정보를 Dto로 변환 한다.
         List<BoardResponseDto> boardResponseDtos = new ArrayList<>();
+        System.out.println(boardPage);
+
         if (boardPage != null) {
             for (Board boardTemp : boardPage) {
                 //작성자 간이 닉네임 생성.
@@ -486,7 +493,7 @@ public class BoardService {
                 boardResponseDtos.add(boardResponseDto);
             }
         }
-        return new BoardResponseFinalDto(boardResponseDtos, Objects.requireNonNull(boardPage).getTotalElements());
+        return new BoardResponseFinalDto(boardResponseDtos, boardPage != null ? boardPage.getTotalElements() : 0);
     }
 
     //공유 게시물 상세 조회
