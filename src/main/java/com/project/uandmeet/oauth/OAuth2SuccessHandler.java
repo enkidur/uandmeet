@@ -14,6 +14,7 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.util.UUID;
 
 @RequiredArgsConstructor
 @Component
@@ -30,6 +31,12 @@ public class OAuth2SuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
 
         UserDetailsImpl userDetails = (UserDetailsImpl) authentication.getPrincipal(); // 구글 이메일
 
+        String nickname = userDetails.getMember().getNickname();
+
+        String username = userDetails.getUsername();
+
+        String profile = userDetails.getMember().getProfile();
+
         String accessToken = jwtTokenProvider.createToken(userDetails.getUsername(), userDetails.getMember().getId());
 
         String refreshToken = jwtTokenProvider.createRefreshToken();
@@ -37,17 +44,20 @@ public class OAuth2SuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
         // redis 에 token 저장
         redisUtil.setDataExpire(userDetails.getUsername(),refreshToken, JwtProperties.REFRESH_EXPIRATION_TIME);
 
-        String url = makeRedirectUrl(accessToken, refreshToken);
+        String url = makeRedirectUrl(accessToken, refreshToken,username , nickname, profile);
 
         System.out.println("조합된 URL: "+url);
 
         getRedirectStrategy().sendRedirect(request, response, url);
     }
 
-    private String makeRedirectUrl(String access_Token, String refresh_Token) {
+    private String makeRedirectUrl(String access_Token, String refresh_Token,String username,String nickname, String profile) {
         return UriComponentsBuilder.fromUriString("http://localhost:3000/oauth2/redirect")
                 .queryParam("access_Token", access_Token)
                 .queryParam("refresh_Token", refresh_Token)
+                .queryParam("username", username)
+                .queryParam("nickname", nickname)
+                .queryParam("profile", profile)
                 .build().toUriString();
     }
 }

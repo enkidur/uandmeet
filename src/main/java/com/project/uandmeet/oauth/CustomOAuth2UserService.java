@@ -39,11 +39,20 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
         // 여기까지가 userRequest정보 -> loadUser함수 호출 -> 구글로부터 회원프로필 받아줌.
         System.out.println("userRequest : "+super.loadUser(userRequest).getAttributes()); // 구글 로그인한 유저의 이름,이메일,사진 등이 담겨있음
 
+
         String email = oAuth2User.getAttribute("email");
         String loginto ="Google";
         String role = "ROLE_USER";
         String password = UUID.randomUUID().toString();
         String encodedPassword = passwordEncoder.encode(password);
+        String profileImage = oAuth2User.getAttribute("picture");
+
+
+        // nickname 설정
+        String[] emailadress = email.split("@");
+        String id = emailadress[0];
+        String uuid = UUID.randomUUID().toString().substring(0,3);
+        String uniqueId = id + uuid;
 
         Member memberEntity = memberRepository.findByUsername(email).orElse(null);
 
@@ -52,39 +61,13 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
                     .username(email)
                     .loginto(loginto)
                     .password(encodedPassword)
+                    .nickname(uniqueId)
+                    .profile(profileImage)
                     .build();
             System.out.println("유저아이디"+memberEntity.getUsername());
             System.out.println("플랫폼"+memberEntity.getLoginto());
             System.out.println("패스워드"+memberEntity.getPassword());
             memberRepository.save(memberEntity);
-//
-//            String accessToken = jwtTokenProvider.createToken(memberEntity.getUsername());
-//            String refreshToken = jwtTokenProvider.createRefreshToken();
-
-            // redis 에 token 저장
-//            redisUtil.setDataExpire(memberEntity.getUsername(),refreshToken,JwtProperties.REFRESH_EXPIRATION_TIME);
-
-            // token 을 Header 에 발급
-            // 재발급떼문에 set 사용
-//            HttpHeaders headers = new HttpHeaders();
-//            headers.set(JwtProperties.HEADER_ACCESS, JwtProperties.TOKEN_PREFIX + accessToken);
-//            headers.set(JwtProperties.HEADER_REFRESH, JwtProperties.TOKEN_PREFIX + refreshToken);
-//            System.out.println("OAuth2 Service의 AccessToken:"+accessToken);
-//            System.out.println("OAuth2 Service의 RefreshToken:"+refreshToken);
-        }
-        else{
-//
-//            String accessToken = jwtTokenProvider.createToken(memberEntity.getUsername());
-//            String refreshToken = jwtTokenProvider.createRefreshToken();
-//
-//            // redis 에 token 저장
-//            redisUtil.setDataExpire(memberEntity.getUsername(),refreshToken,JwtProperties.REFRESH_EXPIRATION_TIME);
-//
-//            HttpHeaders headers = new HttpHeaders();
-//            headers.set(JwtProperties.HEADER_ACCESS, JwtProperties.TOKEN_PREFIX + accessToken);
-//            headers.set(JwtProperties.HEADER_REFRESH, JwtProperties.TOKEN_PREFIX + refreshToken);
-//            System.out.println("OAuth2 Service의 AccessToken:"+accessToken);
-//            System.out.println("OAuth2 Service의 RefreshToken:"+refreshToken);
 
         }
 
