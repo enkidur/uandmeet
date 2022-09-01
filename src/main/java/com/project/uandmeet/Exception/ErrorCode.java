@@ -39,6 +39,8 @@ public enum ErrorCode {
     CAN_NOT_CREATE_ROOM(HttpStatus.BAD_REQUEST, "채팅 방을 생성할 수 없습니다"),
     DUPLICATE_CHAT_ROOM(HttpStatus.BAD_REQUEST, "채팅 방이 이미 존재합니다"),
 
+    FAILED_MESSAGE(HttpStatus.BAD_REQUEST, "메세지 보내기에 실패했습니다."),
+
     // 서버 오류관련
     INTERNAL_SERVER_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "서버에서 요청사항을 수행할 수 없습니다."),
 

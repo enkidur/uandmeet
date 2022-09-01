@@ -1,7 +1,6 @@
 package com.project.uandmeet.chat.config;
 
-import com.project.uandmeet.chat.service.ChatMessageService;
-import com.project.uandmeet.chat.service.ChatRoomService;
+import com.project.uandmeet.chat.service.ChatService;
 import com.project.uandmeet.security.jwt.JwtTokenProvider;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -20,8 +19,7 @@ import java.util.Optional;
 public class StompHandler implements ChannelInterceptor {
 
     private final JwtTokenProvider jwtTokenProvider;
-    private final ChatRoomService chatRoomService;
-    private final ChatMessageService chatService;
+    private final ChatService chatService;
 
 
     //Controller에 가기전에 이곳을 먼저 들리게 된다. 그것이 인터셉터의 역할
@@ -51,7 +49,7 @@ public class StompHandler implements ChannelInterceptor {
 //            // sessionId는 현재들어와있는 유저를 확인하기 위함이다.
             String sessionId = (String) message.getHeaders().get("simpSessionId");
 //            //sessionId와 roomId를 맵핑
-            chatRoomService.setUserEnterInfo(sessionId, roomId);
+            chatService.setUserEnterInfo(sessionId, roomId);
 
             // 구독했다는 것은 처음 입장했다는 것이므로 입장 메시지를 발송한다.
             // 클라이언트 입장 메시지를 채팅방에 발송한다.(redis publish)
@@ -69,7 +67,7 @@ public class StompHandler implements ChannelInterceptor {
             // 연결이 종료된 클라이언트 sesssionId로 채팅방 id를 얻는다.
             String sessionId = (String) message.getHeaders().get("simpSessionId");
             //나갈떄 redis 맵에서 roomId와 sessionId의 매핑을 끊어줘야 하기때문에 roomId찾고
-            String roomId = chatRoomService.getUserEnterRoomId(sessionId);
+            String roomId = chatService.getUserEnterRoomId(sessionId);
 
             // 클라이언트 퇴장 메시지를 채팅방에 발송한다.(redis publish)
             String token = Optional.ofNullable(accessor.getFirstNativeHeader("token")).orElse("UnknownUser");
@@ -80,7 +78,7 @@ public class StompHandler implements ChannelInterceptor {
             }
 
             // 퇴장한 클라이언트의 roomId 맵핑 정보를 삭제한다.
-            chatRoomService.removeUserEnterInfo(sessionId);
+            chatService.removeUserEnterInfo(sessionId);
             log.info("DISCONNECT {}, {}", sessionId, roomId);
         }
         return message;
