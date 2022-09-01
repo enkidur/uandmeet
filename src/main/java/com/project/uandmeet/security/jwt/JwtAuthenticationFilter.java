@@ -5,6 +5,7 @@ import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+
 import com.project.uandmeet.dto.LoginRequestDto;
 import com.project.uandmeet.redis.RedisUtil;
 import com.project.uandmeet.security.UserDetailsImpl;
@@ -24,7 +25,7 @@ import lombok.RequiredArgsConstructor;
 
 @RequiredArgsConstructor // final 생성자 자동 생성
 //@AllArgsConstructor
-public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilter{
+public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilter {
 
     private final AuthenticationManager authenticationManager;
     //    private final MemberService memberService;
@@ -55,7 +56,7 @@ public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilte
             e.printStackTrace();
         }
 
-        System.out.println("JwtAuthenticationFilter : "+loginRequestDto);
+        System.out.println("JwtAuthenticationFilter : " + loginRequestDto);
 
         // 유저네임패스워드 토큰 생성
         // token 생성 -> formLogin에서 자동 실행되나 disable 때문에 직접 생성
@@ -86,7 +87,7 @@ public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilte
                 authenticationManager.authenticate(authenticationToken);
 
         UserDetailsImpl userDetailsImpl = (UserDetailsImpl) authentication.getPrincipal();
-        System.out.println("Authentication : "+userDetailsImpl.getMember().getUsername());
+        System.out.println("Authentication : " + userDetailsImpl.getMember().getUsername());
 
         // 3. PrincipalDetails 에 session 을 담음 (권한 관리를 위해 Session에 담음)
         // 굳이 Jwt 를 사용하면서 session 을 만들 필요 없지만, 권한 처리를 위해
@@ -121,7 +122,8 @@ public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilte
         // 재발급떼문에 setHeader 사용
         response.setHeader(JwtProperties.HEADER_ACCESS, JwtProperties.TOKEN_PREFIX + accessToken);
         response.setHeader(JwtProperties.HEADER_REFRESH, JwtProperties.TOKEN_PREFIX + refreshToken);
-        response.addHeader("username",userDetailsImpl.getUsername());
+
+        response.addHeader("username", userDetailsImpl.getUsername());
         response.addHeader("nickname", userDetailsImpl.getMember().getNickname());
         response.addHeader("profile", userDetailsImpl.getMember().getProfile());
     }
