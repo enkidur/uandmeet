@@ -2,11 +2,9 @@ package com.project.uandmeet.dto.boardDtoGroup;
 
 import com.project.uandmeet.dto.MemberDtoGroup.MemberSimpleDto;
 import com.project.uandmeet.model.Board;
+import com.project.uandmeet.model.Category;
 import lombok.*;
 
-import java.net.PortUnreachableException;
-import java.sql.Timestamp;
-import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 
 @Getter
@@ -37,7 +35,7 @@ public class BoardResponseDto {
         this.gu = board.getGu();
         this.id = board.getId();
         this.createdAt = board.getCreatedAt().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:SS:ss.SSS"));
-        this.category = board.getContent();
+        this.category = board.getCategory().getCategory();
         this.endDateAt = board.getEndDateAt();
         this.content = board.getContent();
         this.title = board.getTitle();
@@ -52,7 +50,7 @@ public class BoardResponseDto {
         this.memberSimpleDto = memberSimpleDto;
         this.id = board.getId();
         this.createdAt = board.getCreatedAt().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:SS:ss.SSS"));
-        this.category = board.getContent();
+        this.category = board.getCategory().getCategory();
         this.endDateAt = board.getEndDateAt();
         this.content = board.getContent();
         this.title = board.getTitle();
