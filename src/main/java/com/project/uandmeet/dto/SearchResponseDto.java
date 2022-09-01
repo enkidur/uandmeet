@@ -32,8 +32,8 @@ public class SearchResponseDto {
     private double lng;
 
     public SearchResponseDto(Board board){
-        this.city = board.getCity();
-        this.gu = board.getGu();
+        this.city = board.getCity().getCtpKorNmAbbreviation();
+        this.gu = board.getGu().getSigKorNm();
         this.id = board.getId();
         this.createdAt = board.getCreatedAt();
         this.category = board.getCategory();

@@ -21,7 +21,7 @@ public class BoardRequestDto {
         private String endDateAt;
         private String city;
         private String gu;
-        private String maxEntry;
+        private Long maxEntry;
         private MultipartFile data;
 
 

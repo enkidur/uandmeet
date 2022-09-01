@@ -25,11 +25,11 @@ public class Entry {
     @JoinColumn(name = "board_id")
     private Board board;
 
-    private String nickname; // 참여한 사람의 닉네임 ( 이메일 잘라서 뒤에 랜덤값 붙힘 )
+//    private Long memberEntryId; // 참여한 사람의 id ( 이메일 잘라서 뒤에 랜덤값 붙힘 )
 
     public Entry(Board board, Member member) {
         this.member = member;
         this.board = board;
-        this.nickname = member.getNickname();
+ //       this.memberEntryId = member.getId();
     }
 }

@@ -41,12 +41,21 @@ public class Board extends BaseTime{
 
     private String boardimage;
 
-    private Long maxEntry;
+    //매칭참여 MAX수
+    @Column(nullable = false)
+    private Long maxEntry=0L;
 
-    private Long currentEntry;
+    //매칭참여 수
+    @Column(nullable = false)
+    private Long currentEntry=0L;
 
-    private String city;
-    private String gu;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "Siarea_id")
+    private Siarea city;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "Guarea_id")
+    private Guarea gu;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "category_id")
@@ -65,7 +74,7 @@ public class Board extends BaseTime{
     @OneToMany(fetch = FetchType.LAZY,mappedBy = "board",cascade = CascadeType.ALL)
     private List<Comment> commentList = new ArrayList<>();
 
-    public Board(Member member, Category category, BoardRequestDto.createAndCheck boardRequestDto, String uploadImage)
+    public Board(Member member, Category category, Siarea siarea, Guarea gu, BoardRequestDto.createAndCheck boardRequestDto, String uploadImage)
     {
         this.member = member;
         this.category = category;
@@ -74,13 +83,14 @@ public class Board extends BaseTime{
         this.content = boardRequestDto.getContent();
         this.boardimage = uploadImage;
         this.endDateAt =boardRequestDto.getEndDateAt();
-        this.city = boardRequestDto.getCity();
-        this.gu = boardRequestDto.getGu();
+        this.city = siarea;
+        this.gu = gu;
         this.lat = boardRequestDto.getLat();
         this.lng = boardRequestDto.getLng();
+        this.maxEntry = boardRequestDto.getMaxEntry();
     }
 
-    public Board(Member member, Category category, BoardRequestDto.createAndCheck boardRequestDto)
+    public Board(Member member, Category category,Siarea siarea,Guarea gu, BoardRequestDto.createAndCheck boardRequestDto)
     {
         this.member = member;
         this.category = category;
@@ -88,10 +98,11 @@ public class Board extends BaseTime{
         this.title = boardRequestDto.getTitle();
         this.content = boardRequestDto.getContent();
         this.endDateAt =boardRequestDto.getEndDateAt();
-        this.city = boardRequestDto.getCity();
-        this.gu = boardRequestDto.getGu();
+        this.city = siarea;
+        this.gu = gu;
         this.lat = boardRequestDto.getLat();
         this.lng = boardRequestDto.getLng();
+        this.maxEntry = boardRequestDto.getMaxEntry();
     }
 
     //매칭 업데이트

@@ -11,7 +11,7 @@ import java.util.Optional;
 
 @Repository
 public interface EntryRepository extends JpaRepository <Entry, Long> {
-    Optional<Entry> findByNicknameAndBoard(String nickname, Board board);
+    Optional<Entry> findByMemberAndBoard(Member member, Board board);
     Optional<Entry> findByMemberAndBoard(String member_id, Board board_id);
 
     boolean existsByMemberAndBoard(Long member_id, Long board_id);

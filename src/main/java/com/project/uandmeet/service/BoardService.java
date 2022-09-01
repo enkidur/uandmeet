@@ -55,44 +55,43 @@ public class BoardService {
         Member memberTemp = memberRepostiory.findByUsername(userDetails.getUsername())
                 .orElseThrow(() -> new CustomException(ErrorCode.EMPTY_CONTENT));
 
-            Category category = categoryRepository.findAllByCategory(boardRequestDto.getCategory())
-                    .orElseThrow(() -> new CustomException(ErrorCode.EMPTY_CONTENT));
+        Category category = categoryRepository.findAllByCategory(boardRequestDto.getCategory())
+                .orElseThrow(() -> new CustomException(ErrorCode.EMPTY_CONTENT));
+
+        Siarea siarea = null;
+        Guarea guarea = null;
 
         if(boardRequestDto.getBoardType().equals("matching")) {
-            Siarea siarea = siareaRepostiory.findByCtpKorNmAbbreviation(boardRequestDto.getCity())
+            siarea = siareaRepostiory.findByCtpKorNmAbbreviation(boardRequestDto.getCity())
                     .orElseThrow(() -> new CustomException(ErrorCode.EMPTY_CONTENT));
 
-            Guarea guarea = null;
+
             try {
                 guarea = guareaRepostiory.findAllBySiareaAndSigKorNm(siarea, boardRequestDto.getGu())
                         .orElseThrow(() -> new CustomException(ErrorCode.EMPTY_CONTENT));
             } catch (Exception e) {
-                System.out.println(e);
                 throw new CustomException(ErrorCode.EMPTY_CONTENT);
             }
         }
 
         if (boardRequestDto.getData() != null) {
-
             ImageDto uploadImage = s3Uploader.upload(boardRequestDto.getData(), POST_IMAGE_DIR);
 
             try {
-                Board board = new Board(memberTemp, category, boardRequestDto, uploadImage.getImageUrl());
+                Board board = new Board(memberTemp, category, siarea, guarea, boardRequestDto, uploadImage.getImageUrl());
                 boardRepository.save(board);
                 return new CustomException(ErrorCode.COMPLETED_OK);
             } catch (Exception e) {
-                System.out.println(e);
                 return new CustomException(ErrorCode.INTERNAL_SERVER_ERROR);
             }
         } else {
-            Board board = new Board(memberTemp, category, boardRequestDto);
+            Board board = new Board(memberTemp, category, siarea, guarea, boardRequestDto);
 
             try {
                 boardRepository.save(board);
                 return new CustomException(ErrorCode.COMPLETED_OK);
 
             } catch (Exception e) {
-                System.out.println(e);
                 return new CustomException(ErrorCode.INTERNAL_SERVER_ERROR);
             }
         }
@@ -207,7 +206,6 @@ public class BoardService {
                 boardRepository.deleteById(id);
                 return new CustomException(ErrorCode.COMPLETED_OK);
             } catch (Exception e) {
-                System.out.println(e);
                 return new CustomException(ErrorCode.INTERNAL_SERVER_ERROR);
             }
         } else {
@@ -235,7 +233,6 @@ public class BoardService {
                 return new CustomException(ErrorCode.COMPLETED_OK);
 
             } catch (Exception e) {
-                System.out.println(e);
                 return new CustomException(ErrorCode.INTERNAL_SERVER_ERROR);
             }
         } else {
@@ -256,7 +253,7 @@ public class BoardService {
         Board board = boardRepository.findById(likeDto.getPostid())
                 .orElseThrow(() -> new CustomException(ErrorCode.EMPTY_CONTENT));
 
-        if (board.getMember().getEmail().equals(memberTemp.getEmail())) {
+        if (board.getMember().getId().equals(memberTemp.getId())) {
 
             if (likeDto.getIsLike()) {
                 if (!likedRepository.findByBoardAndMember(board, memberTemp).isPresent()) {
@@ -268,16 +265,12 @@ public class BoardService {
                         board.setLikeCount(board.getLikeCount() + 1);
                         boardRepository.save(board);
 
-                        System.out.println(board);
-
                         responseEntity = ResponseEntity.ok(board.getLikeCount());
 
                     } catch (Exception e) {
-                        System.out.println(e);
                         throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "서버에서 요청사항을 수행할 수 없습니다.");
                     }
                 } else {
-                    System.out.println("등록되어 있음");
                     throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "해당 요청사항을 수행할 수 없습니다.");
                 }
             } else {
@@ -293,10 +286,8 @@ public class BoardService {
 
                     boardRepository.save(board);
 
-                    System.out.println(board);
                     responseEntity = ResponseEntity.ok(board.getLikeCount());
                 } else {
-                    System.out.println("등록 안되어 있음.");
                     throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "해당 요청사항을 수행할 수 없습니다.");
                 }
             }
@@ -319,22 +310,22 @@ public class BoardService {
         Member member = memberRepostiory.findById(userDetails.getMember().getId())
                 .orElseThrow(() -> new CustomException(ErrorCode.EMPTY_CONTENT));
 
-        if (!entryRepository.findByNicknameAndBoard(member.getNickname(), board).isPresent()) {
+        if (!entryRepository.findByMemberAndBoard(member, board).isPresent()) {
             Entry entry = new Entry(board, member);
             try {
                 entryRepository.save(entry);
-                board.setLikeCount(board.getLikeCount() + 1);
+                board.setCurrentEntry(board.getCurrentEntry() + 1);
 
                 boardRepository.save(board);
-                System.out.println(board);
 
-                responseEntity = ResponseEntity.ok(board.getCommentCount());
+                responseEntity = ResponseEntity.ok(board.getCurrentEntry());
 
             } catch (Exception e) {
-                System.out.println(e);
                 throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "서버에서 요청사항을 수행할 수 없습니다.");
             }
         }
+        else
+            ResponseEntity.status(HttpStatus.valueOf("이미 참여 했습니다."));
 
         return responseEntity;
     }
@@ -350,19 +341,19 @@ public class BoardService {
         Member member = memberRepostiory.findById(userDetails.getMember().getId())
                 .orElseThrow(() -> new CustomException(ErrorCode.EMPTY_CONTENT));
 
-        if (entryRepository.findByNicknameAndBoard(member.getNickname(), board).isPresent()) {
-            Entry entry = new Entry(board, member);
+        Entry entry = entryRepository.findByMemberAndBoard(member, board)
+                .orElseThrow(() -> new CustomException(ErrorCode.EMPTY_CONTENT));
+
+        if (entry != null) {
             try {
-                entryRepository.save(entry);
-                board.setLikeCount(board.getLikeCount() - 1);
+                entryRepository.delete(entry);
+                board.setCurrentEntry(board.getCurrentEntry() - 1);
 
                 boardRepository.save(board);
-                System.out.println(board);
 
-                responseEntity = ResponseEntity.ok(board.getCommentCount());
+                responseEntity = ResponseEntity.ok(board.getCurrentEntry());
 
             } catch (Exception e) {
-                System.out.println(e);
                 throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "서버에서 요청사항을 수행할 수 없습니다.");
             }
         }
@@ -386,7 +377,6 @@ public class BoardService {
             return commentsReponseDto;
 
         } catch (IllegalArgumentException ignored) {
-            System.out.println(ignored);
             throw new CustomException(ErrorCode.INTERNAL_SERVER_ERROR);
         }
     }
@@ -427,7 +417,6 @@ public class BoardService {
                 boardRepository.deleteById(boardId);
                 return new CustomException(ErrorCode.COMPLETED_OK);
             } catch (Exception e) {
-                System.out.println(e);
                 return new CustomException(ErrorCode.INTERNAL_SERVER_ERROR);
             }
         } else {
@@ -447,7 +436,6 @@ public class BoardService {
 
             return new CustomException(ErrorCode.COMPLETED_OK);
         } catch (Exception e) {
-            System.out.println(e);
             return new CustomException(ErrorCode.INTERNAL_SERVER_ERROR);
         }
     }
@@ -481,7 +469,6 @@ public class BoardService {
 
         // 찾으 정보를 Dto로 변환 한다.
         List<BoardResponseDto> boardResponseDtos = new ArrayList<>();
-        System.out.println(boardPage);
 
         if (boardPage != null) {
             for (Board boardTemp : boardPage) {
@@ -537,7 +524,6 @@ public class BoardService {
                 return new CustomException(ErrorCode.COMPLETED_OK);
 
             } catch (Exception e) {
-                System.out.println(e);
                 return new CustomException(ErrorCode.INTERNAL_SERVER_ERROR);
             }
         } else {
