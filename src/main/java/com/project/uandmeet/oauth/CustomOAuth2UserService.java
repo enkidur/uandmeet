@@ -47,7 +47,6 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
         String encodedPassword = passwordEncoder.encode(password);
         String profileImage = oAuth2User.getAttribute("picture");
 
-
         // nickname 설정
         String[] emailadress = email.split("@");
         String id = emailadress[0];
