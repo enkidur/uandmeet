@@ -59,6 +59,7 @@ public class Member {
 
     @OneToMany(fetch = FetchType.LAZY,mappedBy = "member",cascade = CascadeType.ALL)
     private List<Entry> entryList = new ArrayList<>();
+
     @Column
     @Enumerated(value = EnumType.STRING) // Enum type을 STring 으로 변화하여 저장
     private MemberRoleEnum role;

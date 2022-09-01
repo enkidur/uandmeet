@@ -1,8 +1,9 @@
 package com.project.uandmeet.api;
 
-import com.project.uandmeet.api.OpenApiResponseParams;
 import com.project.uandmeet.dto.ApiDtoGroup.GuareaDto;
 import com.project.uandmeet.dto.ApiDtoGroup.SiareaDto;
+import com.project.uandmeet.exception.CustomException;
+import com.project.uandmeet.exception.ErrorCode;
 import com.project.uandmeet.model.Guarea;
 import com.project.uandmeet.model.Siarea;
 import com.project.uandmeet.repository.GuareaRepostiory;
@@ -72,7 +73,7 @@ public class OpenApiManager {
         return jsonFeatures;
     }
 
-    public List<OpenApiResponseParams> fetch() throws ParseException {
+    public List<OpenApiResponseParams> fetch() throws ParseException, NullPointerException {
         System.out.println(MakeUrl(sidata));
 
 /*      RestTemplate
@@ -89,7 +90,7 @@ public class OpenApiManager {
 
         List<SiareaDto> siareaDtos = new ArrayList<>();
         List<GuareaDto> guareaDtos = new ArrayList<>();
-
+        List<Siarea> siareas = new ArrayList<>();
         //Si에 관한 내용
         for (Object siFeaturesTemp : sijsonFeatures) {
             JSONObject jsonProperties = (JSONObject) siFeaturesTemp;
@@ -102,6 +103,7 @@ public class OpenApiManager {
             Siarea siarea = new Siarea(jsonProperties, jsonPropertiesProperties);
 
             siareaDtos.add(siareaDto);
+            siareas.add(siarea);
             siareaRepostiory.save(siarea);
         }
 
@@ -114,7 +116,23 @@ public class OpenApiManager {
             System.out.println(guJsonPropertiesProperties);
 
             GuareaDto guareaDto = new GuareaDto(gujsonProperties, guJsonPropertiesProperties);
-            Guarea guarea = new Guarea(gujsonProperties, guJsonPropertiesProperties);
+
+            Siarea siareatemp = null;
+            for(Siarea siarea : siareas) {
+
+                if (guareaDto.getFullNm().contains(siarea.getCtpKorNm())) {
+                    siareatemp = siarea;
+                    break;
+                }
+            }
+
+            Guarea guarea = null;
+            if(siareatemp != null) {
+                guarea = new Guarea(gujsonProperties, guJsonPropertiesProperties, siareatemp);
+            }else{
+                System.out.println("siareatemp 값이 없습니다.");
+                throw new NullPointerException("siareatemp 값이 없습니다.");
+            }
 
             guareaDtos.add(guareaDto);
             guareaRepostiory.save(guarea);
