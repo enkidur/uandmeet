@@ -12,10 +12,10 @@ import java.util.Map;
 public class MypageDto {
     private String nickname;
     private List<String> concern;
-    private Map<Category, Long> joinCnt;
+    private Map<String, Long> joinCnt;
 
 
-    public MypageDto(String nickname, List<String> concern, Map<Category, Long> joinCnt) {
+    public MypageDto(String nickname, List<String> concern, Map<String, Long> joinCnt) {
         this.nickname = nickname;
         this.concern = concern;
         this.joinCnt = joinCnt;
