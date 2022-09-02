@@ -23,13 +23,11 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 
 @Service
 @RequiredArgsConstructor //생성자 미리 생성.
@@ -50,7 +48,8 @@ public class BoardService {
 
     //게시판 생성
     @Transactional
-    public CustomException boardNew(BoardRequestDto.createAndCheck boardRequestDto, UserDetailsImpl userDetails) throws IOException {
+    public ResponseEntity<Long> boardNew(BoardRequestDto.createAndCheck boardRequestDto, UserDetailsImpl userDetails) throws IOException,CustomException {
+        ResponseEntity<Long> responseEntity;
         //로그인 유저 정보.
         Member memberTemp = memberRepostiory.findByUsername(userDetails.getUsername())
                 .orElseThrow(() -> new CustomException(ErrorCode.EMPTY_CONTENT));
@@ -64,7 +63,6 @@ public class BoardService {
         if(boardRequestDto.getBoardType().equals("matching")) {
             siarea = siareaRepostiory.findByCtpKorNmAbbreviation(boardRequestDto.getCity())
                     .orElseThrow(() -> new CustomException(ErrorCode.EMPTY_CONTENT));
-
 
             try {
                 guarea = guareaRepostiory.findAllBySiareaAndSigKorNm(siarea, boardRequestDto.getGu())
@@ -80,21 +78,22 @@ public class BoardService {
             try {
                 Board board = new Board(memberTemp, category, siarea, guarea, boardRequestDto, uploadImage.getImageUrl());
                 boardRepository.save(board);
-                return new CustomException(ErrorCode.COMPLETED_OK);
+                responseEntity = ResponseEntity.ok(board.getId());
             } catch (Exception e) {
-                return new CustomException(ErrorCode.INTERNAL_SERVER_ERROR);
+                throw new CustomException(ErrorCode.INTERNAL_SERVER_ERROR);
             }
         } else {
             Board board = new Board(memberTemp, category, siarea, guarea, boardRequestDto);
 
             try {
                 boardRepository.save(board);
-                return new CustomException(ErrorCode.COMPLETED_OK);
+                responseEntity = ResponseEntity.ok(board.getId());
 
             } catch (Exception e) {
-                return new CustomException(ErrorCode.INTERNAL_SERVER_ERROR);
+                throw new  CustomException(ErrorCode.INTERNAL_SERVER_ERROR);
             }
         }
+        return responseEntity;
     }
 
     //매칭 게시물 전체 조회 (카테고리별 전체 조회)
@@ -160,7 +159,7 @@ public class BoardService {
             for (Board boardTemp : boardPage) {
                 //작성자 간이 닉네임 생성.
                 MemberSimpleDto memberSimpleDto = new MemberSimpleDto(boardTemp.getMember().getNickname(),
-                        boardTemp.getMember().getEmail(), boardTemp.getMember().getProfile());
+                        boardTemp.getMember().getUsername(), boardTemp.getMember().getProfile());
 
                 BoardResponseDto boardResponseDto = new BoardResponseDto(memberSimpleDto, boardTemp);
                 boardResponseDtos.add(boardResponseDto);
@@ -183,7 +182,7 @@ public class BoardService {
         if (boards != null) {
             //작성자 간이 닉네임 생성.
             MemberSimpleDto memberSimpleDto = new MemberSimpleDto(boards.getMember().getNickname(),
-                    boards.getMember().getEmail(), boards.getMember().getProfile());
+                    boards.getMember().getUsername(), boards.getMember().getProfile());
 
             boardResponseDto = new BoardResponseDto(memberSimpleDto, boards);
             return boardResponseDto;
@@ -201,7 +200,7 @@ public class BoardService {
                 .orElseThrow(() -> new CustomException(ErrorCode.EMPTY_CONTENT));
 
         //본인이 아니면 예외처리
-        if (board.getMember().getEmail().equals(memberTemp.getEmail())) {
+        if (board.getMember().getUsername().equals(memberTemp.getUsername())) {
             try {
                 boardRepository.deleteById(id);
                 return new CustomException(ErrorCode.COMPLETED_OK);
@@ -226,7 +225,7 @@ public class BoardService {
                 .orElseThrow(() -> new CustomException(ErrorCode.EMPTY_CONTENT));
 
         //본인이 아니면 예외처리
-        if (board.getMember().getEmail().equals(memberTemp.getEmail())) {
+        if (board.getMember().getUsername().equals(memberTemp.getUsername())) {
             Board boardUpdate = new Board(board, boardRequestMatchingUpdateDto);
             try {
                 boardRepository.save(boardUpdate);
@@ -394,7 +393,7 @@ public class BoardService {
             for (Comment commentTemp : commentList) {
                 //작성자 간이 닉네임 생성.
                 MemberSimpleDto memberSimpleDto = new MemberSimpleDto(commentTemp.getMember().getNickname(),
-                        commentTemp.getMember().getEmail(), commentTemp.getMember().getProfile());
+                        commentTemp.getMember().getUsername(), commentTemp.getMember().getProfile());
 
                 CommentsInquiryDto commentsInquiryDto = new CommentsInquiryDto(memberSimpleDto, commentTemp);
                 commentsInquiryDtos.add(commentsInquiryDto);
@@ -412,7 +411,7 @@ public class BoardService {
                 .orElseThrow(() -> new CustomException(ErrorCode.EMPTY_CONTENT));
 
         //본인이 아니면 예외처리
-        if (comment.getMember().getEmail().equals(memberTemp.getEmail())) {
+        if (comment.getMember().getUsername().equals(memberTemp.getUsername())) {
             try {
                 boardRepository.deleteById(boardId);
                 return new CustomException(ErrorCode.COMPLETED_OK);
@@ -474,7 +473,7 @@ public class BoardService {
             for (Board boardTemp : boardPage) {
                 //작성자 간이 닉네임 생성.
                 MemberSimpleDto memberSimpleDto = new MemberSimpleDto(boardTemp.getMember().getNickname(),
-                        boardTemp.getMember().getEmail(), boardTemp.getMember().getProfile());
+                        boardTemp.getMember().getUsername(), boardTemp.getMember().getProfile());
 
                 BoardResponseDto boardResponseDto = new BoardResponseDto(boardTemp,memberSimpleDto);
                 boardResponseDtos.add(boardResponseDto);
@@ -497,7 +496,7 @@ public class BoardService {
         if (boards != null) {
             //작성자 간이 닉네임 생성.
             MemberSimpleDto memberSimpleDto = new MemberSimpleDto(boards.getMember().getNickname(),
-                    boards.getMember().getEmail(), boards.getMember().getProfile());
+                    boards.getMember().getUsername(), boards.getMember().getProfile());
 
             boardResponseDto = new BoardResponseDto(boards,memberSimpleDto);
             return boardResponseDto;
@@ -517,7 +516,7 @@ public class BoardService {
                 .orElseThrow(() -> new CustomException(ErrorCode.EMPTY_CONTENT));
 
         //본인이 아니면 예외처리
-        if (board.getMember().getEmail().equals(memberTemp.getEmail())) {
+        if (board.getMember().getUsername().equals(memberTemp.getUsername())) {
             Board boardUpdate = new Board(board, boardRequestInfoUpdateDto);
             try {
                 boardRepository.save(boardUpdate);
