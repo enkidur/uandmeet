@@ -35,6 +35,7 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
         // url/chatting 웹 소켓 연결 주소
         registry.addEndpoint("/ws-stomp")
                 .setAllowedOriginPatterns("*")
+                .setAllowedOriginPatterns("https://uandmeetbucket.s3-website.ap-northeast-2.amazonaws.com")
                 .setAllowedOriginPatterns("add domain plz")
                 .setAllowedOriginPatterns("add ip plz")
                 .withSockJS(); // sock.js를 통하여 낮은 버전의 브라우저에서도 websocket 이 동작할수 있게 한다

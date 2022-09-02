@@ -1,6 +1,7 @@
 package com.project.uandmeet.chat.config;
 
 import com.project.uandmeet.chat.service.RedisSubscriber;
+import com.project.uandmeet.notification.SseRedisSubscriber;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.redis.connection.RedisConnectionFactory;
@@ -32,19 +33,31 @@ public class RedisConfig {
     }
 
     // 단일 Topic 사용을 위한 Bean 설정
+    //채팅
     @Bean
     public ChannelTopic channelTopic() {
         return new ChannelTopic("board");
+    }
+
+    //알림 (sse)
+    @Bean
+    public ChannelTopic sseTopic() {
+        return new ChannelTopic("sse");
     }
 
     //     redis에 발행(publish)된 메시지 처리를 위한 리스너 설정
     @Bean
     public RedisMessageListenerContainer redisMessageListener(RedisConnectionFactory connectionFactory,
                                                               MessageListenerAdapter listenerAdapter,
-                                                              ChannelTopic channelTopic) {
+                                                              MessageListenerAdapter sseListenerAdapter,
+                                                              ChannelTopic channelTopic,
+                                                              ChannelTopic sseTopic) {
         RedisMessageListenerContainer container = new RedisMessageListenerContainer();
         container.setConnectionFactory(connectionFactory);
+        //채팅 리스너
         container.addMessageListener(listenerAdapter, channelTopic);
+        //알림 리스너 (sse)
+        container.addMessageListener(listenerAdapter, sseTopic);
         return container;
     }
 
@@ -53,6 +66,11 @@ public class RedisConfig {
     // pub 데이터가 sendMessage로 던져짐
     @Bean
     public MessageListenerAdapter listenerAdapter(RedisSubscriber subscriber) {
+        return new MessageListenerAdapter(subscriber, "sendMessage");
+    }
+
+    @Bean
+    public MessageListenerAdapter sseListenerAdapter(SseRedisSubscriber subscriber) {
         return new MessageListenerAdapter(subscriber, "sendMessage");
     }
 }
