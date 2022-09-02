@@ -4,10 +4,7 @@ import com.project.uandmeet.dto.*;
 import com.project.uandmeet.dto.boardDtoGroup.BoardRequestDto;
 import com.project.uandmeet.exception.CustomException;
 import com.project.uandmeet.exception.ErrorCode;
-import com.project.uandmeet.model.Concern;
-import com.project.uandmeet.model.JoinCnt;
-import com.project.uandmeet.model.Member;
-import com.project.uandmeet.model.Star;
+import com.project.uandmeet.model.*;
 import com.project.uandmeet.redis.RedisUtil;
 import com.project.uandmeet.repository.EntryRepository;
 import com.project.uandmeet.repository.MemberRepository;
@@ -22,6 +19,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
@@ -107,7 +105,7 @@ public class MemberService {
         String username = requestDto.getUsername();
         String[] emailadress = username.split("@");
         String id = emailadress[0];
-        String uuid = UUID.randomUUID().toString().substring(0,3);
+        String uuid = UUID.randomUUID().toString().substring(0, 3);
         String uniqueId = id + uuid;
         // 이메일 패턴 체크
         checkEmail(username);
@@ -140,7 +138,6 @@ public class MemberService {
     }
 
 
-
     // 회원 탈퇴
     public String withdraw(UserDetailsImpl userDetails, String password) {
         if (userDetails.getPassword().equals(passwordEncoder.encode(password))) {
@@ -170,7 +167,7 @@ public class MemberService {
         jwtTokenProvider.validateToken(authorizationHeader);
         String username = jwtTokenProvider.getUserPk(authorizationHeader);
         Member member = memberRepository.findByUsername(username).orElseThrow(
-                ()->new RuntimeException("사용자를 찾을 수 없습니다.")
+                () -> new RuntimeException("사용자를 찾을 수 없습니다.")
         );
         Long userId = member.getId();
         // Access Token 재발급
@@ -223,9 +220,9 @@ public class MemberService {
             // 유효 시간(3분)동안 {fromEmail, authKey} 저장
             redisUtil.setDataExpire(authNumber, setFrom, 60 * 3L);
             // 횟수
-            redisUtil.setDataExpire("Cnt" + authNumber, String.valueOf(emailCnt),60 * 60L);
+            redisUtil.setDataExpire("Cnt" + authNumber, String.valueOf(emailCnt), 60 * 60L);
             // 유효 시간(1시간)동안 {toEmail, emailCnt} 저장
-            redisUtil.setDataExpire(toMail, String.valueOf(emailCnt),60 * 60L);
+            redisUtil.setDataExpire(toMail, String.valueOf(emailCnt), 60 * 60L);
             return "인증 번호 :" + authNumber + "남은 횟수 :" + restCnt;
         }
         return "인증 횟수를 초과하였습니다. 1시간 뒤에 다시 시도해 주세요.";
@@ -233,7 +230,7 @@ public class MemberService {
 
     // 인증 체크
     public String findCheck(String authNum) {
-        return String.valueOf(authNum.equals( authNumber));
+        return String.valueOf(authNum.equals(authNumber));
     }
 
     // 비밀번호 변경
@@ -256,23 +253,47 @@ public class MemberService {
         Member member = memberRepository.findById(userId).orElseThrow(
                 () -> new RuntimeException("볼수 없는 정보입니다")
         );
+//        List<Entry> entry = entryRepository.findByMember(member); // 참여한 매칭 리스트
+//        System.out.println("엔트리 :"+entry.get(0));
+//        Long cnt = entryRepository.countByMember(member); // 참여한 매칭
+//        System.out.println("참여 매칭 :"+cnt);
         String nickname = member.getNickname();
-        List<Concern> concern = member.getConcern();
-        List<JoinCnt> joinCnt = member.getJoinCnt();
+        List<String> concern = member.getConcern();
+        Map<Category, Long> joinCnt = new HashMap<>();
+//        for (int i = 0; i < cnt; i++) {
+//            String category = String.valueOf(entry.get(i).getBoard().getCategory());
+//            Long cCnt = entryRepository.countByBoard(entry.get(i).getBoard().getCategory());
+//            System.out.println("카테고리 :"+category);
+//            System.out.println(cCnt);
+//            joinCnt.put(entry.get(i).getBoard().getCategory(), entryRepository.countByBoard(entry.get(i).getBoard().getCategory()));
+//            System.out.println("조인 카운터 :"+joinCnt);
+//        }
         MypageDto mypageDto = new MypageDto(nickname, concern, joinCnt);
         return mypageDto;
     }
 
     // 활동내역 -> 관심사 수정
-    public MypageDto concernedit(UserDetailsImpl userDetails, List<Concern> concern) {
+    public MypageDto concernedit(UserDetailsImpl userDetails, String concern1, String concern2, String concern3) {
         Long userId = userDetails.getMember().getId();
         Member member = memberRepository.findById(userId).orElseThrow(
                 () -> new RuntimeException("수정 권한이 없습니다.")
         );
+        List<Entry> entry = entryRepository.findByMember(member); // 참여한 매칭 리스트
+        Long cnt = entryRepository.countByMember(member); // 참여한 매칭 수
         String nickname = member.getNickname(); // 고민중
-        List<JoinCnt> joinCnt = member.getJoinCnt();
+        List<String> concerns = new ArrayList<>(); // 초기화
+//        for (int i = 0; i < concerns.size(); i++) {
+//            Concern concern1 = concerns.get(i);
+        concerns.add(concern1);
+        concerns.add(concern2);
+        concerns.add(concern3);
 
-        MypageDto mypageDto = new MypageDto(nickname, concern, joinCnt);
+        member.setConcern(concerns);
+        Map<Category, Long> joinCnt = new HashMap<>();
+//        for (int i = 0; i < cnt; i++) {
+//            joinCnt.put(entry.get(i).getBoard().getCategory(), entryRepository.countByBoard(entry.get(i).getBoard().getId()));
+//        }
+        MypageDto mypageDto = new MypageDto(nickname, concerns, joinCnt);
         return mypageDto;
     }
 
@@ -282,12 +303,19 @@ public class MemberService {
         Member member = memberRepository.findById(userId).orElseThrow(
                 () -> new RuntimeException("수정 권한이 없습니다.")
         );
-        List<Concern> concern = member.getConcern();
-        List<JoinCnt> joinCnt = member.getJoinCnt();
+        List<Entry> entry = entryRepository.findByMember(member); // 참여한 매칭 리스트
+        Long cnt = entryRepository.countByMember(member); // 참여한 매칭
+        List<String> concern = member.getConcern();
+        Map<Category, Long> joinCnt = new HashMap<>();
+        for (int i = 0; i < cnt; i++) {
+            joinCnt.put(entry.get(i).getBoard().getCategory(), entryRepository.countByBoard(entry.get(i).getBoard().getId()));
+        }
         Member usingnickname = memberRepository.findByNickname(nickname).orElse(null);
         if (usingnickname == null) {
             member.setNickname(nickname);
-        } else { throw new RuntimeException("이미 존재하는 닉네임입니다.");}
+        } else {
+            throw new RuntimeException("이미 존재하는 닉네임입니다.");
+        }
         MypageDto mypageDto = new MypageDto(nickname, concern, joinCnt);
         return mypageDto;
     }
@@ -375,14 +403,14 @@ public class MemberService {
     }
 
     public void join(MemberRequestDto requestDto) {
-        Member member = new Member(requestDto.getUsername(),passwordEncoder.encode(requestDto.getPassword()));
+        Member member = new Member(requestDto.getUsername(), passwordEncoder.encode(requestDto.getPassword()));
         memberRepository.save(member);
     }
 
     //채팅회원관련
     public Member findByNickname(String nickname) {
         Member member = memberRepository.findByNickname(nickname).orElseThrow(
-                ()-> new CustomException(ErrorCode.MEMBER_NOT_FOUND)
+                () -> new CustomException(ErrorCode.MEMBER_NOT_FOUND)
         );
         return member;
     }

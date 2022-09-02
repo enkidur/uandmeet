@@ -165,7 +165,7 @@ public class MemberController {
         return ResponseEntity.ok(memberService.action(userDetails));
     }
 
-    // 활동페이지 -> nickname 수정
+//     활동페이지 -> nickname 수정
     @PutMapping("/api/mypage/actionedit/nickname")
     public ResponseEntity<MypageDto> nicknameedit(@AuthenticationPrincipal UserDetailsImpl userDetails,
                                                   @RequestBody NicknameDto requestDto) {
@@ -175,8 +175,9 @@ public class MemberController {
 
     // 활동페이지 -> concern 수정
     @PutMapping("/api/mypage/actionedit/concern")
-    public ResponseEntity<MypageDto> concernedit(@AuthenticationPrincipal UserDetailsImpl userDetails, ConcernDto requestDto) {
-        return ResponseEntity.ok(memberService.concernedit(userDetails, requestDto.getConcern()));
+    public ResponseEntity<MypageDto> concernedit(@AuthenticationPrincipal UserDetailsImpl userDetails,
+                                                 @RequestBody ConcernDto requestDto) {
+        return ResponseEntity.ok(memberService.concernedit(userDetails, requestDto.getConcern1(), requestDto.getConcern2(), requestDto.getConcern3()));
     }
 
     //myInfo 페이지

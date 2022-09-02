@@ -28,25 +28,17 @@ public class Member {
     private String password;
 
     @Column
-    private String phone;
-
-    @Column
     private String birth; // yyyy-mm-dd구조
 
     @Column
     private String gender;
 
-    @Column(nullable = true, unique = true)
-    private String email;
-
     @Column
     private String profile; // 이미지
 
-    @OneToMany(mappedBy = "member", fetch = FetchType.LAZY)
-    private List<Concern> concern;
-
-    @OneToMany(mappedBy = "member", fetch = FetchType.LAZY)
-    private List<JoinCnt> joinCnt;
+//    @OneToMany(mappedBy = "member", fetch = FetchType.LAZY)
+    @ElementCollection(fetch = FetchType.LAZY)
+    private List<String> concern;
 
     @OneToMany(fetch = FetchType.LAZY,mappedBy = "member")
     private List<Star> star;
