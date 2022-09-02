@@ -9,9 +9,13 @@ import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 import java.io.IOException;
 
-// local 환경에서 여타의 CRUD를 테스트해보기 위해서는 Profile 을 local 로 설정해주어야 한다
+/**
+ * <h1>내장 레디스 설정</h1>
+ * <p>스프링 내장 레디스 설정 클래스</p>
+ * <p>로컬에서 테스트 하려면 프로필을 수정하면 된다</p>
+ */
 //@Profile("local")
-@Profile("${Redis_host}")
+@Profile("${spring.redis.host}")
 @Configuration
 public class EmbeddedRedisConfig {
 
