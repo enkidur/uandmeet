@@ -38,10 +38,10 @@ public class AllChatController {
     }
 
     //이전에 채팅 기록  조회
-    @GetMapping("/chat/message/{projectId}")
+    @GetMapping("/chat/message/{boardId}")
     @ResponseBody
-    public  List<FindChatMessageDto> getAllMessage(@PathVariable String projectId){
-        return chatService.getAllMessage(projectId);
+    public  List<FindChatMessageDto> getAllMessage(@PathVariable String boardId){
+        return chatService.getAllMessage(boardId);
     }
 
 
