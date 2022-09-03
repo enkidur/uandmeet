@@ -25,6 +25,10 @@ public class Entry {
     @JoinColumn(name = "board_id")
     private Board board;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "category_id")
+    private Category category;
+
 //    private Long memberEntryId; // 참여한 사람의 id ( 이메일 잘라서 뒤에 랜덤값 붙힘 )
 
     public Entry(Board board, Member member) {

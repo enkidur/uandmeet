@@ -253,21 +253,19 @@ public class MemberService {
         Member member = memberRepository.findById(userId).orElseThrow(
                 () -> new RuntimeException("볼수 없는 정보입니다")
         );
-//        List<Entry> entry = entryRepository.findByMember(member); // 참여한 매칭 리스트
-//        System.out.println("엔트리 :"+entry.get(0));
-//        Long cnt = entryRepository.countByMember(member); // 참여한 매칭
-//        System.out.println("참여 매칭 :"+cnt);
+        List<Entry> entry = entryRepository.findByMember(member); // 참여한 매칭 리스트
+        System.out.println("엔트리 :"+entry.get(1).getBoard().getCategory().getCategory());
+        Long cnt = entryRepository.countByMember(member); // 참여한 매칭
+        System.out.println("참여 매칭 :"+cnt);
         String nickname = member.getNickname();
         List<String> concern = member.getConcern();
-        Map<Category, Long> joinCnt = new HashMap<>();
-//        for (int i = 0; i < cnt; i++) {
-//            String category = String.valueOf(entry.get(i).getBoard().getCategory());
-//            Long cCnt = entryRepository.countByBoard(entry.get(i).getBoard().getCategory());
-//            System.out.println("카테고리 :"+category);
-//            System.out.println(cCnt);
-//            joinCnt.put(entry.get(i).getBoard().getCategory(), entryRepository.countByBoard(entry.get(i).getBoard().getCategory()));
-//            System.out.println("조인 카운터 :"+joinCnt);
-//        }
+        Map<String, Long> joinCnt = new HashMap<>();
+        for (int i = 0; i < cnt; i++) {
+            String category = entry.get(i).getBoard().getCategory().getCategory();
+            Long categoryCnt = entryRepository.countByMemberAndCategory(member, entry.get(i).getCategory());
+            joinCnt.put(category, categoryCnt);
+            System.out.println("조인 카운터 :" + joinCnt);
+        }
         MypageDto mypageDto = new MypageDto(nickname, concern, joinCnt);
         return mypageDto;
     }
@@ -284,18 +282,20 @@ public class MemberService {
         List<String> concerns = new ArrayList<>(); // 초기화
 //        for (int i = 0; i < concerns.size(); i++) {
 //            Concern concern1 = concerns.get(i);
-        concerns.add(concern1);
-        concerns.add(concern2);
-        concerns.add(concern3);
-
-        member.setConcern(concerns);
-        Map<Category, Long> joinCnt = new HashMap<>();
-//        for (int i = 0; i < cnt; i++) {
-//            joinCnt.put(entry.get(i).getBoard().getCategory(), entryRepository.countByBoard(entry.get(i).getBoard().getId()));
-//        }
+            concerns.add(concern1);
+            concerns.add(concern2);
+            concerns.add(concern3);
+            member.setConcern(concerns);
+        Map<String, Long> joinCnt = new HashMap<>();
+        for (int i = 0; i < cnt; i++) {
+            System.out.println(entry.get(i).getBoard().getCategory());
+            joinCnt.put(entry.get(i).getBoard().getCategory().getCategory(), entryRepository.countByBoard(entry.get(i).getBoard().getId()));
+        }
         MypageDto mypageDto = new MypageDto(nickname, concerns, joinCnt);
         return mypageDto;
     }
+
+
 
     // 활동 페이지 -> 닉네임 수정
     public MypageDto nicknameedit(UserDetailsImpl userDetails, String nickname) {
@@ -306,9 +306,9 @@ public class MemberService {
         List<Entry> entry = entryRepository.findByMember(member); // 참여한 매칭 리스트
         Long cnt = entryRepository.countByMember(member); // 참여한 매칭
         List<String> concern = member.getConcern();
-        Map<Category, Long> joinCnt = new HashMap<>();
+        Map<String, Long> joinCnt = new HashMap<>();
         for (int i = 0; i < cnt; i++) {
-            joinCnt.put(entry.get(i).getBoard().getCategory(), entryRepository.countByBoard(entry.get(i).getBoard().getId()));
+            joinCnt.put(entry.get(i).getBoard().getCategory().getCategory(), entryRepository.countByBoard(entry.get(i).getBoard().getId()));
         }
         Member usingnickname = memberRepository.findByNickname(nickname).orElse(null);
         if (usingnickname == null) {
