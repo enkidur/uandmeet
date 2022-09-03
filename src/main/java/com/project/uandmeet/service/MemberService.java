@@ -196,6 +196,8 @@ public class MemberService {
 
     public String findpassword(String username) {
         if (emailCnt < 4) {
+            emailCnt += 1;
+            int restCnt = 3 - emailCnt;
             // 비밀번호 난수 생성
             makeRandomNumber();
 
@@ -209,14 +211,28 @@ public class MemberService {
             String toMail = username;
             String title = "비밀번호 찾기 이메일 입니다."; // 이메일 제목
             String content =
-                    "홈페이지를 방문해주셔서 감사합니다." +    //html 형식으로 작성 !
-                            "<br><br>" +
-                            "비밀번호 찾기 인증번호는 " + authNumber + "입니다." +
-                            "<br>" +
-                            "인증 후 비밀번호를 변경해 주세요"; //이메일 내용 삽입
+            " <div" 																																																	+
+                    "	style=\"font-family: 'Apple SD Gothic Neo', 'sans-serif' !important; width: 400px; height: 600px; border-top: 4px solid #00CFFF; margin: 100px auto; padding: 30px 0; box-sizing: border-box;\">"		+
+                    "	<h1 style=\"margin: 0; padding: 0 5px; font-size: 28px; font-weight: 400;\">"																															+
+                    "		<span style=\"font-size: 15px; margin: 0 0 10px 3px;\">너나만나</span><br />"																													+
+                    "		<span style=\"color: #00CFFF\">메일인증</span> 안내입니다."																																				+
+                    "	</h1>\n"																																																+
+                    "	<p style=\"font-size: 16px; line-height: 26px; margin-top: 50px; padding: 0 5px;\">"																													+
+                    "		안녕하세요.<br />"																																													+
+                    toMail																																																+
+                    "	<p style=\"font-size: 16px; line-height: 26px; margin-top: 50px; padding: 0 5px;\">"																													+
+                    "		님<br />"																																													+
+                    "		너나만나의 비밀번호 찾기입니다.<br />"																																						+
+                    "		<b style=\"color: #00CFFF\">'인증 번호'</b> 를 입력하여 비밀번호 찾기를 완료해 주세요.<br />"																													+
+                    "		감사합니다."																																															+
+                    "	</p>"																																																	+
+                    "          <div style=\"text-align: center;\"><h1><b style=\"color: #00CFFF\" >" + authNumber + "<br /><h1></div>"																																										+
+                    "	<div style=\"border-top: 1px solid #DDD; padding: 5px;\"></div>"																																		+
+                    "<br>" +
+                    "남은 인증 횟수 : " + restCnt +
+                    " </div>";
+
             emailService.mailSend(setFrom, toMail, title, content);
-            emailCnt += 1;
-            int restCnt = 3 - emailCnt;
             // 유효 시간(3분)동안 {fromEmail, authKey} 저장
             redisUtil.setDataExpire(authNumber, setFrom, 60 * 3L);
             // 횟수
@@ -254,21 +270,24 @@ public class MemberService {
                 () -> new RuntimeException("볼수 없는 정보입니다")
         );
         List<Entry> entry = entryRepository.findByMember(member); // 참여한 매칭 리스트
-        System.out.println("엔트리 :"+entry.get(1).getBoard().getCategory().getCategory());
-        Long cnt = entryRepository.countByMember(member); // 참여한 매칭
-        System.out.println("참여 매칭 :"+cnt);
         String nickname = member.getNickname();
         List<String> concern = member.getConcern();
+        Long cnt = entryRepository.countByMember(member); // 참여한 매칭
         Map<String, Long> joinCnt = new HashMap<>();
         for (int i = 0; i < cnt; i++) {
-            String category = entry.get(i).getBoard().getCategory().getCategory();
-            Long categoryCnt = entryRepository.countByMemberAndCategory(member, entry.get(i).getCategory());
-            joinCnt.put(category, categoryCnt);
-            System.out.println("조인 카운터 :" + joinCnt);
+            if (entry.get(0).getBoard().getCategory().getCategory() == null) {
+                MypageDto mypageDto = new MypageDto(nickname, concern);
+                return mypageDto;
+            } else {
+                String category = entry.get(i).getCategory().getCategory();
+                Long categoryCnt = entryRepository.countByMemberAndCategory(member, entry.get(i).getCategory());
+                joinCnt.put(category, categoryCnt);
+            }
         }
         MypageDto mypageDto = new MypageDto(nickname, concern, joinCnt);
         return mypageDto;
     }
+
 
     // 활동내역 -> 관심사 수정
     public MypageDto concernedit(UserDetailsImpl userDetails, String concern1, String concern2, String concern3) {
@@ -279,22 +298,27 @@ public class MemberService {
         List<Entry> entry = entryRepository.findByMember(member); // 참여한 매칭 리스트
         Long cnt = entryRepository.countByMember(member); // 참여한 매칭 수
         String nickname = member.getNickname(); // 고민중
-        List<String> concerns = new ArrayList<>(); // 초기화
+        List<String> concern = new ArrayList<>(); // 초기화
 //        for (int i = 0; i < concerns.size(); i++) {
 //            Concern concern1 = concerns.get(i);
-            concerns.add(concern1);
-            concerns.add(concern2);
-            concerns.add(concern3);
-            member.setConcern(concerns);
+        concern.add(concern1);
+        concern.add(concern2);
+        concern.add(concern3);
+        member.setConcern(concern);
         Map<String, Long> joinCnt = new HashMap<>();
         for (int i = 0; i < cnt; i++) {
-            System.out.println(entry.get(i).getBoard().getCategory());
-            joinCnt.put(entry.get(i).getBoard().getCategory().getCategory(), entryRepository.countByBoard(entry.get(i).getBoard().getId()));
+            if (entry.get(0).getBoard().getCategory().getCategory() == null) {
+                MypageDto mypageDto = new MypageDto(nickname, concern);
+                return mypageDto;
+            } else {
+                String category = entry.get(i).getCategory().getCategory();
+                Long categoryCnt = entryRepository.countByMemberAndCategory(member, entry.get(i).getCategory());
+                joinCnt.put(category, categoryCnt);
+            }
         }
-        MypageDto mypageDto = new MypageDto(nickname, concerns, joinCnt);
+        MypageDto mypageDto = new MypageDto(nickname, concern, joinCnt);
         return mypageDto;
     }
-
 
 
     // 활동 페이지 -> 닉네임 수정
@@ -308,7 +332,14 @@ public class MemberService {
         List<String> concern = member.getConcern();
         Map<String, Long> joinCnt = new HashMap<>();
         for (int i = 0; i < cnt; i++) {
-            joinCnt.put(entry.get(i).getBoard().getCategory().getCategory(), entryRepository.countByBoard(entry.get(i).getBoard().getId()));
+            if (entry.get(0).getBoard().getCategory().getCategory() == null) {
+                MypageDto mypageDto = new MypageDto(nickname, concern);
+                return mypageDto;
+            } else {
+                String category = entry.get(i).getCategory().getCategory();
+                Long categoryCnt = entryRepository.countByMemberAndCategory(member, entry.get(i).getCategory());
+                joinCnt.put(category, categoryCnt);
+            }
         }
         Member usingnickname = memberRepository.findByNickname(nickname).orElse(null);
         if (usingnickname == null) {
