@@ -57,7 +57,7 @@ public class RedisConfig {
         //채팅 리스너
         container.addMessageListener(listenerAdapter, channelTopic);
         //알림 리스너 (sse)
-        container.addMessageListener(listenerAdapter, sseTopic);
+        container.addMessageListener(sseListenerAdapter, sseTopic);
         return container;
     }
 
