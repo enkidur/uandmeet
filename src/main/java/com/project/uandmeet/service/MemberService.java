@@ -154,13 +154,16 @@ public class MemberService {
 //        jwtTokenProvider.createToken(username);
 //    }
 
-    public Map<String, String> refresh(HttpServletRequest request, HttpServletResponse response) {
+    public Map<String, String> refresh(HttpServletRequest request, HttpServletResponse response, UserDetailsImpl userDetails) {
 
         // refreshToken
-        String authorizationHeader = request.getHeader(HttpHeaders.AUTHORIZATION);
+        String authorizationHeader = request.getHeader(JwtProperties.HEADER_REFRESH);
 
         if (authorizationHeader == null || !authorizationHeader.startsWith(JwtProperties.TOKEN_PREFIX)) {
             throw new RuntimeException("JWT Token이 존재하지 않습니다.");
+        }
+        if (!redisUtil.getData(userDetails.getUsername() + JwtProperties.HEADER_REFRESH).equals(authorizationHeader)) {
+            throw new RuntimeException("잘못된 JWT Token입니다.");
         }
 
         // Refresh Token 유효성 검사
@@ -182,7 +185,8 @@ public class MemberService {
         if (refreshExpireTime.before(new Date(now.getTime() + 1000 * 60 * 60 * 24L))) { // refresh token 만료시간이 특정시간보다 작으면 재발급
             String newRefreshToken = jwtTokenProvider.createRefreshToken();
             accessTokenResponseMap.put(JwtProperties.HEADER_REFRESH, JwtProperties.TOKEN_PREFIX + newRefreshToken);
-            redisUtil.setDataExpire(jwtTokenProvider.getUserPk(accessToken), newRefreshToken, JwtProperties.REFRESH_EXPIRATION_TIME);
+            redisUtil.setDataExpire(jwtTokenProvider.getUserPk(accessToken) + JwtProperties.HEADER_ACCESS, accessToken, JwtProperties.ACCESS_EXPIRATION_TIME);
+            redisUtil.setDataExpire(jwtTokenProvider.getUserPk(accessToken) + JwtProperties.HEADER_REFRESH, newRefreshToken, JwtProperties.REFRESH_EXPIRATION_TIME);
         }
 
         accessTokenResponseMap.put(JwtProperties.HEADER_ACCESS, JwtProperties.TOKEN_PREFIX + accessToken);
@@ -211,26 +215,26 @@ public class MemberService {
             String toMail = username;
             String title = "비밀번호 찾기 이메일 입니다."; // 이메일 제목
             String content =
-            " <div" 																																																	+
-                    "	style=\"font-family: 'Apple SD Gothic Neo', 'sans-serif' !important; width: 400px; height: 600px; border-top: 4px solid #00CFFF; margin: 100px auto; padding: 30px 0; box-sizing: border-box;\">"		+
-                    "	<h1 style=\"margin: 0; padding: 0 5px; font-size: 28px; font-weight: 400;\">"																															+
-                    "		<span style=\"font-size: 15px; margin: 0 0 10px 3px;\">너나만나</span><br />"																													+
-                    "		<span style=\"color: #00CFFF\">메일인증</span> 안내입니다."																																				+
-                    "	</h1>\n"																																																+
-                    "	<p style=\"font-size: 16px; line-height: 26px; margin-top: 50px; padding: 0 5px;\">"																													+
-                    "		안녕하세요.<br />"																																													+
-                    toMail																																																+
-                    "	<p style=\"font-size: 16px; line-height: 26px; margin-top: 50px; padding: 0 5px;\">"																													+
-                    "		님<br />"																																													+
-                    "		너나만나의 비밀번호 찾기입니다.<br />"																																						+
-                    "		<b style=\"color: #00CFFF\">'인증 번호'</b> 를 입력하여 비밀번호 찾기를 완료해 주세요.<br />"																													+
-                    "		감사합니다."																																															+
-                    "	</p>"																																																	+
-                    "          <div style=\"text-align: center;\"><h1><b style=\"color: #00CFFF\" >" + authNumber + "<br /><h1></div>"																																										+
-                    "	<div style=\"border-top: 1px solid #DDD; padding: 5px;\"></div>"																																		+
-                    "<br>" +
-                    "남은 인증 횟수 : " + restCnt +
-                    " </div>";
+                    " <div" +
+                            "	style=\"font-family: 'Apple SD Gothic Neo', 'sans-serif' !important; width: 400px; height: 600px; border-top: 4px solid #00CFFF; margin: 100px auto; padding: 30px 0; box-sizing: border-box;\">" +
+                            "	<h1 style=\"margin: 0; padding: 0 5px; font-size: 28px; font-weight: 400;\">" +
+                            "		<span style=\"font-size: 15px; margin: 0 0 10px 3px;\">너나만나</span><br />" +
+                            "		<span style=\"color: #00CFFF\">메일인증</span> 안내입니다." +
+                            "	</h1>\n" +
+                            "	<p style=\"font-size: 16px; line-height: 26px; margin-top: 50px; padding: 0 5px;\">" +
+                            "		안녕하세요.<br />" +
+                            toMail +
+                            "	<p style=\"font-size: 16px; line-height: 26px; margin-top: 50px; padding: 0 5px;\">" +
+                            "		님<br />" +
+                            "		너나만나의 비밀번호 찾기입니다.<br />" +
+                            "		<b style=\"color: #00CFFF\">'인증 번호'</b> 를 입력하여 비밀번호 찾기를 완료해 주세요.<br />" +
+                            "		감사합니다." +
+                            "	</p>" +
+                            "          <div style=\"text-align: center;\"><h1><b style=\"color: #00CFFF\" >" + authNumber + "<br /><h1></div>" +
+                            "	<div style=\"border-top: 1px solid #DDD; padding: 5px;\"></div>" +
+                            "<br>" +
+                            "남은 인증 횟수 : " + restCnt +
+                            " </div>";
 
             emailService.mailSend(setFrom, toMail, title, content);
             // 유효 시간(3분)동안 {fromEmail, authKey} 저장
@@ -271,7 +275,7 @@ public class MemberService {
         );
         List<Entry> entry = entryRepository.findByMember(member); // 참여한 매칭 리스트
         String nickname = member.getNickname();
-        List<String> concern = member.getConcern();
+        Map<String, String> concern = member.getConcern();
         Long cnt = entryRepository.countByMember(member); // 참여한 매칭
         Map<String, Long> joinCnt = new HashMap<>();
         for (int i = 0; i < cnt; i++) {
@@ -290,7 +294,13 @@ public class MemberService {
 
 
     // 활동내역 -> 관심사 수정
-    public MypageDto concernedit(UserDetailsImpl userDetails, String concern1, String concern2, String concern3) {
+    public MypageDto concernedit(UserDetailsImpl userDetails,
+                                 String concern1En,
+                                 String concern1Kor,
+                                 String concern2En,
+                                 String concern2Kor,
+                                 String concern3En,
+                                 String concern3Kor) {
         Long userId = userDetails.getMember().getId();
         Member member = memberRepository.findById(userId).orElseThrow(
                 () -> new RuntimeException("수정 권한이 없습니다.")
@@ -298,12 +308,15 @@ public class MemberService {
         List<Entry> entry = entryRepository.findByMember(member); // 참여한 매칭 리스트
         Long cnt = entryRepository.countByMember(member); // 참여한 매칭 수
         String nickname = member.getNickname(); // 고민중
-        List<String> concern = new ArrayList<>(); // 초기화
+        Map<String, String> concern = new HashMap<>(); // 초기화
 //        for (int i = 0; i < concerns.size(); i++) {
 //            Concern concern1 = concerns.get(i);
-        concern.add(concern1);
-        concern.add(concern2);
-        concern.add(concern3);
+//        concern.add(concern1);
+//        concern.add(concern2);
+//        concern.add(concern3);
+        concern.put(concern1En, concern1Kor);
+        concern.put(concern2En, concern2Kor);
+        concern.put(concern3En, concern3Kor);
         member.setConcern(concern);
         Map<String, Long> joinCnt = new HashMap<>();
         for (int i = 0; i < cnt; i++) {
@@ -329,7 +342,7 @@ public class MemberService {
         );
         List<Entry> entry = entryRepository.findByMember(member); // 참여한 매칭 리스트
         Long cnt = entryRepository.countByMember(member); // 참여한 매칭
-        List<String> concern = member.getConcern();
+        Map<String, String> concern = member.getConcern();
         Map<String, Long> joinCnt = new HashMap<>();
         for (int i = 0; i < cnt; i++) {
             if (entry.get(0).getBoard().getCategory().getCategory() == null) {

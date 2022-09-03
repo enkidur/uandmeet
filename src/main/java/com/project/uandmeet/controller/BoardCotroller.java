@@ -148,7 +148,7 @@ public class BoardCotroller {
     //댓글작성
     @PostMapping("/api/board/{id}/comments")
     private CommentsReponseDto commentsNew(@PathVariable("id") Long id,
-                                           CommentsRequestDto commentsRequestDto,
+                                           @RequestBody CommentsRequestDto commentsRequestDto,
                                            @AuthenticationPrincipal UserDetailsImpl userDetails) {
         return boardService.commentsNew(id,commentsRequestDto,userDetails);
     }

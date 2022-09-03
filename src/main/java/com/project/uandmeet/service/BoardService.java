@@ -369,7 +369,7 @@ public class BoardService {
                 .orElseThrow(() -> new CustomException(ErrorCode.EMPTY_CONTENT));
 
         Comment comment = new Comment(commentsRequestDto, member, board);
-        CommentsReponseDto commentsReponseDto = new CommentsReponseDto(comment);
+        CommentsReponseDto commentsReponseDto = new CommentsReponseDto(comment, userDetails.getMember().getNickname(), userDetails.getMember().getProfile());
 
         try {
             commentRepository.save(comment);

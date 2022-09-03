@@ -115,8 +115,9 @@ public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilte
 
         // Refresh Token DB에 저장
 //        memberService.updateRefreshToken(userDetailsImpl.getUsername(), refreshToken);
-        // Refresh Token Redis 에 저장
-        redisUtil.setDataExpire(userDetailsImpl.getUsername(), refreshToken, JwtProperties.REFRESH_EXPIRATION_TIME);
+        // AccessToken, Refresh Token Redis 에 저장
+        redisUtil.setDataExpire(userDetailsImpl.getUsername()+JwtProperties.HEADER_ACCESS, JwtProperties.HEADER_ACCESS, JwtProperties.ACCESS_EXPIRATION_TIME);
+        redisUtil.setDataExpire(userDetailsImpl.getUsername()+JwtProperties.HEADER_REFRESH, JwtProperties.HEADER_REFRESH, JwtProperties.REFRESH_EXPIRATION_TIME);
 
         // token 을 Header 에 발급
         // 재발급떼문에 setHeader 사용

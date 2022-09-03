@@ -12,7 +12,7 @@ import java.time.LocalDateTime;
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor
-public class Comment {
+public class Comment extends BaseEntity{
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -37,6 +37,7 @@ public class Comment {
 
     public Comment(CommentsRequestDto commentsRequestDto, Member member, Board board) {
         this.comment = commentsRequestDto.getContent();
-
+        this.member = member;
+        this.board = board;
     }
 }

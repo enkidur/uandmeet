@@ -5,6 +5,7 @@ import lombok.*;
 import javax.persistence.*;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 @Getter
 @Setter
@@ -38,7 +39,7 @@ public class Member {
 
 //    @OneToMany(mappedBy = "member", fetch = FetchType.LAZY)
     @ElementCollection(fetch = FetchType.LAZY)
-    private List<String> concern;
+    private Map<String, String> concern;
 
     @OneToMany(fetch = FetchType.LAZY,mappedBy = "member")
     private List<Star> star;

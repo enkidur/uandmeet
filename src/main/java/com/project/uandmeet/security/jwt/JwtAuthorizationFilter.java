@@ -7,6 +7,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import com.project.uandmeet.model.Member;
+import com.project.uandmeet.redis.RedisUtil;
 import com.project.uandmeet.repository.MemberRepository;
 import com.project.uandmeet.security.UserDetailsImpl;
 import io.jsonwebtoken.JwtException;
@@ -27,6 +28,8 @@ public class JwtAuthorizationFilter extends BasicAuthenticationFilter {
 
     @Autowired
     private JwtTokenProvider jwtTokenProvider;
+    @Autowired
+    private RedisUtil redisUtil;
 
     public JwtAuthorizationFilter(AuthenticationManager authenticationManager, JwtTokenProvider jwtTokenProvider) {
         super(authenticationManager);
@@ -52,7 +55,9 @@ public class JwtAuthorizationFilter extends BasicAuthenticationFilter {
 
 
         // 토큰 검증
-
+        if (!redisUtil.getData(jwtTokenProvider.getUserPk(token)+JwtProperties.HEADER_ACCESS).equals(token)) {
+            throw new RuntimeException("잘못된 AccessToken입니다.");
+        }
         // 유효한 토큰인지 확인
         if (token != null && jwtTokenProvider.validateToken(token)) {
             // 토큰이 유효하면 토큰으로부터 유저 정보를 받아와서 저장

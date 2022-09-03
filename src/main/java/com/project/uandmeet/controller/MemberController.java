@@ -131,8 +131,10 @@ public class MemberController {
     // 7. 서버는 Refresh Token 유효성 체크를 하게 되고, 새로운 Access Token 을 발급한다.
     // 8. 클라이언트는 새롭게 받은 Access Token 을 기존의 Access Token 에 덮어쓰게 된다.
     @GetMapping("/api/refresh")
-    public ResponseEntity<Map<String, String>> refresh(HttpServletRequest request, HttpServletResponse response) {
-        Map<String, String> tokens = memberService.refresh(request, response);
+    public ResponseEntity<Map<String, String>> refresh(HttpServletRequest request,
+                                                       HttpServletResponse response,
+                                                       @AuthenticationPrincipal UserDetailsImpl userDetails) {
+        Map<String, String> tokens = memberService.refresh(request, response, userDetails);
         return ResponseEntity.ok(tokens);
     }
 
@@ -177,7 +179,13 @@ public class MemberController {
     @PutMapping("/api/mypage/actionedit/concern")
     public ResponseEntity<MypageDto> concernedit(@AuthenticationPrincipal UserDetailsImpl userDetails,
                                                  @RequestBody ConcernDto requestDto) {
-        return ResponseEntity.ok(memberService.concernedit(userDetails, requestDto.getConcern1(), requestDto.getConcern2(), requestDto.getConcern3()));
+        return ResponseEntity.ok(memberService.concernedit(userDetails,
+                requestDto.getConcern1En(),
+                requestDto.getConcern1Kor(),
+                requestDto.getConcern2En(),
+                requestDto.getConcern2Kor(),
+                requestDto.getConcern3En(),
+                requestDto.getConcern3Kor() ));
     }
 
     //myInfo 페이지
