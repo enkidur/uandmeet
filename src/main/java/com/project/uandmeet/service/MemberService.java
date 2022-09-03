@@ -162,9 +162,9 @@ public class MemberService {
         if (authorizationHeader == null || !authorizationHeader.startsWith(JwtProperties.TOKEN_PREFIX)) {
             throw new RuntimeException("JWT Token이 존재하지 않습니다.");
         }
-        if (!redisUtil.getData(userDetails.getUsername() + JwtProperties.HEADER_REFRESH).equals(authorizationHeader)) {
-            throw new RuntimeException("잘못된 JWT Token입니다.");
-        }
+//        if (!redisUtil.getData(userDetails.getUsername() + JwtProperties.HEADER_REFRESH).equals(authorizationHeader)) {
+//            throw new RuntimeException("잘못된 JWT Token입니다.");
+//        }
 
         // Refresh Token 유효성 검사
         jwtTokenProvider.validateToken(authorizationHeader);
