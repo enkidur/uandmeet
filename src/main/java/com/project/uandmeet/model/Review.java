@@ -37,6 +37,7 @@ public class Review {
 
     private Timestamp created_at;
 
+    // 별점
     @Column
     private int num;
 

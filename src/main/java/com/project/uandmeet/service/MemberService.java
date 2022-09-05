@@ -460,17 +460,23 @@ public class MemberService {
         return member;
     }
 
-    public Map<Integer, Long> simpleReview(Long memberId) {
+    public SimpleReviewResponseDto simpleReview(Long memberId) {
         Member member = memberRepository.findById(memberId).orElseThrow(
                 () -> new RuntimeException("찾을 수 없는 사용자입니다.")
         );
-        Map<Integer, Long> review = new HashMap<>();
-        Long reviewCnt = reviewRepository.count();
-        for (int i = 1; i <= reviewCnt; i++) {
-            Long numCnt = reviewRepository.countByNum(i);
-            review.put(i, numCnt);
+        Map<Integer, Long> plusReview = new HashMap<>();
+        Map<Integer, Long> minusReview = new HashMap<>();
+        Long reviewCnt = reviewRepository.countByTo(member);
+        System.out.println(reviewCnt);
+        for (int i = 1; i <=5; i++) {
+            Long numCnt = reviewRepository.countByToAndNum(member, i);
+            plusReview.put(i, numCnt);
         }
-        return review;
+        for (int i = 1; i <=5; i++) {
+            Long numCnt = reviewRepository.countByToAndNum(member, i+10);
+            minusReview.put(i, numCnt);
+        }
+        return new SimpleReviewResponseDto(plusReview, minusReview);
     }
 
     public List<Review> Review(Long memberId) {

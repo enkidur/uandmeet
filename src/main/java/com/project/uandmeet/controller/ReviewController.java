@@ -20,7 +20,6 @@ import org.springframework.web.bind.annotation.RestController;
 @RequiredArgsConstructor
 public class ReviewController {
     private final ReviewService reviewService;
-    private final BoardRepository boardRepository;
 
     // review 작성 페이지
     @GetMapping("/api/review")

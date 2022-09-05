@@ -1,12 +1,10 @@
 package com.project.uandmeet.service;
 
-
 import com.project.uandmeet.dto.*;
 import com.project.uandmeet.model.Board;
 import com.project.uandmeet.model.Member;
 import com.project.uandmeet.model.Review;
 import com.project.uandmeet.repository.BoardRepository;
-import com.project.uandmeet.repository.MemberRepository;
 import com.project.uandmeet.repository.ReviewRepository;
 import com.project.uandmeet.security.UserDetailsImpl;
 import lombok.RequiredArgsConstructor;
@@ -18,7 +16,6 @@ import org.springframework.stereotype.Service;
 @RequiredArgsConstructor
 public class ReviewService {
     private final ReviewRepository reviewRepository;
-    private final MemberRepository memberRepostiory;
     private final BoardRepository boardRepository;
 
     public ReviewResponseDto review(UserDetailsImpl userDetails, BoardIdRequestDto requestDto) {

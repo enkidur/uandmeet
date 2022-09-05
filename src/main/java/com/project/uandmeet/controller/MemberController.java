@@ -225,14 +225,14 @@ public class MemberController {
 
     // 매칭 간단평가
     @GetMapping("/api/userinfo/simplereview")
-    public ResponseEntity<Map<Integer, Long>> simpleReview(Long memberId) {
-        return ResponseEntity.ok(memberService.simpleReview(memberId));
+    public ResponseEntity<SimpleReviewResponseDto> simpleReview(@RequestBody MemberIdRequestDto requestDto) {
+        return ResponseEntity.ok(memberService.simpleReview(requestDto.getMemberId()));
     }
 
     // 매칭 후기
     @GetMapping("/api/userinfo/review")
-    public ResponseEntity<List<Review>> Review(Long memberId) {
-        return ResponseEntity.ok(memberService.Review(memberId));
+    public ResponseEntity<List<Review>> Review(@RequestBody MemberIdRequestDto requestDto) {
+        return ResponseEntity.ok(memberService.Review(requestDto.getMemberId()));
     }
 
     // login test
