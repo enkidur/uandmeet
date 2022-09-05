@@ -1,21 +1,18 @@
 package com.project.uandmeet.service;
 
 import com.project.uandmeet.dto.*;
-import com.project.uandmeet.dto.boardDtoGroup.BoardRequestDto;
 import com.project.uandmeet.exception.CustomException;
 import com.project.uandmeet.exception.ErrorCode;
 import com.project.uandmeet.model.*;
 import com.project.uandmeet.redis.RedisUtil;
 import com.project.uandmeet.repository.EntryRepository;
 import com.project.uandmeet.repository.MemberRepository;
+import com.project.uandmeet.repository.ReviewRepository;
 import com.project.uandmeet.security.UserDetailsImpl;
 import com.project.uandmeet.security.jwt.JwtProperties;
 import com.project.uandmeet.security.jwt.JwtTokenProvider;
 import com.project.uandmeet.service.S3.S3Uploader;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -24,7 +21,6 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.util.*;
-import java.util.concurrent.TimeUnit;
 import java.util.regex.Pattern;
 
 @Transactional
@@ -33,6 +29,7 @@ import java.util.regex.Pattern;
 public class MemberService {
     private final MemberRepository memberRepository;
     private final EntryRepository entryRepository;
+    private final ReviewRepository reviewRepository;
     private final BCryptPasswordEncoder passwordEncoder;
     private final EmailService emailService;
     private final RedisUtil redisUtil;
@@ -309,14 +306,9 @@ public class MemberService {
         Long cnt = entryRepository.countByMember(member); // 참여한 매칭 수
         String nickname = member.getNickname(); // 고민중
         Map<String, String> concern = new HashMap<>(); // 초기화
-//        for (int i = 0; i < concerns.size(); i++) {
-//            Concern concern1 = concerns.get(i);
-//        concern.add(concern1);
-//        concern.add(concern2);
-//        concern.add(concern3);
-        concern.put(concern1En, concern1Kor);
-        concern.put(concern2En, concern2Kor);
-        concern.put(concern3En, concern3Kor);
+        concern.put("en :"+concern1En, "ko :"+concern1Kor);
+        concern.put("en :"+concern2En, "ko :"+concern2Kor);
+        concern.put("en :"+concern3En, "ko :"+concern3Kor);
         member.setConcern(concern);
         Map<String, Long> joinCnt = new HashMap<>();
         for (int i = 0; i < cnt; i++) {
@@ -372,7 +364,7 @@ public class MemberService {
                 () -> new RuntimeException("볼 수 없는 정보입니다")
         );
         String gender = member.getGender();
-        String birth = member.getBirth(); // year, month, day
+        List<Long> birth = member.getBirth(); // year, month, day
         MyPageInfoDto myPageInfoDto = new MyPageInfoDto(username, gender, birth);
         return myPageInfoDto;
     }
@@ -385,7 +377,7 @@ public class MemberService {
                 () -> new RuntimeException("볼 수 없는 정보입니다")
         );
         String gender = requestDto.getGender();
-        String birth = member.getBirth();
+        List<Long> birth = member.getBirth();
         member.setGender(gender);
         MyPageInfoDto myPageInfoDto = new MyPageInfoDto(username, gender, birth);
         return myPageInfoDto;
@@ -399,7 +391,10 @@ public class MemberService {
                 () -> new RuntimeException("볼 수 없는 정보입니다")
         );
         String gender = member.getGender();
-        String birth = requestDto.getBirth();
+        List<Long> birth = new ArrayList<>(); // 초기화
+        birth.add(requestDto.getBirthYear());
+        birth.add(requestDto.getBirthMonth());
+        birth.add(requestDto.getBirthDay());
         member.setBirth(birth);
         MyPageInfoDto myPageInfoDto = new MyPageInfoDto(username, gender, birth);
         return myPageInfoDto;
@@ -457,6 +452,23 @@ public class MemberService {
                 () -> new CustomException(ErrorCode.MEMBER_NOT_FOUND)
         );
         return member;
+    }
+
+    public Map<Integer, Long> simpleReview(Long memberId) {
+        Member member = memberRepository.findById(memberId).orElseThrow(
+                () -> new RuntimeException("찾을 수 없는 사용자입니다.")
+        );
+        Map<Integer, Long> review = new HashMap<>();
+        Long reviewCnt = reviewRepository.count();
+        for (int i = 1; i <= reviewCnt; i++) {
+            Long numCnt = reviewRepository.countByNum(i);
+            review.put(i, numCnt);
+        }
+        return review;
+    }
+
+    public List<Review> Review(Long memberId) {
+        return reviewRepository.findAllById(memberId);
     }
 }
 

@@ -18,7 +18,6 @@ import java.util.List;
 public  interface BoardRepository extends JpaRepository<Board, Long>, QuerydslPredicateExecutor<Board> {
 
     Board findBoardById(Long boardId);
-
     Page<Board> findAllByBoardTypeAndCategory(String boardType, Category Category, Pageable pageable);
     Page<Board> findAllByBoardTypeAndCategoryAndCity(String boardType, Category category, Siarea city, Pageable pageable);
     Page<Board> findAllByBoardTypeAndCategoryAndCityAndGu(String boardType, Category Category, Pageable pageable,Siarea City, Guarea Gu);

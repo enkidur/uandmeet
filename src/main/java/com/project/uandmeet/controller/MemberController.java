@@ -2,8 +2,7 @@ package com.project.uandmeet.controller;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.project.uandmeet.dto.*;
-import com.project.uandmeet.model.Concern;
-import com.project.uandmeet.redis.RedisUtil;
+import com.project.uandmeet.model.Review;
 import com.project.uandmeet.security.UserDetailsImpl;
 import com.project.uandmeet.service.EmailService;
 import com.project.uandmeet.service.KakaoService;
@@ -12,7 +11,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -170,7 +168,7 @@ public class MemberController {
         return ResponseEntity.ok(memberService.action(userDetails));
     }
 
-//     활동페이지 -> nickname 수정
+    // 활동페이지 -> nickname 수정
     @PutMapping("/api/mypage/actionedit/nickname")
     public ResponseEntity<MypageDto> nicknameedit(@AuthenticationPrincipal UserDetailsImpl userDetails,
                                                   @RequestBody NicknameDto requestDto) {
@@ -223,6 +221,18 @@ public class MemberController {
     public ResponseEntity<ProfileDto> profileedit(@AuthenticationPrincipal UserDetailsImpl userDetails,
                                                   @RequestBody ProfileEditRequestDto requestDto) throws IOException {
         return ResponseEntity.ok(memberService.profileedit(userDetails, requestDto));
+    }
+
+    // 매칭 간단평가
+    @GetMapping("/api/userinfo/simplereview")
+    public ResponseEntity<Map<Integer, Long>> simpleReview(Long memberId) {
+        return ResponseEntity.ok(memberService.simpleReview(memberId));
+    }
+
+    // 매칭 후기
+    @GetMapping("/api/userinfo/review")
+    public ResponseEntity<List<Review>> Review(Long memberId) {
+        return ResponseEntity.ok(memberService.Review(memberId));
     }
 
     // login test

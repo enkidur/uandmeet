@@ -1,9 +1,11 @@
 package com.project.uandmeet.dto;
 
 import com.project.uandmeet.model.Star;
+import lombok.Getter;
 
 import java.util.List;
 
+@Getter
 public class ProfileDto {
     private String nickname;
     private List<Star> star;

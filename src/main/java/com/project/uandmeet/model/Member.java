@@ -29,7 +29,10 @@ public class Member {
     private String password;
 
     @Column
-    private String birth; // yyyy-mm-dd구조
+    @ElementCollection(fetch = FetchType.LAZY)
+    private List<Long> birth;
+//    @Column
+//    private String birth; // yyyy-mm-dd구조
 
     @Column
     private String gender;
@@ -38,23 +41,28 @@ public class Member {
     private String profile; // 이미지
 
 //    @OneToMany(mappedBy = "member", fetch = FetchType.LAZY)
+    @Column
     @ElementCollection(fetch = FetchType.LAZY)
     private Map<String, String> concern;
 
     @OneToMany(fetch = FetchType.LAZY,mappedBy = "member")
     private List<Star> star;
 
-    @OneToMany(fetch = FetchType.LAZY,mappedBy = "member",cascade = CascadeType.ALL)
+    @OneToMany(fetch = FetchType.LAZY, mappedBy = "member",cascade = CascadeType.ALL)
     private List<Board> boardList = new ArrayList<>();
 
-    @OneToMany(fetch = FetchType.LAZY,mappedBy = "member",cascade = CascadeType.ALL)
+    @OneToMany(fetch = FetchType.LAZY, mappedBy = "member",cascade = CascadeType.ALL)
     private List<Liked> likeList = new ArrayList<>();
 
-    @OneToMany(fetch = FetchType.LAZY,mappedBy = "member",cascade = CascadeType.ALL)
+    @OneToMany(fetch = FetchType.LAZY, mappedBy = "member",cascade = CascadeType.ALL)
     private List<Entry> entryList = new ArrayList<>();
+
     @Column
     @Enumerated(value = EnumType.STRING) // Enum type을 STring 으로 변화하여 저장
     private MemberRoleEnum role;
+
+    @OneToMany(fetch = FetchType.LAZY)
+    private List<Review> review;
 
     @Column
     private String loginto;

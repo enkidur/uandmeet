@@ -5,13 +5,8 @@ import lombok.Getter;
 @Getter
 public class InfoeditRequestDto {
     private String gender;
-    private String birth;
+    private Long birthYear;
+    private Long birthMonth;
+    private Long birthDay;
 
-    public void setGender(String gender) {
-        this.gender = gender;
-    }
-
-    public void setBirth(String birth) {
-        this.birth = birth;
-    }
 }

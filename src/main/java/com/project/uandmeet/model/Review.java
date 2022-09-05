@@ -1,17 +1,10 @@
 package com.project.uandmeet.model;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
 import lombok.Getter;
-import lombok.NoArgsConstructor;
-
 import javax.persistence.*;
 import java.sql.Timestamp;
 
 @Getter
-@Builder
-@NoArgsConstructor
-@AllArgsConstructor
 @Entity
 public class Review {
 /*
@@ -39,24 +32,25 @@ public class Review {
     private String message;
 
     //단일 평가점수
+    @Column
     private Long evaluation_items;
 
     private Timestamp created_at;
 
+    @Column
     private int num;
 
-    public Review(Board board, Member from, Member to, Long score) {
-        this.board = board;
-        this.from = from;
-        this.to = to;
-        evaluation_items = score;
-    }
 
-    public Review(Board board, Member from, Member to, int num, String review) {
+    public Review(Board board, Member from, Member to, int num, Long score, String review) {
         this.board = board;
         this.from = from;
         this.to = to;
         this.num = num;
+        evaluation_items = score;
         message = review;
+    }
+
+    public Review() {
+
     }
 }
