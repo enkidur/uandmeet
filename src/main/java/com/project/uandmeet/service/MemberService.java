@@ -41,6 +41,7 @@ public class MemberService {
     private int emailCnt; // email 인증 횟수
 
     // 난수 생성
+    @Transactional
     public void makeRandomNumber() {
         String checkNum = UUID.randomUUID().toString().substring(0, 6);
         System.out.println("임시 비밀번호 : " + checkNum);
@@ -48,6 +49,7 @@ public class MemberService {
     }
 
     // 회원 가입 1. emali check
+    @Transactional
     public String checkemail(String username) throws IOException {
         checkEmail(username);
 
@@ -56,6 +58,7 @@ public class MemberService {
         return "email check";
     }
 
+    @Transactional
     private void checkEmail(String username) {
         String[] emailadress = username.split("@");
         String id = emailadress[0];
@@ -83,6 +86,7 @@ public class MemberService {
 
 
     // 비밀번호, 비밀번호 재입력 확인
+    @Transactional
     public String checkPassword(String password, String passwordCheck) {
         if (password.length() < 3) {
             throw new IllegalArgumentException("비밀번호를 3자 이상 입력하세요");
@@ -128,6 +132,7 @@ public class MemberService {
     }
 
 
+    @Transactional
     public void checkDuplicateEmail(String username) {
         Optional<Member> member = memberRepository.findByUsername(username);
         if (member.isPresent()) {
@@ -137,6 +142,7 @@ public class MemberService {
 
 
     // 회원 탈퇴
+    @Transactional
     public String withdraw(UserDetailsImpl userDetails, String password) {
         if (userDetails.getPassword().equals(passwordEncoder.encode(password))) {
             String username = userDetails.getUsername();
@@ -152,6 +158,7 @@ public class MemberService {
 //        jwtTokenProvider.createToken(username);
 //    }
 
+    @Transactional
     public Map<String, String> refresh(HttpServletRequest request, HttpServletResponse response, UserDetailsImpl userDetails) {
 
         // refreshToken
@@ -196,6 +203,7 @@ public class MemberService {
         return tokens;
     }
 
+    @Transactional
     public String findpassword(String username) {
         if (emailCnt < 4) {
             emailCnt += 1;
@@ -247,11 +255,13 @@ public class MemberService {
     }
 
     // 인증 체크
+    @Transactional
     public String findCheck(String authNum) {
         return String.valueOf(authNum.equals(authNumber));
     }
 
     // 비밀번호 변경
+    @Transactional
     public String passChange(UserDetailsImpl userDetails, PasswordChangeDto passwordChangeDto) {
         Long userId = userDetails.getMember().getId();
         Member member = memberRepository.findById(userId).orElseThrow(
@@ -266,6 +276,7 @@ public class MemberService {
     }
 
     // 활동 내역 조회
+    @Transactional
     public MypageDto action(UserDetailsImpl userDetails) {
         Long userId = userDetails.getMember().getId();
         Member member = memberRepository.findById(userId).orElseThrow(
@@ -292,6 +303,7 @@ public class MemberService {
 
 
     // 활동내역 -> 관심사 수정
+    @Transactional
     public MypageDto concernedit(UserDetailsImpl userDetails,
                                  String concern1En,
                                  String concern1Kor,
@@ -328,6 +340,7 @@ public class MemberService {
 
 
     // 활동 페이지 -> 닉네임 수정
+    @Transactional
     public MypageDto nicknameedit(UserDetailsImpl userDetails, String nickname) {
         Long userId = userDetails.getMember().getId();
         Member member = memberRepository.findById(userId).orElseThrow(
@@ -358,6 +371,7 @@ public class MemberService {
     }
 
     // memberInfo 조회
+    @Transactional(readOnly = true)
     public MyPageInfoDto myinfo(UserDetailsImpl userDetails) {
         String username = userDetails.getUsername();
         Long userId = userDetails.getMember().getId();
@@ -371,6 +385,7 @@ public class MemberService {
     }
 
     // info -> gender 수정
+    @Transactional
     public MyPageInfoDto genderedit(UserDetailsImpl userDetails, InfoeditRequestDto requestDto) {
         String username = userDetails.getUsername();
         Long userId = userDetails.getMember().getId();
@@ -385,6 +400,7 @@ public class MemberService {
     }
 
     // info -> birth 수정
+    @Transactional
     public MyPageInfoDto birthedit(UserDetailsImpl userDetails, InfoeditRequestDto requestDto) {
         String username = userDetails.getUsername();
         Long userId = userDetails.getMember().getId();
@@ -402,6 +418,7 @@ public class MemberService {
     }
 
     // profile 조회
+    @Transactional(readOnly = true)
     public ProfileDto profile(UserDetailsImpl userDetails) {
         Long userId = userDetails.getMember().getId();
         Member member = memberRepository.findById(userId).orElseThrow(
@@ -415,6 +432,7 @@ public class MemberService {
     }
 
     // profile 수정
+    @Transactional
     public ProfileDto profileedit(UserDetailsImpl userDetails, ProfileEditRequestDto requestDto) throws IOException {
         Long userId = userDetails.getMember().getId();
         Member member = memberRepository.findById(userId).orElseThrow(
@@ -434,6 +452,7 @@ public class MemberService {
     }
 
     // password 변경
+    @Transactional
     public String changepass(UserDetailsImpl userDetails, PasswordChangeDto passwordChangeDto) {
         Long userId = userDetails.getMember().getId();
         Member member = memberRepository.findById(userId).orElseThrow(
@@ -446,13 +465,14 @@ public class MemberService {
         }
         return "비밀번호 변경 완료";
     }
-
+    @Transactional
     public void join(MemberRequestDto requestDto) {
         Member member = new Member(requestDto.getUsername(), passwordEncoder.encode(requestDto.getPassword()));
         memberRepository.save(member);
     }
 
     //채팅회원관련
+    @Transactional
     public Member findByNickname(String nickname) {
         Member member = memberRepository.findByNickname(nickname).orElseThrow(
                 () -> new CustomException(ErrorCode.MEMBER_NOT_FOUND)
@@ -460,6 +480,7 @@ public class MemberService {
         return member;
     }
 
+    @Transactional
     public Map<Integer, Long> simpleReview(Long memberId) {
         Member member = memberRepository.findById(memberId).orElseThrow(
                 () -> new RuntimeException("찾을 수 없는 사용자입니다.")
@@ -473,6 +494,7 @@ public class MemberService {
         return review;
     }
 
+    @Transactional
     public List<Review> Review(Long memberId) {
         return reviewRepository.findAllById(memberId);
     }

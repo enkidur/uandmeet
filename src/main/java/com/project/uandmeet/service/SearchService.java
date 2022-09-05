@@ -12,6 +12,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -23,6 +24,7 @@ public class SearchService {
     private final BoardRepository boardRepository;
 
 
+    @Transactional
     public List<SearchResponseDto> queryDslSearch(int page, int size, String sort, String keyword, String city, String gu) {
 
         if(sort.equals("title")){

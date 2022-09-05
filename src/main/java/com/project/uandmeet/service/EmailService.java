@@ -9,6 +9,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.mail.javamail.JavaMailSenderImpl;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
 import javax.mail.*;
 import javax.mail.internet.MimeMessage;
 import java.io.IOException;
@@ -37,12 +39,14 @@ public class EmailService {
         authNumber = checkNum;
     }
 
+    @Transactional
     public String checkAuthNum(String authNum) {
         return String.valueOf(authNum.equals(authNumber));
     }
 
 
     //이메일 보낼 양식
+    @Transactional
     public String joinEmail(String email) throws IOException { // 컨트롤러에서 아이디가 넘어오면서 붙을 스트링값
         if (emailCnt < 4) {
             emailCnt += 1;
@@ -84,7 +88,7 @@ public class EmailService {
     }
 
 
-
+    @Transactional
     public void checkDuplicateEmail(String username) {
         Optional<Member> member = memberRepository.findByUsername(username);
         if (member.isPresent()) {

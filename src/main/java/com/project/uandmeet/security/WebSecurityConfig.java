@@ -96,16 +96,6 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
                 .addFilter(new JwtAuthorizationFilter(authenticationManager(), jwtTokenProvider));// AuthenticatonManager 파라미터 필요
 //                .addFilterBefore(new JwtAuthenticationFilter(authenticationManager), UsernamePasswordAuthenticationFilter.class)
 
-
-//        http.authorizeRequests()
-//                .and()
-//                .oauth2Login()
-//                .loginPage("/login/google")
-//                .userInfoEndpoint()
-//                .userService(principalOauth2UserService);
-
-        // 추가 예정
-
         http.oauth2Login()
                 .successHandler(oAuth2SuccessHandler)
                 .userInfoEndpoint()
@@ -118,7 +108,8 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
 //        configuration.addAllowedOriginPattern("http://localhost:3000");
-        configuration.addAllowedOriginPattern("http://13.209.65.84:8080");
+        configuration.addAllowedOriginPattern("http://13.124.51.222:8080");
+        configuration.addAllowedOriginPattern("http://13.124.51.222");
         //이곳에 관련 url 추가 해야합니다 도메인,리액트(?) 등
         configuration.addAllowedMethod("*");
         configuration.addAllowedHeader("*");

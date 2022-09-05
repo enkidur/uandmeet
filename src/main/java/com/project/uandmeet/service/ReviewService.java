@@ -12,6 +12,7 @@ import com.project.uandmeet.security.UserDetailsImpl;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @Slf4j
@@ -21,6 +22,7 @@ public class ReviewService {
     private final MemberRepository memberRepostiory;
     private final BoardRepository boardRepository;
 
+    @Transactional
     public ReviewResponseDto review(UserDetailsImpl userDetails, BoardIdRequestDto requestDto) {
         String nickname = userDetails.getMember().getNickname();
         Board board = boardRepository.findById(requestDto.getBoardId()).orElseThrow(
@@ -32,6 +34,7 @@ public class ReviewService {
     }
 
 
+    @Transactional
     public ReviewDto createReview(UserDetailsImpl userDetails, ReviewRequestDto requestDto) {
         Member from = userDetails.getMember();
 //        Member to = memberRepostiory.findById(requestDto.getToId()).orElseThrow(

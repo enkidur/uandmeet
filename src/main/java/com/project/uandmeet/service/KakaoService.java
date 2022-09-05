@@ -42,6 +42,7 @@ public class KakaoService {
     private final RedisUtil redisUtil;
 
 
+    @Transactional
     public void kakaoLogin(String code) throws JsonProcessingException {
         // 1. "인가 코드"로 "액세스 토큰" 요청
         String kakaoToken = getKakoToken(code);
@@ -61,6 +62,7 @@ public class KakaoService {
     }
 
 
+    @Transactional
     private String getKakoToken(String code) throws JsonProcessingException {
         // HTTP Header 생성
         HttpHeaders headers = new HttpHeaders();
@@ -92,6 +94,7 @@ public class KakaoService {
         return jsonNode.get("access_token").asText();
     }
 
+    @Transactional
     private KakaoUserInfoDto getKaKaoUserInfo(String kakaoToken) throws JsonProcessingException {
         // HTTP Header 생성
         HttpHeaders headers = new HttpHeaders();
@@ -124,6 +127,7 @@ public class KakaoService {
     }
 
 
+    @Transactional
     private Member registerKakaoIfNeeded(KakaoUserInfoDto kakaoUserInfo) {
         // DB 에 중복된 Kakao Id 가 있는지 확인
 //        String id = kakaoUserInfo.getId();
@@ -153,6 +157,7 @@ public class KakaoService {
         return member;
     }
 
+    @Transactional
     private void createToken(Member member) {
 
         String accessToken = jwtTokenProvider.createToken(member.getUsername(), member.getId());

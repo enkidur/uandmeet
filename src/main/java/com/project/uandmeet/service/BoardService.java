@@ -97,7 +97,7 @@ public class BoardService {
     }
 
     //매칭 게시물 전체 조회 (카테고리별 전체 조회)
-    @Transactional
+    @Transactional(readOnly = true)
     public BoardResponseFinalDto boardMatchingAllInquiry(String type, String cate, Integer page, Integer amount, String city, String gu) {
 
         //페이지 번호 변경
@@ -169,7 +169,7 @@ public class BoardService {
     }
 
     //매칭 게시물 상세 조회
-    @Transactional
+    @Transactional(readOnly = true)
     public BoardResponseDto boardChoiceInquiry(Long id) {
 
         //개시판 정보 추출
@@ -362,6 +362,7 @@ public class BoardService {
 
 
     //댓글 작성.
+    @Transactional
     public CommentsReponseDto commentsNew(Long id, CommentsRequestDto commentsRequestDto, UserDetailsImpl userDetails) {
         Member member = memberRepostiory.findById(userDetails.getMember().getId())
                 .orElseThrow(() -> new CustomException(ErrorCode.EMPTY_CONTENT));
@@ -381,6 +382,7 @@ public class BoardService {
     }
 
     //댓글 조회
+    @Transactional(readOnly = true)
     public List<CommentsInquiryDto> commentInquiry(Long id) {
 
         //Board의 전체 댓글들을 조회한다.
@@ -403,6 +405,7 @@ public class BoardService {
     }
 
     //댓글 삭제
+    @Transactional
     public CustomException commentDel(Long boardId, Long commentId, UserDetailsImpl userDetails) {
         //로그인 유저 정보.
         Member memberTemp = memberRepostiory.findById(userDetails.getMember().getId())
@@ -423,6 +426,7 @@ public class BoardService {
         }
     }
 
+    @Transactional
     public CustomException categoryNew(String category) {
 
         String[] TEMP = new String[]{"gym", "running", "ridding", "badminton", "tennis", "golf", "hiking", "ballet", "climing", "pilates", "swiming", "boxing", "bowling",
@@ -440,7 +444,7 @@ public class BoardService {
     }
 
     //공유 게시물 전체 조회 (카테고리별 전체 조회)
-    @Transactional
+    @Transactional(readOnly = true)
     public BoardResponseFinalDto boardInfoAllInquiry(String type, String cate, Integer page, Integer amount) {
 
         if(page > 0)
@@ -483,7 +487,7 @@ public class BoardService {
     }
 
     //공유 게시물 상세 조회
-    @Transactional
+    @Transactional(readOnly = true)
     public BoardResponseDto boardChoiceInfoInquiry(Long id) {
 
         //개시판 정보 추출
