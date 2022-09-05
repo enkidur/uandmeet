@@ -9,6 +9,7 @@ import lombok.Setter;
 @Setter
 @Getter
 public class MemberRequestDto {
+    private String authNum;
     private String username;
     private String password;
     private String passwordCheck;

@@ -70,9 +70,9 @@ public class MemberController {
 
     // 회원가입 3. Email 인증번호 확인
     @PostMapping("/api/checkAuthNum")
-    public @ResponseBody ResponseEntity<String> checkAuthNum(@RequestBody AuthNumDto requestDto, @RequestBody MemberRequestDto memberRequestDto) throws IOException {
+    public @ResponseBody ResponseEntity<String> checkAuthNum(@RequestBody MemberRequestDto memberRequestDto) throws IOException {
 //        String level = redisUtil.getData(username + "level");
-        emailService.checkAuthNum(requestDto.getAuthNum());
+        emailService.checkAuthNum(memberRequestDto.getAuthNum());
         memberService.checkPassword(memberRequestDto.getPassword(), memberRequestDto.getPasswordCheck());
         ResponseEntity<String> res = ResponseEntity.ok(memberService.signup(memberRequestDto));
 //        int val = Integer.parseInt(level);

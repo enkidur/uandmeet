@@ -13,6 +13,7 @@ import com.project.uandmeet.security.jwt.JwtProperties;
 import com.project.uandmeet.security.jwt.JwtTokenProvider;
 import com.project.uandmeet.service.S3.S3Uploader;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -421,10 +422,15 @@ public class MemberService {
         );
         String nickname = member.getNickname();
         List<Star> star = member.getStar();
-        String uploadImage = String.valueOf(s3Uploader.upload(requestDto.getData(), POST_IMAGE_DIR));
-        member.setProfile(uploadImage);
-        ProfileDto profileDto = new ProfileDto(nickname, star, uploadImage);
-        return profileDto;
+        if (requestDto.getData() != null) {
+            ImageDto uploadImage = s3Uploader.upload(requestDto.getData(), POST_IMAGE_DIR);
+            member.setProfile(uploadImage.getImageUrl());
+            ProfileDto profileDto = new ProfileDto(nickname, star, uploadImage.getImageUrl());
+            return profileDto;
+        } else {
+            ProfileDto profileDto = new ProfileDto(nickname, star);
+            return profileDto;
+        }
     }
 
     // password 변경

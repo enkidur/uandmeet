@@ -16,4 +16,8 @@ public class ProfileDto {
         this.star = star;
         this.profileimgurl = profileimgurl;
     }
+    public ProfileDto(String nickname, List<Star> star) {
+        this.nickname = nickname;
+        this.star = star;
+    }
 }
