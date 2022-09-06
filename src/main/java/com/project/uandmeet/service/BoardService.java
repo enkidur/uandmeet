@@ -543,7 +543,7 @@ public class BoardService {
         } else return null;
     }
 
-    //공유 게시물 상세 조회(로그인 후)
+    //공유 게시물 상세 조회 (로그인 후)
     @Transactional
     public BoardResponseDto boardChoiceInfoLoginInquiry(Long id, UserDetailsImpl userDetails) {
 
@@ -598,4 +598,53 @@ public class BoardService {
             return new CustomException(ErrorCode.INVALID_AUTHORITY);
         }
     }
+
+    @Transactional
+    public BoardResponseFinalDto boardMatchingmypageAllInquiry(String type,
+                                                               String cate,
+                                                               Integer page,
+                                                               Integer amount,
+                                                               UserDetailsImpl userDetails) {
+
+        if (page > 0)
+            page = page - 1;
+        else if (page <= 0)
+            page = 0;
+
+        Sort sortInfo = Sort.by("createdAt").ascending();
+        PageRequest pageRequest = PageRequest.of(page, amount, sortInfo);
+        Page<Board> boardPage;
+        Category category = null;
+        //페이지 번호 변경
+
+        //들어온 문자열 제차 확인
+        if (!(cate.equals("all") || cate.equals("ALL"))) {
+            category = categoryRepository.findAllByCategory(cate)
+                    .orElseThrow(() -> new CustomException(ErrorCode.EMPTY_CONTENT));
+        }
+
+        //개시판 정보 추출 (본인이 쓴것만)
+        if (cate.equals("all") || cate.equals("ALL")) {
+            boardPage = boardRepository.findAllByBoardTypeAndMember("matching", pageRequest);
+        } else
+            boardPage = boardRepository.findAllByBoardTypeAndCategory("matching", category, pageRequest);
+
+        // 찾으 정보를 Dto로 변환 한다.
+        List<BoardResponseDto> boardResponseDtos = new ArrayList<>();
+
+        if (boardPage != null) {
+            for (Board boardTemp : boardPage) {
+                //작성자 간이 닉네임 생성.
+                MemberSimpleDto memberSimpleDto = new MemberSimpleDto(boardTemp.getMember().getNickname(),
+                        boardTemp.getMember().getUsername(), boardTemp.getMember().getProfile());
+
+                BoardResponseDto boardResponseDto = new BoardResponseDto(boardTemp, memberSimpleDto);
+                boardResponseDtos.add(boardResponseDto);
+            }
+        }
+        return new BoardResponseFinalDto(boardResponseDtos, boardPage != null ? boardPage.getTotalElements() : 0);
+    }
+
+
+
 }

@@ -40,7 +40,6 @@ public class BoardCotroller {
         return boardService.boardNew(boardRequestDto, userDetails);
     }
 
-
     //매칭 게시물 전체 조회 (카테고리별 전체 조회)
     @GetMapping("/api/boards/matching")
     private ResponseEntity<BoardResponseFinalDto> boardMatchingAllInquiry(
@@ -191,7 +190,6 @@ public class BoardCotroller {
 
     }
 
-/*
 
     //매칭 게시물 전체 조회 (카테고리별 전체 조회)
     @GetMapping("/api/boards/mypage/matching")
@@ -200,9 +198,8 @@ public class BoardCotroller {
             @RequestParam String cate,          //카테고리
             @RequestParam Integer page,        //페이지번호
             @RequestParam Integer amount,
-            @RequestParam String city,        //시
-            @RequestParam String gu) {        //군
-        BoardResponseFinalDto boardMatchingmypageAllInquiry = boardService.boardMatchingmypageAllInquiry("matching",cate,page,amount,city,gu);
+            @AuthenticationPrincipal UserDetailsImpl userDetails) {        //군
+        BoardResponseFinalDto boardMatchingmypageAllInquiry = boardService.boardMatchingmypageAllInquiry(type,cate,page,amount,userDetails);
 
         if (boardMatchingmypageAllInquiry == null) {
             throw new CustomException(ErrorCode.CAN_NOT_CREATE_ROOM);
@@ -211,7 +208,6 @@ public class BoardCotroller {
                     .body(boardMatchingmypageAllInquiry);
     }
 
-*/
 
 
     @GetMapping("/board/search")
