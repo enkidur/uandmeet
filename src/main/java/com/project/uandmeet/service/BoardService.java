@@ -599,13 +599,13 @@ public class BoardService {
         }
     }
 
+/*
     @Transactional
     public BoardResponseFinalDto boardMatchingmypageAllInquiry(String type,
                                                                String cate,
                                                                Integer page,
                                                                Integer amount,
                                                                UserDetailsImpl userDetails) {
-
         if (page > 0)
             page = page - 1;
         else if (page <= 0)
@@ -646,5 +646,6 @@ public class BoardService {
     }
 
 
+*/
 
 }

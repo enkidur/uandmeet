@@ -190,6 +190,7 @@ public class BoardCotroller {
 
     }
 
+/*
 
     //매칭 게시물 전체 조회 (카테고리별 전체 조회)
     @GetMapping("/api/boards/mypage/matching")
@@ -207,6 +208,7 @@ public class BoardCotroller {
             return ResponseEntity.status(HttpStatus.CREATED)
                     .body(boardMatchingmypageAllInquiry);
     }
+*/
 
 
 
