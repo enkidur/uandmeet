@@ -126,23 +126,15 @@ public class BoardCotroller {
     private ResponseEntity<Long> likeClick(LikeDto likeDto,
                                            @AuthenticationPrincipal UserDetailsImpl userDetails) {
         return boardService.likeClick(likeDto, userDetails);
-
     }
 
-    //매칭참여
+
+    // TODO: 2022-09-06 참여 취소 하나로 합치기 boolean
+    //매칭여부
     @PostMapping("/board/{id}/matchingentry")
-    private ResponseEntity<Long> matchingJoin(@PathVariable("id") Long id,
+    private ResponseEntity<Long> matchingClick(@PathVariable("id") Long id,
                                               @AuthenticationPrincipal UserDetailsImpl userDetails) {
-        return boardService.matchingJoin(id, userDetails);
-
-    }
-
-    //매칭취소
-    @PostMapping("/board/{id}/matchingentrycancel")
-    private ResponseEntity<Long> matchingCancel(@PathVariable("id") Long id,
-                                                @AuthenticationPrincipal UserDetailsImpl userDetails) {
-        return boardService.matchingCancel(id, userDetails);
-
+        return boardService.matchingClick(id, userDetails);
     }
 
     //댓글작성

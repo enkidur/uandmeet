@@ -2,7 +2,9 @@ package com.project.uandmeet.chat.service;
 
 import com.project.uandmeet.exception.CustomException;
 import com.project.uandmeet.exception.ErrorCode;
+import com.project.uandmeet.model.Board;
 import com.project.uandmeet.model.Member;
+import com.project.uandmeet.repository.BoardRepository;
 import com.project.uandmeet.security.UserDetailsImpl;
 import com.project.uandmeet.security.jwt.JwtTokenProvider;
 import lombok.RequiredArgsConstructor;
@@ -32,5 +34,11 @@ public class CommonUtil {
         }catch (Exception e){
             throw new CustomException(ErrorCode.INVALID_AUTH_TOKEN);
         }
+    }
+
+    public static Board getBoard(Long boardId, BoardRepository boardRepository) {
+        return boardRepository.findById(boardId).orElseThrow(()->
+                new CustomException(ErrorCode.BOARD_NOT_FOUND)
+        );
     }
 }

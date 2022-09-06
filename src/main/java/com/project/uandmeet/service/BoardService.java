@@ -1,5 +1,6 @@
 package com.project.uandmeet.service;
 
+import com.project.uandmeet.chat.service.CommonUtil;
 import com.project.uandmeet.dto.ImageDto;
 import com.project.uandmeet.dto.boardDtoGroup.BoardResponseFinalDto;
 import com.project.uandmeet.dto.commentsDtoGroup.CommentsInquiryDto;
@@ -12,6 +13,7 @@ import com.project.uandmeet.dto.boardDtoGroup.BoardRequestDto;
 import com.project.uandmeet.dto.boardDtoGroup.BoardResponseDto;
 import com.project.uandmeet.dto.boardDtoGroup.LikeDto;
 import com.project.uandmeet.model.*;
+import com.project.uandmeet.notification.NotificationService;
 import com.project.uandmeet.repository.*;
 import com.project.uandmeet.security.UserDetailsImpl;
 import com.project.uandmeet.service.S3.S3Uploader;
@@ -38,6 +40,8 @@ public class BoardService {
     private final CategoryRepository categoryRepository;
     private final LikedRepository likedRepository;
     private final EntryRepository entryRepository;
+
+    private final NotificationService notificationService;
     private final CommentRepository commentRepository;
     private final S3Uploader s3Uploader;
     private final String POST_IMAGE_DIR = "static";
@@ -297,67 +301,24 @@ public class BoardService {
         return responseEntity;
     }
 
-
     //매칭 참여
-    @Transactional
-    public ResponseEntity<Long> matchingJoin(Long id, UserDetailsImpl userDetails) {
-        ResponseEntity<Long> responseEntity = null;
-
-        Board board = boardRepository.findById(id)
-                .orElseThrow(() -> new CustomException(ErrorCode.EMPTY_CONTENT));
-
-        Member member = memberRepostiory.findById(userDetails.getMember().getId())
-                .orElseThrow(() -> new CustomException(ErrorCode.EMPTY_CONTENT));
-
-        if (!entryRepository.findByMemberAndBoard(member, board).isPresent()) {
-            Entry entry = new Entry(board, member);
-            try {
-                entryRepository.save(entry);
-                board.setCurrentEntry(board.getCurrentEntry() + 1);
-
-                boardRepository.save(board);
-
-                responseEntity = ResponseEntity.ok(board.getCurrentEntry());
-
-            } catch (Exception e) {
-                throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "서버에서 요청사항을 수행할 수 없습니다.");
-            }
+    public ResponseEntity<Long> matchingClick(Long boardId, UserDetailsImpl userDetails){
+        Member member = userDetails.getMember();
+        Board board = CommonUtil.getBoard(boardId,boardRepository);
+        if (entryRepository.existsByMemberAndBoard(board,member)){
+            throw new CustomException(ErrorCode.DUPLICATED_APPLY);
         }
-        else
-            ResponseEntity.status(HttpStatus.valueOf("이미 참여 했습니다."));
-
-        return responseEntity;
-    }
-
-    //매칭 참여 취소
-    @Transactional
-    public ResponseEntity<Long> matchingCancel(Long id, UserDetailsImpl userDetails) {
-        ResponseEntity<Long> responseEntity = null;
-
-        Board board = boardRepository.findById(id)
-                .orElseThrow(() -> new CustomException(ErrorCode.EMPTY_CONTENT));
-
-        Member member = memberRepostiory.findById(userDetails.getMember().getId())
-                .orElseThrow(() -> new CustomException(ErrorCode.EMPTY_CONTENT));
-
-        Entry entry = entryRepository.findByMemberAndBoard(member, board)
-                .orElseThrow(() -> new CustomException(ErrorCode.EMPTY_CONTENT));
-
-        if (entry != null) {
-            try {
-                entryRepository.delete(entry);
-                board.setCurrentEntry(board.getCurrentEntry() - 1);
-
-                boardRepository.save(board);
-
-                responseEntity = ResponseEntity.ok(board.getCurrentEntry());
-
-            } catch (Exception e) {
-                throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "서버에서 요청사항을 수행할 수 없습니다.");
-            }
+        if (entryRepository.countByMemberAndIsMatchingAndBoard(member,true)>2){
+            throw new CustomException(ErrorCode.MEMBER_HAS_FULL);
         }
+        entryRepository.save(Entry.builder()
+                .member(member)
+                .board(board)
+                .ismatching(false)
+                .build());
 
-        return responseEntity;
+        notificationService.save(board.getMember(),"게시글" + board.getTitle() + "에 " +member.getNickname() + " 님이 매칭되었습니다.");
+        return null;
     }
 
 

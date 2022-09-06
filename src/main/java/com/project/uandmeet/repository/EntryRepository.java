@@ -12,7 +12,8 @@ public interface EntryRepository extends JpaRepository <Entry, Long> {
     Optional<Entry> findByMemberAndBoard(Member member, Board board);
     Optional<Entry> findByMemberAndBoard(String member_id, Board board_id);
 
-    boolean existsByMemberAndBoard(Long member_id, Long board_id);
+    boolean existsByMemberAndBoard(Board board, Member member);
+    int countByMemberAndIsMatchingAndBoard(Member member, boolean isMatching);
     Long countByBoard(Long Board_id);  //BoardId의 갯수를 센다.
     Long countByMember(Member memberId);
     Long countByBoard(String category);
