@@ -34,6 +34,6 @@ public class Entry {
     public Entry(Board board, Member member) {
         this.member = member;
         this.board = board;
- //       this.memberEntryId = member.getId();
+        this.category = board.getCategory();
     }
 }

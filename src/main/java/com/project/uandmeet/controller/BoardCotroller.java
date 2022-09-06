@@ -6,7 +6,6 @@ import com.project.uandmeet.dto.boardDtoGroup.BoardResponseDto;
 import com.project.uandmeet.dto.boardDtoGroup.BoardResponseFinalDto;
 import com.project.uandmeet.dto.boardDtoGroup.LikeDto;
 import com.project.uandmeet.dto.commentsDtoGroup.CommentsInquiryDto;
-import com.project.uandmeet.dto.commentsDtoGroup.CommentsReponseDto;
 import com.project.uandmeet.dto.commentsDtoGroup.CommentsRequestDto;
 import com.project.uandmeet.exception.CustomException;
 import com.project.uandmeet.exception.ErrorCode;
@@ -70,6 +69,17 @@ public class BoardCotroller {
             return boardChoiceInquiry;
     }
 
+    //매칭 게시물 상세 조회 (로그인 후 )
+    @GetMapping("/api/boards/matching/login/{id}")
+    private BoardResponseDto boardChoiceLoginInquiry(@PathVariable("id") Long id,
+                                                @AuthenticationPrincipal UserDetailsImpl userDetails) {
+        BoardResponseDto boardChoiceLoginInquiry = null;
+        boardChoiceLoginInquiry = boardService.boardChoiceLoginInquiry(id,userDetails);
+        if (boardChoiceLoginInquiry == null) {
+            throw new CustomException(ErrorCode.CAN_NOT_CREATE_ROOM);
+        } else
+            return boardChoiceLoginInquiry;
+    }
 
     //매칭 개시물 수정
     @PutMapping("/api/board/matching/{id}")
@@ -105,6 +115,18 @@ public class BoardCotroller {
             return boardChoiceInfoInquiry;
     }
 
+    //공유 게시물 상세 조회(로그인 후)
+    @GetMapping("/api/boards/information/login/{id}")
+    private BoardResponseDto boardChoiceInfoLoginInquiry(@PathVariable("id") Long id,
+                                                         @AuthenticationPrincipal UserDetailsImpl userDetails) {
+        BoardResponseDto boardChoiceInfoLoginInquiry = null;
+        boardChoiceInfoLoginInquiry = boardService.boardChoiceInfoLoginInquiry(id,userDetails);
+        if (boardChoiceInfoLoginInquiry == null) {
+            throw new CustomException(ErrorCode.CAN_NOT_CREATE_ROOM);
+        } else
+            return boardChoiceInfoLoginInquiry;
+    }
+
     //공유 개시물 수정
     @PutMapping("/api/board/information/{id}")
     private CustomException boardInfoUpdate(@PathVariable("id") Long id,
@@ -122,7 +144,7 @@ public class BoardCotroller {
     }
 
     //좋아요 유무
-    @PostMapping("/board/likes")
+    @PostMapping("/board/{id}/likes")
     private ResponseEntity<Long> likeClick(LikeDto likeDto,
                                            @AuthenticationPrincipal UserDetailsImpl userDetails) {
         return boardService.likeClick(likeDto, userDetails);
@@ -147,9 +169,9 @@ public class BoardCotroller {
 
     //댓글작성
     @PostMapping("/api/board/{id}/comments")
-    private CommentsReponseDto commentsNew(@PathVariable("id") Long id,
-                                           @RequestBody CommentsRequestDto commentsRequestDto,
-                                           @AuthenticationPrincipal UserDetailsImpl userDetails) {
+    private ResponseEntity<CommentsInquiryDto> commentsNew(@PathVariable("id") Long id,
+                                                           @RequestBody CommentsRequestDto commentsRequestDto,
+                                                           @AuthenticationPrincipal UserDetailsImpl userDetails) {
         return boardService.commentsNew(id,commentsRequestDto,userDetails);
     }
 
@@ -168,6 +190,29 @@ public class BoardCotroller {
         return boardService.commentDel(boardId,commentId, userDetails);
 
     }
+
+/*
+
+    //매칭 게시물 전체 조회 (카테고리별 전체 조회)
+    @GetMapping("/api/boards/mypage/matching")
+    private ResponseEntity<BoardResponseFinalDto> boardMatchingmypageAllInquiry(
+            @RequestParam String type,          //작성글 = write, 신청 = Subscribe
+            @RequestParam String cate,          //카테고리
+            @RequestParam Integer page,        //페이지번호
+            @RequestParam Integer amount,
+            @RequestParam String city,        //시
+            @RequestParam String gu) {        //군
+        BoardResponseFinalDto boardMatchingmypageAllInquiry = boardService.boardMatchingmypageAllInquiry("matching",cate,page,amount,city,gu);
+
+        if (boardMatchingmypageAllInquiry == null) {
+            throw new CustomException(ErrorCode.CAN_NOT_CREATE_ROOM);
+        } else
+            return ResponseEntity.status(HttpStatus.CREATED)
+                    .body(boardMatchingmypageAllInquiry);
+    }
+
+*/
+
 
     @GetMapping("/board/search")
     public ResponseEntity<List<SearchResponseDto>> search(@RequestParam(value = "page") int page,

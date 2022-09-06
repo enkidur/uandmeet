@@ -3,7 +3,6 @@ package com.project.uandmeet.service;
 import com.project.uandmeet.dto.ImageDto;
 import com.project.uandmeet.dto.boardDtoGroup.BoardResponseFinalDto;
 import com.project.uandmeet.dto.commentsDtoGroup.CommentsInquiryDto;
-import com.project.uandmeet.dto.commentsDtoGroup.CommentsReponseDto;
 import com.project.uandmeet.dto.commentsDtoGroup.CommentsRequestDto;
 import com.project.uandmeet.exception.CustomException;
 import com.project.uandmeet.exception.ErrorCode;
@@ -48,7 +47,7 @@ public class BoardService {
 
     //게시판 생성
     @Transactional
-    public ResponseEntity<Long> boardNew(BoardRequestDto.createAndCheck boardRequestDto, UserDetailsImpl userDetails) throws IOException,CustomException {
+    public ResponseEntity<Long> boardNew(BoardRequestDto.createAndCheck boardRequestDto, UserDetailsImpl userDetails) throws IOException, CustomException {
         ResponseEntity<Long> responseEntity;
         //로그인 유저 정보.
         Member memberTemp = memberRepostiory.findByUsername(userDetails.getUsername())
@@ -60,7 +59,7 @@ public class BoardService {
         Siarea siarea = null;
         Guarea guarea = null;
 
-        if(boardRequestDto.getBoardType().equals("matching")) {
+        if (boardRequestDto.getBoardType().equals("matching")) {
             siarea = siareaRepostiory.findByCtpKorNmAbbreviation(boardRequestDto.getCity())
                     .orElseThrow(() -> new CustomException(ErrorCode.EMPTY_CONTENT));
 
@@ -90,7 +89,7 @@ public class BoardService {
                 responseEntity = ResponseEntity.ok(board.getId());
 
             } catch (Exception e) {
-                throw new  CustomException(ErrorCode.INTERNAL_SERVER_ERROR);
+                throw new CustomException(ErrorCode.INTERNAL_SERVER_ERROR);
             }
         }
         return responseEntity;
@@ -101,49 +100,48 @@ public class BoardService {
     public BoardResponseFinalDto boardMatchingAllInquiry(String type, String cate, Integer page, Integer amount, String city, String gu) {
 
         //페이지 번호 변경
-        if(page > 0)
+        if (page > 0)
             page = page - 1;
-        else if(page <= 0)
+        else if (page <= 0)
             page = 0;
 
         Sort sort = Sort.by("createdAt").ascending();
         PageRequest pageRequest = PageRequest.of(page, amount, sort);
         Page<Board> boardPage;
-        Category category =null;
+        Category category = null;
         Siarea siarea = null;
         Guarea guarea = null;
 
 
         //들어온 문자열 제차 확인
-        if(!(cate.equals("all")||cate.equals("ALL"))) {
+        if (!(cate.equals("all") || cate.equals("ALL"))) {
 
             category = categoryRepository.findAllByCategory(cate)
                     .orElseThrow(() -> new CustomException(ErrorCode.EMPTY_CONTENT));
         }
 
-        if(!(city.equals("all") || city.equals("ALL"))){
+        if (!(city.equals("all") || city.equals("ALL"))) {
             siarea = siareaRepostiory.findByCtpKorNmAbbreviation(city)
                     .orElseThrow(() -> new CustomException(ErrorCode.EMPTY_CONTENT));
         }
 
-        if(!(gu.equals("all") || gu.equals("All"))) {
+        if (!(gu.equals("all") || gu.equals("All"))) {
             guarea = guareaRepostiory.findAllBySiareaAndSigKorNm(siarea, gu)
                     .orElseThrow(() -> new CustomException(ErrorCode.EMPTY_CONTENT));
         }
 
         //개시판 정보 추출
-        if(cate.equals("all")||cate.equals("ALL")) {
-            if(city.equals("all") || city.equals("ALL"))
+        if (cate.equals("all") || cate.equals("ALL")) {
+            if (city.equals("all") || city.equals("ALL"))
                 boardPage = boardRepository.findAllByBoardType(type, pageRequest);
             else {
-                if(gu.equals("all") || gu.equals("All"))
+                if (gu.equals("all") || gu.equals("All"))
                     boardPage = boardRepository.findAllByBoardTypeAndCity(type, pageRequest, siarea);
                 else
                     boardPage = boardRepository.findAllByBoardTypeAndCityAndGu(type, pageRequest, siarea, guarea);
             }
-        } else
-        {
-            if(city.equals("all") || city.equals("ALL"))
+        } else {
+            if (city.equals("all") || city.equals("ALL"))
                 boardPage = boardRepository.findAllByBoardTypeAndCategory(type, category, pageRequest);
             else {
                 if (gu.equals("all") || gu.equals("All"))
@@ -165,7 +163,7 @@ public class BoardService {
                 boardResponseDtos.add(boardResponseDto);
             }
         }
-        return new BoardResponseFinalDto(boardResponseDtos,boardPage.getTotalElements());
+        return new BoardResponseFinalDto(boardResponseDtos, boardPage.getTotalElements());
     }
 
     //매칭 게시물 상세 조회
@@ -188,6 +186,35 @@ public class BoardService {
             return boardResponseDto;
         } else return null;
     }
+
+    //매칭 게시물 상세 조회 (로그인 후 )
+    @Transactional
+    public BoardResponseDto boardChoiceLoginInquiry(Long id, UserDetailsImpl userDetails) {
+
+        Member member = memberRepostiory.findById(userDetails.getMember().getId())
+                .orElseThrow(() -> new CustomException(ErrorCode.EMPTY_CONTENT));
+
+        //개시판 정보 추출
+        Board boards = boardRepository.findById(id)
+                .orElseThrow(() -> new CustomException(ErrorCode.EMPTY_CONTENT));
+
+        Liked liked = likedRepository.findByBoardAndMember(boards, member)
+                .orElseThrow(() -> new CustomException(ErrorCode.EMPTY_CONTENT));
+
+        // 찾으 정보를 Dto로 변환 한다.
+        BoardResponseDto boardResponseDto = null;
+
+        if (boards != null) {
+            //작성자 간이 닉네임 생성.
+            MemberSimpleDto memberSimpleDto = new MemberSimpleDto(boards.getMember().getNickname(),
+                    boards.getMember().getUsername(), boards.getMember().getProfile());
+
+            boardResponseDto = new BoardResponseDto(memberSimpleDto, boards,liked);
+            return boardResponseDto;
+
+        } else return null;
+    }
+
 
     //게시물 삭제.
     @Transactional
@@ -249,11 +276,10 @@ public class BoardService {
         Member memberTemp = memberRepostiory.findById(userDetails.getMember().getId())
                 .orElseThrow(() -> new CustomException(ErrorCode.EMPTY_CONTENT));
 
-        Board board = boardRepository.findById(likeDto.getPostid())
+        Board board = boardRepository.findById(likeDto.getBoardid())
                 .orElseThrow(() -> new CustomException(ErrorCode.EMPTY_CONTENT));
 
         if (board.getMember().getId().equals(memberTemp.getId())) {
-
             if (likeDto.getIsLike()) {
                 if (!likedRepository.findByBoardAndMember(board, memberTemp).isPresent()) {
 
@@ -322,8 +348,7 @@ public class BoardService {
             } catch (Exception e) {
                 throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "서버에서 요청사항을 수행할 수 없습니다.");
             }
-        }
-        else
+        } else
             ResponseEntity.status(HttpStatus.valueOf("이미 참여 했습니다."));
 
         return responseEntity;
@@ -362,29 +387,40 @@ public class BoardService {
 
 
     //댓글 작성.
-    public CommentsReponseDto commentsNew(Long id, CommentsRequestDto commentsRequestDto, UserDetailsImpl userDetails) {
+    @Transactional
+    public ResponseEntity<CommentsInquiryDto> commentsNew(Long id, CommentsRequestDto commentsRequestDto, UserDetailsImpl userDetails) {
         Member member = memberRepostiory.findById(userDetails.getMember().getId())
                 .orElseThrow(() -> new CustomException(ErrorCode.EMPTY_CONTENT));
         Board board = boardRepository.findById(id)
                 .orElseThrow(() -> new CustomException(ErrorCode.EMPTY_CONTENT));
 
+
+        MemberSimpleDto memberSimpleDto = new MemberSimpleDto(member.getNickname(),
+                member.getUsername(), member.getProfile());
+
+
         Comment comment = new Comment(commentsRequestDto, member, board);
-        CommentsReponseDto commentsReponseDto = new CommentsReponseDto(comment, userDetails.getMember().getNickname(), userDetails.getMember().getProfile());
 
         try {
             commentRepository.save(comment);
-            return commentsReponseDto;
 
         } catch (IllegalArgumentException ignored) {
             throw new CustomException(ErrorCode.INTERNAL_SERVER_ERROR);
         }
+
+        CommentsInquiryDto commentsInquiryDto = new CommentsInquiryDto(memberSimpleDto, comment);
+
+        return ResponseEntity.ok(commentsInquiryDto);
     }
 
     //댓글 조회
     public List<CommentsInquiryDto> commentInquiry(Long id) {
 
         //Board의 전체 댓글들을 조회한다.
-        List<Comment> commentList = commentRepository.findAllByBoard(id);
+        Board board = boardRepository.findById(id)
+                .orElseThrow(() -> new CustomException(ErrorCode.EMPTY_CONTENT));
+
+        List<Comment> commentList = commentRepository.findByBoardOrderByCreatedAtDesc(board);
 
         // 찾으 정보를 Dto로 변환 한다.
         List<CommentsInquiryDto> commentsInquiryDtos = new ArrayList<>();
@@ -403,17 +439,21 @@ public class BoardService {
     }
 
     //댓글 삭제
+    @Transactional
     public CustomException commentDel(Long boardId, Long commentId, UserDetailsImpl userDetails) {
         //로그인 유저 정보.
         Member memberTemp = memberRepostiory.findById(userDetails.getMember().getId())
                 .orElseThrow(() -> new CustomException(ErrorCode.EMPTY_CONTENT));
-        Comment comment = commentRepository.findByIdAndBoard(commentId, boardId)
+        Board board = boardRepository.findById(boardId)
+                .orElseThrow(() -> new CustomException(ErrorCode.EMPTY_CONTENT));
+        Comment comment = commentRepository.findByIdAndBoard(commentId, board)
                 .orElseThrow(() -> new CustomException(ErrorCode.EMPTY_CONTENT));
 
         //본인이 아니면 예외처리
         if (comment.getMember().getUsername().equals(memberTemp.getUsername())) {
             try {
-                boardRepository.deleteById(boardId);
+                commentRepository.deleteById(comment.getId());
+
                 return new CustomException(ErrorCode.COMPLETED_OK);
             } catch (Exception e) {
                 return new CustomException(ErrorCode.INTERNAL_SERVER_ERROR);
@@ -443,9 +483,9 @@ public class BoardService {
     @Transactional
     public BoardResponseFinalDto boardInfoAllInquiry(String type, String cate, Integer page, Integer amount) {
 
-        if(page > 0)
+        if (page > 0)
             page = page - 1;
-        else if(page <= 0)
+        else if (page <= 0)
             page = 0;
 
         Sort sortInfo = Sort.by("createdAt").ascending();
@@ -455,7 +495,7 @@ public class BoardService {
         //페이지 번호 변경
 
         //들어온 문자열 제차 확인
-        if(!(cate.equals("all") || cate.equals("ALL"))) {
+        if (!(cate.equals("all") || cate.equals("ALL"))) {
             category = categoryRepository.findAllByCategory(cate)
                     .orElseThrow(() -> new CustomException(ErrorCode.EMPTY_CONTENT));
         }
@@ -475,7 +515,7 @@ public class BoardService {
                 MemberSimpleDto memberSimpleDto = new MemberSimpleDto(boardTemp.getMember().getNickname(),
                         boardTemp.getMember().getUsername(), boardTemp.getMember().getProfile());
 
-                BoardResponseDto boardResponseDto = new BoardResponseDto(boardTemp,memberSimpleDto);
+                BoardResponseDto boardResponseDto = new BoardResponseDto(boardTemp, memberSimpleDto);
                 boardResponseDtos.add(boardResponseDto);
             }
         }
@@ -498,7 +538,36 @@ public class BoardService {
             MemberSimpleDto memberSimpleDto = new MemberSimpleDto(boards.getMember().getNickname(),
                     boards.getMember().getUsername(), boards.getMember().getProfile());
 
-            boardResponseDto = new BoardResponseDto(boards,memberSimpleDto);
+            boardResponseDto = new BoardResponseDto(boards, memberSimpleDto);
+            return boardResponseDto;
+        } else return null;
+    }
+
+    //공유 게시물 상세 조회(로그인 후)
+    @Transactional
+    public BoardResponseDto boardChoiceInfoLoginInquiry(Long id, UserDetailsImpl userDetails) {
+
+        //로그인 유저 정보.
+        Member member = memberRepostiory.findById(userDetails.getMember().getId())
+                .orElseThrow(() -> new CustomException(ErrorCode.EMPTY_CONTENT));
+
+        //개시판 정보 추출
+        Board boards = boardRepository.findById(id)
+                .orElseThrow(() -> new CustomException(ErrorCode.EMPTY_CONTENT));
+
+        Liked liked = likedRepository.findByBoardAndMember(boards, member)
+                .orElseThrow(() -> new CustomException(ErrorCode.EMPTY_CONTENT));
+
+        // 찾으 정보를 Dto로 변환 한다.
+        BoardResponseDto boardResponseDto = null;
+
+        if (boards != null) {
+            //작성자 간이 닉네임 생성.
+            MemberSimpleDto memberSimpleDto = new MemberSimpleDto(boards.getMember().getNickname(),
+                    boards.getMember().getUsername(), boards.getMember().getProfile());
+
+
+            boardResponseDto = new BoardResponseDto(memberSimpleDto, boards, liked);
             return boardResponseDto;
         } else return null;
     }
@@ -506,7 +575,7 @@ public class BoardService {
     //공유 게시물 수정
     @Transactional
     public CustomException boardInfoUpdate(Long id, BoardRequestDto.updateInfo boardRequestInfoUpdateDto,
-                                       UserDetailsImpl userDetails) {
+                                           UserDetailsImpl userDetails) {
 
         //로그인 유저 정보.
         Member memberTemp = memberRepostiory.findById(userDetails.getMember().getId())

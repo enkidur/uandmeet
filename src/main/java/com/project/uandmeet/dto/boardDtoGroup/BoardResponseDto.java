@@ -3,6 +3,7 @@ package com.project.uandmeet.dto.boardDtoGroup;
 import com.project.uandmeet.dto.MemberDtoGroup.MemberSimpleDto;
 import com.project.uandmeet.model.Board;
 import com.project.uandmeet.model.Category;
+import com.project.uandmeet.model.Liked;
 import lombok.*;
 
 import java.time.format.DateTimeFormatter;
@@ -27,7 +28,7 @@ public class BoardResponseDto {
     private String gu;
     private double lat;
     private double lng;
-
+    private boolean LikeState;
     public BoardResponseDto(MemberSimpleDto memberSimpleDto ,Board board)
     {
         this.memberSimpleDto = memberSimpleDto;
@@ -57,5 +58,24 @@ public class BoardResponseDto {
         this.boardimage = board.getBoardimage();
         this.likeCount = board.getLikeCount();
         this.commentCount = board.getCommentCount();
+    }
+
+    public BoardResponseDto(MemberSimpleDto memberSimpleDto , Board board, Liked liked)
+    {
+        this.memberSimpleDto = memberSimpleDto;
+        this.city = board.getCity().getCtpKorNmAbbreviation();
+        this.gu = board.getGu().getSigKorNm();
+        this.id = board.getId();
+        this.createdAt = board.getCreatedAt().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:SS:ss.SSS"));
+        this.category = board.getCategory().getCategory();
+        this.endDateAt = board.getEndDateAt();
+        this.content = board.getContent();
+        this.title = board.getTitle();
+        this.boardimage = board.getBoardimage();
+        this.likeCount = board.getLikeCount();
+        this.commentCount = board.getCommentCount();
+        this.maxEntry = board.getMaxEntry();
+        this.currentEntry = board.getCurrentEntry();
+        this.LikeState = liked.getIsLike();
     }
 }
