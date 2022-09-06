@@ -97,15 +97,6 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 //                .addFilterBefore(new JwtAuthenticationFilter(authenticationManager), UsernamePasswordAuthenticationFilter.class)
 
 
-//        http.authorizeRequests()
-//                .and()
-//                .oauth2Login()
-//                .loginPage("/login/google")
-//                .userInfoEndpoint()
-//                .userService(principalOauth2UserService);
-
-        // 추가 예정
-
         http.oauth2Login()
                 .successHandler(oAuth2SuccessHandler)
                 .userInfoEndpoint()
