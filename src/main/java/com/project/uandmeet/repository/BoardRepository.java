@@ -1,13 +1,8 @@
 package com.project.uandmeet.repository;
 
-import com.project.uandmeet.model.Board;
-import com.project.uandmeet.model.Category;
-import com.project.uandmeet.model.Guarea;
-import com.project.uandmeet.model.Siarea;
+import com.project.uandmeet.model.*;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Slice;
-import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.querydsl.QuerydslPredicateExecutor;
 import org.springframework.stereotype.Repository;
@@ -25,4 +20,7 @@ public  interface BoardRepository extends JpaRepository<Board, Long>, QuerydslPr
     Page<Board> findAllByBoardType(String boardType, Pageable pageable);
     Page<Board> findAllByBoardTypeAndCity(String boardType, Pageable pageable,Siarea City);
     Page<Board> findAllByBoardTypeAndCityAndGu(String boardType, Pageable pageable,Siarea City, Guarea Gu);
+
+    List<Board> findByMemberAndBoardType(Member member,String boardType);
+    Long countByMemberAndBoardType(Member member, String boardType);
 }

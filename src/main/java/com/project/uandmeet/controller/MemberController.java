@@ -2,6 +2,8 @@ package com.project.uandmeet.controller;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.project.uandmeet.dto.*;
+import com.project.uandmeet.model.Board;
+import com.project.uandmeet.model.Comment;
 import com.project.uandmeet.model.Review;
 import com.project.uandmeet.security.UserDetailsImpl;
 import com.project.uandmeet.service.EmailService;
@@ -265,9 +267,21 @@ public class MemberController {
         return "user";
     }
 
-//    @GetMapping("/login/google")
-//    public String tem(){
-//        return "redirect:login.html";
-//    }
+    // 나의 게시글
+    @GetMapping("/api/mypost")
+    public ResponseEntity<MypostResponseDto> mypost(@AuthenticationPrincipal UserDetailsImpl userDetails) {
+        return ResponseEntity.ok(memberService.mypost(userDetails));
+    }
 
+    // 나의 게시글(신청글)
+    @GetMapping("/api/myentry")
+    public ResponseEntity<MypostResponseDto> myentry(@AuthenticationPrincipal UserDetailsImpl userDetails) {
+        return ResponseEntity.ok(memberService.myentry(userDetails));
+    }
+
+    // 나의 댓글
+    @GetMapping("/api/mycomment")
+    public ResponseEntity<List<Comment>> mycomment(@AuthenticationPrincipal UserDetailsImpl userDetails) {
+        return ResponseEntity.ok(memberService.mycomment(userDetails));
+    }
 }

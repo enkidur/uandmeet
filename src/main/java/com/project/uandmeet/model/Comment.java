@@ -1,5 +1,6 @@
 package com.project.uandmeet.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.project.uandmeet.dto.commentsDtoGroup.CommentsRequestDto;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -12,7 +13,7 @@ import java.time.LocalDateTime;
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor
-public class Comment extends BaseEntity{
+public class Comment extends BaseTime{
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -25,12 +26,14 @@ public class Comment extends BaseEntity{
     private String boardType;
 
     //생성시간
-    private LocalDateTime createdAt;
+//    private LocalDateTime createdAt;
 
+    @JsonIgnore
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "member_id")
     private Member member;
 
+    @JsonIgnore
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "board_id")
     private Board board;

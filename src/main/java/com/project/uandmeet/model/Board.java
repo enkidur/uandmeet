@@ -1,5 +1,7 @@
 package com.project.uandmeet.model;
 
+import com.fasterxml.jackson.annotation.JsonIdentityInfo;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.project.uandmeet.dto.boardDtoGroup.BoardRequestDto;
 import lombok.*;
 
@@ -9,7 +11,6 @@ import java.util.List;
 
 @Getter
 @Setter
-@Builder
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
@@ -48,29 +49,29 @@ public class Board extends BaseTime{
     //매칭참여 수
     @Column(nullable = false)
     private Long currentEntry=0L;
-
+    @JsonIgnore
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "Siarea_id")
     private Siarea city;
-
+    @JsonIgnore
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "Guarea_id")
     private Guarea gu;
-
+    @JsonIgnore
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "category_id")
     private Category category;
-
+    @JsonIgnore
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "member_id")
     private Member member;
-
+    @JsonIgnore
     @OneToMany(fetch = FetchType.LAZY,mappedBy = "board",cascade = CascadeType.ALL)
     private List<Entry> entryList = new ArrayList<>();
-
+    @JsonIgnore
     @OneToMany(fetch = FetchType.LAZY,mappedBy = "board",cascade = CascadeType.ALL)
     private List<Liked> likeList = new ArrayList<>();
-
+    @JsonIgnore
     @OneToMany(fetch = FetchType.LAZY,mappedBy = "board",cascade = CascadeType.ALL)
     private List<Comment> commentList = new ArrayList<>();
 

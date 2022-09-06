@@ -1,6 +1,7 @@
 package com.project.uandmeet.dto.commentsDtoGroup;
 
 import com.project.uandmeet.model.BaseEntity;
+import com.project.uandmeet.model.BaseTime;
 import com.project.uandmeet.model.Comment;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -10,17 +11,16 @@ import java.time.LocalDateTime;
 
 @Getter
 @Setter
-public class CommentsReponseDto extends BaseEntity {
+public class CommentsReponseDto {
     private Long id;
-    private String centent;
+    private String content;
     private String nicname;
     private String profile;
 
+
     public CommentsReponseDto(Comment comment, String nicname, String profile) {
-        this.id = comment.getId();
-        this.centent = comment.getComment();
+        this.content = comment.getComment();
         this.nicname = nicname;
         this.profile = profile;
-
     }
 }
