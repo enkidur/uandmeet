@@ -33,7 +33,7 @@ public class MemberController {
 
     // 회원가입 1. emali check
     @PostMapping("/api/checkemail")
-    public ResponseEntity<String> checkemail(@RequestBody EmailDto requestDto, @RequestBody EmailDto emailDto) throws IOException {
+    public ResponseEntity<String> checkemail(@RequestBody EmailDto requestDto) throws IOException {
 //        // 헤더에 전달
 //        HttpHeaders headers = new HttpHeaders();
 //        headers.set("level","1");
@@ -43,7 +43,7 @@ public class MemberController {
 //        log.info(String.valueOf(res.getHeaders()));
 //         redis 에 저장
         memberService.checkemail(requestDto.getUsername());
-        ResponseEntity<String> res = ResponseEntity.ok(emailService.joinEmail(emailDto.getUsername()));
+        ResponseEntity<String> res = ResponseEntity.ok(emailService.joinEmail(requestDto.getUsername()));
 //        redisUtil.setDataExpire(username + "level", "1", 300L);
         // 해당 정보를 client 에서 처리하게 좋을지 서버에서 처리하는게 좋을지
         // client 에 저장하면 이동 시 노출위험 -> 암호화 필수 but 서버 부담 감소
@@ -72,11 +72,9 @@ public class MemberController {
 
     // 회원가입 3. Email 인증번호 확인
     @PostMapping("/api/checkAuthNum")
-    public @ResponseBody ResponseEntity<String> checkAuthNum(@RequestBody MemberRequestDto memberRequestDto) throws IOException {
+    public @ResponseBody ResponseEntity<String> checkAuthNum(@RequestBody AuthNumDto requestDto) {
 //        String level = redisUtil.getData(username + "level");
-        emailService.checkAuthNum(memberRequestDto.getAuthNum());
-        memberService.checkPassword(memberRequestDto.getPassword(), memberRequestDto.getPasswordCheck());
-        ResponseEntity<String> res = ResponseEntity.ok(memberService.signup(memberRequestDto));
+        ResponseEntity<String> res = ResponseEntity.ok(emailService.checkAuthNum(requestDto.getAuthNum()));
 //        int val = Integer.parseInt(level);
 //        if (val < 2) {
 //            return ResponseEntity.ok("잘못된 접근입니다.");
@@ -86,17 +84,18 @@ public class MemberController {
     }
 
     // 회원가입 4. password check
-//    @PostMapping("/api/checkpassword")
-//    public ResponseEntity<String> checkPassword(@RequestBody PasswordDto passwordDto) {
+    @PostMapping("/api/checkpassword")
+    public ResponseEntity<String> checkPassword(@RequestBody MemberRequestDto requestDto) throws IOException {
 //        String level = redisUtil.getData(username + "level");
-//        ResponseEntity<String> res = ResponseEntity.ok(memberService.checkPassword(passwordDto.getPassword(), passwordDto.getPasswordCheck()));
+        memberService.checkPassword(requestDto.getPassword(), requestDto.getPasswordCheck());
+        ResponseEntity<String> res = ResponseEntity.ok(memberService.signup(requestDto));
 //        int val = Integer.parseInt(level);
 //        if (val < 3) {
 //            return ResponseEntity.ok("잘못된 접근입니다.");
 //        }
 //        redisUtil.setDataExpire(username + "level", "4", 300L);
-//        return res;
-//    }
+        return res;
+    }
 
     // 회원가입 5. 가입완료
 //    @PostMapping("/api/signup")
