@@ -117,6 +117,12 @@ public class MemberController {
 
     }
 
+    // logout
+    @GetMapping("/api/logout")
+    public void logout (@AuthenticationPrincipal UserDetailsImpl userDetails) {
+        memberService.logout(userDetails);
+    }
+
     // 회원 탈퇴
     @DeleteMapping("/api/withdraw")
     public ResponseEntity<String> withdraw(@AuthenticationPrincipal UserDetailsImpl userDetails,
@@ -126,7 +132,7 @@ public class MemberController {
 
     // 1. 클라이언트에서 로그인한다.
     // 2. 서버는 클라이언트에게 Access Token 과 Refresh Token 을 발급한다. 동시에 Refresh Token 은 redeis 에 저장된다.
-    // 3. 클라이언트는 local 저장소에 두 Token 을 저장한다.
+    // 3. 클라이언트는 local 저장소에 Token 을 저장한다.
     // 4. 매 요청마다 Access Token 을 헤더에 담아서 요청한다.
     // 5 .이 때, Access Token 이 만료가 되면 서버는 만료되었다는 Response 를 하게 된다.
     // 6. 클라이언트는 해당 Response 를 받으면 Refresh Token 을 보낸다.
@@ -134,9 +140,8 @@ public class MemberController {
     // 8. 클라이언트는 새롭게 받은 Access Token 을 기존의 Access Token 에 덮어쓰게 된다.
     @GetMapping("/api/refresh")
     public ResponseEntity<Map<String, String>> refresh(HttpServletRequest request,
-                                                       HttpServletResponse response,
-                                                       @AuthenticationPrincipal UserDetailsImpl userDetails) {
-        Map<String, String> tokens = memberService.refresh(request, response, userDetails);
+                                                       HttpServletResponse response) {
+        Map<String, String> tokens = memberService.refresh(request, response);
         return ResponseEntity.ok(tokens);
     }
 
@@ -267,9 +272,15 @@ public class MemberController {
     }
 
     // 나의 게시글
-    @GetMapping("/api/mypost")
-    public ResponseEntity<MypostResponseDto> mypost(@AuthenticationPrincipal UserDetailsImpl userDetails) {
-        return ResponseEntity.ok(memberService.mypost(userDetails));
+    @GetMapping("/api/mypost/information")
+    public ResponseEntity<MypostResponseDto> mypostinformation(@AuthenticationPrincipal UserDetailsImpl userDetails) {
+        return ResponseEntity.ok(memberService.mypostinformation(userDetails));
+    }
+
+    // 나의 게시글
+    @GetMapping("/api/mypost/matching")
+    public ResponseEntity<MypostResponseDto> mypostmatching(@AuthenticationPrincipal UserDetailsImpl userDetails) {
+        return ResponseEntity.ok(memberService.mypostmatching(userDetails));
     }
 
 //     나의 게시글(신청글)

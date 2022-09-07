@@ -1,5 +1,8 @@
 package com.project.uandmeet.service;
 
+import com.project.uandmeet.chat.model.ChatRoom;
+import com.project.uandmeet.chat.repository.ChatRoomRepository;
+import com.project.uandmeet.chat.service.ChatRoomService;
 import com.project.uandmeet.dto.ImageDto;
 import com.project.uandmeet.dto.boardDtoGroup.BoardResponseFinalDto;
 import com.project.uandmeet.dto.commentsDtoGroup.CommentsInquiryDto;
@@ -39,6 +42,7 @@ public class BoardService {
     private final LikedRepository likedRepository;
     private final EntryRepository entryRepository;
     private final CommentRepository commentRepository;
+    private final ChatRoomRepository chatRoomRepository;
     private final S3Uploader s3Uploader;
     private final String POST_IMAGE_DIR = "static";
 
@@ -78,6 +82,10 @@ public class BoardService {
             try {
                 Board board = new Board(memberTemp, category, siarea, guarea, boardRequestDto, uploadImage.getImageUrl());
                 boardRepository.save(board);
+
+                ChatRoom chatRoom = new ChatRoom(userDetails.getMember(),board);
+                chatRoomRepository.save(chatRoom);
+
                 responseEntity = ResponseEntity.ok(board.getId());
             } catch (Exception e) {
                 throw new CustomException(ErrorCode.INTERNAL_SERVER_ERROR);
@@ -87,12 +95,17 @@ public class BoardService {
 
             try {
                 boardRepository.save(board);
+
+                ChatRoom chatRoom = new ChatRoom(userDetails.getMember(),board);
+                chatRoomRepository.save(chatRoom);
+
                 responseEntity = ResponseEntity.ok(board.getId());
 
             } catch (Exception e) {
                 throw new CustomException(ErrorCode.INTERNAL_SERVER_ERROR);
             }
         }
+
         return responseEntity;
     }
 
