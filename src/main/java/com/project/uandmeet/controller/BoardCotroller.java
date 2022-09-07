@@ -1,5 +1,7 @@
 package com.project.uandmeet.controller;
 
+import com.project.uandmeet.chat.model.ChatRoom;
+import com.project.uandmeet.chat.service.ChatRoomService;
 import com.project.uandmeet.dto.SearchResponseDto;
 import com.project.uandmeet.dto.boardDtoGroup.BoardRequestDto;
 import com.project.uandmeet.dto.boardDtoGroup.BoardResponseDto;
@@ -28,6 +30,7 @@ import java.util.List;
 public class BoardCotroller {
     private final BoardService boardService;
     private final SearchService searchService;
+    private final ChatRoomService chatRoomService;
 
     @PostMapping("/api/categoryset/{category}")
     private CustomException categoryNew(@PathVariable("category") String category) {
@@ -149,7 +152,6 @@ public class BoardCotroller {
     private ResponseEntity<Long> likeClick(LikeDto likeDto,
                                            @AuthenticationPrincipal UserDetailsImpl userDetails) {
         return boardService.likeClick(likeDto, userDetails);
-
     }
 
     //매칭하기

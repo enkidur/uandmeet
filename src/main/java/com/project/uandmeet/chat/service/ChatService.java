@@ -1,44 +1,26 @@
 package com.project.uandmeet.chat.service;
 
-import com.project.uandmeet.chat.dto.ChatMessageDto;
-import com.project.uandmeet.chat.dto.FindChatMessageDto;
-import com.project.uandmeet.chat.dto.SenderDto;
 import com.project.uandmeet.chat.model.ChatMessage;
 import com.project.uandmeet.chat.repository.MessageRepository;
-import com.project.uandmeet.model.Member;
-import com.project.uandmeet.security.jwt.JwtTokenProvider;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.data.redis.core.HashOperations;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.data.redis.listener.ChannelTopic;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
-import javax.annotation.Resource;
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
-import java.util.List;
-import java.util.concurrent.TimeUnit;
 
 @Service
 @Slf4j
 @RequiredArgsConstructor
 public class ChatService {
 
-    //레디스 저장소 사용
-    //key hashKey value 구조
-    @Resource(name = "redisTemplate")
-    private HashOperations<String, String, String> hashOpsEnterInfo;
-
-    //의존성 주입
-    private static final String CHAT_MESSAGE = "CHAT_MESSAGE";
-    private final RedisPublisher redisPublisher;
-    private final JwtTokenProvider jwtTokenProvider;
-    private final RedisTemplate<String, Object> redisTemplate;
+    private final ChannelTopic channelTopic;
+    private final RedisTemplate redisTemplate;
+    private final ChatRoomService chatRoomService;
     private final MessageRepository messageRepository;
-
-    // 채팅룸에 입장한 클라이언트의 sessionId 와 채팅룸 id 를 맵핑한 정보 저장
-    public static final String ENTER_INFO = "ENTER_INFO";
 
     // destination 정보에서 roomId 추출
     public String getRoomId(String destination) {
@@ -49,77 +31,27 @@ public class ChatService {
             return "";
     }
 
-    // 유저가 입장한 채팅방 ID 와 유저 세션 ID 맵핑 정보 저장
-    //Enter라는 곳에 sessionId와 roomId를 맵핑시켜놓음
-    public void setUserEnterInfo(String sessionId, String roomId) {
-        hashOpsEnterInfo.put(ENTER_INFO, sessionId, roomId);
-    }
+    // 채팅방에 메시지 발송
+    public void sendChatMessage(ChatMessage chatMessage) {
 
-    // 유저 세션으로 입장해 있는 채팅방 ID 조회
-    public String getUserEnterRoomId(String sessionId) {
-        return hashOpsEnterInfo.get(ENTER_INFO, sessionId);
-    }
+        // 채팅방 인원수 세팅
+        chatMessage.setMemberCount(chatRoomService.getMemberCount(chatMessage.getRoomId()));
 
-    // 유저 세션정보와 맵핑된 채팅방 ID 삭제
-    //한 유저는 하나의 룸 아이디에만 맵핑되어있다!
-    // 실시간으로 보는 방은 하나이기 떄문이다.
-    public void removeUserEnterInfo(String sessionId) {
-        hashOpsEnterInfo.delete(ENTER_INFO, sessionId);
-    }
-
-    @Transactional
-    public void save(ChatMessageDto messageDto, String token) {
-        log.info("save Message : {}", messageDto.getMessage());
-
-        // 유저 정보값을 토큰으로 찾아오기
-        Member member = CommonUtil.getUserByToken(token, jwtTokenProvider);
-        String now = LocalDateTime.now().format(DateTimeFormatter.ofPattern("MM-dd HH:mm"));
-
-        // 메세지 보내는 사람의 정보값 넣기
-        messageDto.setMember(SenderDto.builder()
-                        .id(member.getId())
-                        .profile(member.getProfile())
-//                        .role(member.getRole())
-                        .nickname(member.getNickname())
-                .build());
-        messageDto.setCreatedAt(now);
-
-        // DB 저장
-        ChatMessage chatMessage = ChatMessage.builder()
-                .message(messageDto.getMessage())
-                .boardId(messageDto.getBoardId())
-                .type(messageDto.getType())
-                .member(member)
-                .createdAt(now)
-                .build();
-
-        messageRepository.save(chatMessage);
-        messageDto.setId(chatMessage.getId());
-        redisPublisher.publishsave(messageDto);
-
-    }
-
-    // 이전 채팅 기록 조회
-    public List<FindChatMessageDto> getAllMessage(String boardId) {
-        HashOperations<String, String, List<FindChatMessageDto>> opsHashChatMessage = redisTemplate.opsForHash();
-
-
-        List<FindChatMessageDto> chatMessageDtoList = opsHashChatMessage.get(CHAT_MESSAGE, boardId);
-
-        if (chatMessageDtoList!= null && chatMessageDtoList.size() > 100) {
-            //from redis
-            return chatMessageDtoList;
+        if (ChatMessage.MessageType.ENTER.equals(chatMessage.getType())) {
+            chatMessage.setMessage(chatMessage.getSender() + "님이 방에 입장했습니다.");
+        } else if (ChatMessage.MessageType.QUIT.equals(chatMessage.getType())) {
+            chatMessage.setMessage(chatMessage.getSender() + "님이 방에서 나갔습니다.");
         }
-        //from mysql
+        log.info("sender, sendMessage: {}, {}", chatMessage.getSender(), chatMessage.getMessage());
+        redisTemplate.convertAndSend(channelTopic.getTopic(), chatMessage);
+    }
 
-        // redis 에서 가져온 메세지 리스트의 값이 null 일때  Mysql db에서 데이터를 불러와 레디스에 저장후 리턴
-        List<FindChatMessageDto> chatMessages = messageRepository.findTop100ByBoardIdOrderByIdDesc(boardId);
-
-        // ChatRoom chatRoom2 = roomRepository.findByRoomId(boardId);
-        redisTemplate.opsForHash().put(CHAT_MESSAGE, boardId, chatMessages);
-        redisTemplate.expire(CHAT_MESSAGE,10, TimeUnit.SECONDS);
-
-        return chatMessages;
+    // 채팅방의 마지막 150개 메세지를 페이징하여 리턴함
+    public Page<ChatMessage> getChatMessageByRoomId(String roomId, Pageable pageable) {
+        int page = (pageable.getPageNumber() == 0) ? 0 : (pageable.getPageNumber() - 1);
+        Sort sort = Sort.by(Sort.Direction.DESC, "id" );
+        pageable = PageRequest.of(page, 150, sort );
+        return messageRepository.findByRoomIdOrderByIdDesc(roomId, pageable);
     }
 
 
