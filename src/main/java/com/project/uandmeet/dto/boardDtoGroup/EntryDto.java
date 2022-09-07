@@ -10,6 +10,6 @@ import lombok.Setter;
 @AllArgsConstructor
 @NoArgsConstructor
 public class EntryDto {
-    private Long boardid;
+    private Long boardId;
     private Boolean isMatching;
 }
