@@ -13,9 +13,11 @@ import com.project.uandmeet.security.UserDetailsImpl;
 import com.project.uandmeet.service.BoardService;
 import com.project.uandmeet.service.SearchService;
 import lombok.RequiredArgsConstructor;
+import org.apache.catalina.User;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.parameters.P;
 import org.springframework.web.bind.annotation.*;
 
 import java.io.IOException;
@@ -150,21 +152,29 @@ public class BoardCotroller {
 
     }
 
-    //매칭참여
+    //매칭하기
+
     @PostMapping("/board/{id}/matchingentry")
-    private ResponseEntity<Long> matchingJoin(@PathVariable("id") Long id,
-                                              @AuthenticationPrincipal UserDetailsImpl userDetails) {
-        return boardService.matchingJoin(id, userDetails);
-
+    private ResponseEntity<Long> addMatching(@PathVariable Long id,
+                                             @AuthenticationPrincipal UserDetailsImpl userDetails){
+        return boardService.addMatching(id,userDetails);
     }
 
-    //매칭취소
-    @PostMapping("/board/{id}/matchingentrycancel")
-    private ResponseEntity<Long> matchingCancel(@PathVariable("id") Long id,
-                                                @AuthenticationPrincipal UserDetailsImpl userDetails) {
-        return boardService.matchingCancel(id, userDetails);
-
-    }
+//    //매칭참여
+//    @PostMapping("/board/{id}/matchingentry")
+//    private ResponseEntity<Long> matchingJoin(@PathVariable("id") Long id,
+//                                              @AuthenticationPrincipal UserDetailsImpl userDetails) {
+//        return boardService.matchingJoin(id, userDetails);
+//
+//    }
+//
+//    //매칭취소
+//    @PostMapping("/board/{id}/matchingentrycancel")
+//    private ResponseEntity<Long> matchingCancel(@PathVariable("id") Long id,
+//                                                @AuthenticationPrincipal UserDetailsImpl userDetails) {
+//        return boardService.matchingCancel(id, userDetails);
+//
+//    }
 
     //댓글작성
     @PostMapping("/api/board/{id}/comments")
