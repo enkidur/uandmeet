@@ -10,16 +10,9 @@ import java.util.Optional;
 @Repository
 public interface EntryRepository extends JpaRepository <Entry, Long> {
     Optional<Entry> findByMemberAndBoard(Member member, Board board);
-    Optional<Entry> findByMemberAndBoard(String member_id, Board board_id);
 
-    boolean existsByMemberAndBoard(Member member, Board board);
-
-    Long countByBoard(Long Board_id);  //BoardId의 갯수를 센다.
     Long countByMember(Member memberId);
-    Long countByBoard(String category);
     Long countByMemberAndCategory(Member memberId, Category category);
-    void deleteByMemberAndBoard(Long Member_id, Long Board_id);
 
-    Long[] findByBoard(Category category);
     List<Entry> findByMember(Member userId);
 }

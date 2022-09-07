@@ -22,21 +22,11 @@ import org.springframework.data.redis.serializer.StringRedisSerializer;
 @Configuration
 public class RedisConfig {
 
-    // 어플리케이션에서 사용할 redisTemplate 설정
-    @Bean
-    public RedisTemplate<String, Object> redisTemplate(RedisConnectionFactory connectionFactory) {
-        RedisTemplate<String, Object> redisTemplate = new RedisTemplate<>();
-        redisTemplate.setConnectionFactory(connectionFactory);
-        redisTemplate.setKeySerializer(new StringRedisSerializer());
-        redisTemplate.setValueSerializer(new Jackson2JsonRedisSerializer<>(String.class));
-        return redisTemplate;
-    }
-
     // 단일 Topic 사용을 위한 Bean 설정
     //채팅
     @Bean
     public ChannelTopic channelTopic() {
-        return new ChannelTopic("board");
+        return new ChannelTopic("chatroom");
     }
 
     //알림 (sse)
@@ -68,10 +58,25 @@ public class RedisConfig {
     public MessageListenerAdapter listenerAdapter(RedisSubscriber subscriber) {
         return new MessageListenerAdapter(subscriber, "sendMessage");
     }
-
+    //알림
     @Bean
     public MessageListenerAdapter sseListenerAdapter(SseRedisSubscriber subscriber) {
         return new MessageListenerAdapter(subscriber, "sendMessage");
     }
+    // 어플리케이션에서 사용할 redisTemplate 설정
+    @Bean
+    public RedisTemplate<String, Object> redisTemplate(RedisConnectionFactory connectionFactory) {
+        RedisTemplate<String, Object> redisTemplate = new RedisTemplate<>();
+        redisTemplate.setConnectionFactory(connectionFactory);
+        redisTemplate.setKeySerializer(new StringRedisSerializer());
+        redisTemplate.setValueSerializer(new Jackson2JsonRedisSerializer<>(String.class));
+        return redisTemplate;
+    }
+
+
+
+
+
+
 }
 

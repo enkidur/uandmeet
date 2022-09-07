@@ -11,6 +11,7 @@ import javax.persistence.*;
 @AllArgsConstructor
 @Entity
 public class Entry {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -34,5 +35,6 @@ public class Entry {
         this.member = member;
         this.board = board;
         this.category = board.getCategory();
+        this.isMatching = isMatching();
     }
 }

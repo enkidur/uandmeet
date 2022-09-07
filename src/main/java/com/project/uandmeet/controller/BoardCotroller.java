@@ -1,10 +1,7 @@
 package com.project.uandmeet.controller;
 
 import com.project.uandmeet.dto.SearchResponseDto;
-import com.project.uandmeet.dto.boardDtoGroup.BoardRequestDto;
-import com.project.uandmeet.dto.boardDtoGroup.BoardResponseDto;
-import com.project.uandmeet.dto.boardDtoGroup.BoardResponseFinalDto;
-import com.project.uandmeet.dto.boardDtoGroup.LikeDto;
+import com.project.uandmeet.dto.boardDtoGroup.*;
 import com.project.uandmeet.dto.commentsDtoGroup.CommentsInquiryDto;
 import com.project.uandmeet.dto.commentsDtoGroup.CommentsRequestDto;
 import com.project.uandmeet.exception.CustomException;
@@ -45,11 +42,11 @@ public class BoardCotroller {
     //매칭 게시물 전체 조회 (카테고리별 전체 조회)
     @GetMapping("/api/boards/matching")
     private ResponseEntity<BoardResponseFinalDto> boardMatchingAllInquiry(
-                                                                  @RequestParam String cate,          //카테고리
-                                                                  @RequestParam Integer page,        //페이지번호
-                                                                  @RequestParam Integer amount,
-                                                                  @RequestParam String city,        //시
-                                                                  @RequestParam String gu) {        //군
+            @RequestParam String cate,          //카테고리
+            @RequestParam Integer page,        //페이지번호
+            @RequestParam Integer amount,
+            @RequestParam String city,        //시
+            @RequestParam String gu) {        //군
         BoardResponseFinalDto boardMatchingAllInquiry = boardService.boardMatchingAllInquiry("matching",cate,page,amount,city,gu);
 
         if (boardMatchingAllInquiry == null) {
@@ -73,7 +70,7 @@ public class BoardCotroller {
     //매칭 게시물 상세 조회 (로그인 후 )
     @GetMapping("/api/boards/matching/login/{id}")
     private BoardResponseDto boardChoiceLoginInquiry(@PathVariable("id") Long id,
-                                                @AuthenticationPrincipal UserDetailsImpl userDetails) {
+                                                     @AuthenticationPrincipal UserDetailsImpl userDetails) {
         BoardResponseDto boardChoiceLoginInquiry = null;
         boardChoiceLoginInquiry = boardService.boardChoiceLoginInquiry(id,userDetails);
         if (boardChoiceLoginInquiry == null) {
@@ -93,9 +90,9 @@ public class BoardCotroller {
     //공유 게시물 전체 조회 (카테고리별 전체 조회)
     @GetMapping("/api/boards/information")
     private ResponseEntity<BoardResponseFinalDto> boardInfoAllInquiry(
-                                                                  @RequestParam String cate,
-                                                                  @RequestParam Integer page,
-                                                                  @RequestParam Integer amount) {
+            @RequestParam String cate,
+            @RequestParam Integer page,
+            @RequestParam Integer amount) {
         BoardResponseFinalDto boardInfoAllInquiry = boardService.boardInfoAllInquiry("information", cate,page,amount);
 
         if (boardInfoAllInquiry == null) {
@@ -131,8 +128,8 @@ public class BoardCotroller {
     //공유 개시물 수정
     @PutMapping("/api/board/information/{id}")
     private CustomException boardInfoUpdate(@PathVariable("id") Long id,
-                                        @RequestBody BoardRequestDto.updateInfo boardRequestDto,
-                                        @AuthenticationPrincipal UserDetailsImpl userDetails) {
+                                            @RequestBody BoardRequestDto.updateInfo boardRequestDto,
+                                            @AuthenticationPrincipal UserDetailsImpl userDetails) {
         return boardService.boardInfoUpdate(id, boardRequestDto, userDetails);
     }
 
@@ -145,36 +142,18 @@ public class BoardCotroller {
     }
 
     //좋아요 유무
-    @PostMapping("/board/{id}/likes")
+    @PostMapping("/board/likes")
     private ResponseEntity<Long> likeClick(LikeDto likeDto,
                                            @AuthenticationPrincipal UserDetailsImpl userDetails) {
         return boardService.likeClick(likeDto, userDetails);
-
     }
 
-    //매칭하기
-
-    @PostMapping("/board/{id}/matchingentry")
-    private ResponseEntity<Long> addMatching(@PathVariable Long id,
-                                             @AuthenticationPrincipal UserDetailsImpl userDetails){
-        return boardService.addMatching(id,userDetails);
+    //매칭참여
+    @PostMapping("/board/matchingentry")
+    private ResponseEntity<Long> matchingJoin(EntryDto entryDto,
+                                              @AuthenticationPrincipal UserDetailsImpl userDetails) {
+        return boardService.matchingJoin(entryDto, userDetails);
     }
-
-//    //매칭참여
-//    @PostMapping("/board/{id}/matchingentry")
-//    private ResponseEntity<Long> matchingJoin(@PathVariable("id") Long id,
-//                                              @AuthenticationPrincipal UserDetailsImpl userDetails) {
-//        return boardService.matchingJoin(id, userDetails);
-//
-//    }
-//
-//    //매칭취소
-//    @PostMapping("/board/{id}/matchingentrycancel")
-//    private ResponseEntity<Long> matchingCancel(@PathVariable("id") Long id,
-//                                                @AuthenticationPrincipal UserDetailsImpl userDetails) {
-//        return boardService.matchingCancel(id, userDetails);
-//
-//    }
 
     //댓글작성
     @PostMapping("/api/board/{id}/comments")
@@ -200,36 +179,14 @@ public class BoardCotroller {
 
     }
 
-/*
-
-    //매칭 게시물 전체 조회 (카테고리별 전체 조회)
-    @GetMapping("/api/boards/mypage/matching")
-    private ResponseEntity<BoardResponseFinalDto> boardMatchingmypageAllInquiry(
-            @RequestParam String type,          //작성글 = write, 신청 = Subscribe
-            @RequestParam String cate,          //카테고리
-            @RequestParam Integer page,        //페이지번호
-            @RequestParam Integer amount,
-            @AuthenticationPrincipal UserDetailsImpl userDetails) {        //군
-        BoardResponseFinalDto boardMatchingmypageAllInquiry = boardService.boardMatchingmypageAllInquiry(type,cate,page,amount,userDetails);
-
-        if (boardMatchingmypageAllInquiry == null) {
-            throw new CustomException(ErrorCode.CAN_NOT_CREATE_ROOM);
-        } else
-            return ResponseEntity.status(HttpStatus.CREATED)
-                    .body(boardMatchingmypageAllInquiry);
-    }
-*/
-
-
-
     @GetMapping("/board/search")
     public List<SearchResponseDto> search(@RequestParam(value = "page") int page,
-                                                          @RequestParam(value = "boardType") String boardType,
-                                                          @RequestParam(value = "amount") int size,
-                                                          @RequestParam(value = "sort") String sort,
-                                                          @RequestParam(value = "keyword") String keyword,
-                                                          @RequestParam(value = "city") String city,
-                                                          @RequestParam(value = "gu") String gu) {
+                                          @RequestParam(value = "boardType") String boardType,
+                                          @RequestParam(value = "amount") int size,
+                                          @RequestParam(value = "sort") String sort,
+                                          @RequestParam(value = "keyword") String keyword,
+                                          @RequestParam(value = "city") String city,
+                                          @RequestParam(value = "gu") String gu) {
 
         List<SearchResponseDto> searchResponseDto = searchService.queryDslSearch(boardType,page, size, sort, keyword, city, gu);
 

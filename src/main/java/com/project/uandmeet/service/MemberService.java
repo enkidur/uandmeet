@@ -452,14 +452,6 @@ public class MemberService {
         memberRepository.save(member);
     }
 
-    //채팅회원관련
-    public Member findByNickname(String nickname) {
-        Member member = memberRepository.findByNickname(nickname).orElseThrow(
-                () -> new CustomException(ErrorCode.MEMBER_NOT_FOUND)
-        );
-        return member;
-    }
-
     public SimpleReviewResponseDto simpleReview(Long memberId) {
         Member member = memberRepository.findById(memberId).orElseThrow(
                 () -> new RuntimeException("찾을 수 없는 사용자입니다.")
@@ -572,6 +564,11 @@ public class MemberService {
         }
         Long totalCount = commentRepository.countByMember(member);
         return new MypostCommentResponseDto(totalCount, commentList);
+    }
+
+    // 유저의 닉네임으로 유저 조회
+    public Member getMember(String nickname) {
+        return memberRepository.findByNickname(nickname).orElseThrow(() -> new IllegalArgumentException("회원이 아닙니다."));
     }
 }
 
