@@ -22,6 +22,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.support.TransactionSynchronizationManager;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.io.IOException;
@@ -543,8 +544,10 @@ public class BoardService {
     }
 
     //공유 게시물 상세 조회
-    @Transactional
+    @Transactional(readOnly = true)
     public BoardResponseDto boardChoiceInfoInquiry(Long id) {
+
+        System.out.println("레플리카:"+ TransactionSynchronizationManager.isCurrentTransactionReadOnly());
 
         //개시판 정보 추출
         Board boards = boardRepository.findById(id)

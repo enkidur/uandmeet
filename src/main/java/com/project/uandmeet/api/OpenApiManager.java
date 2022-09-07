@@ -159,6 +159,7 @@ public class OpenApiManager {
     public List<OpenApiResponseParams> dataRequest() {
 
         List<Siarea> siareas = siareaRepostiory.findAll();
+
         List<Guarea> guareas = guareaRepostiory.findAll();
 
         List<OpenApiResponseParams> openApiResponseParams = new ArrayList<>();
