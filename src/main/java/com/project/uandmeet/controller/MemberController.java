@@ -273,7 +273,7 @@ public class MemberController {
         return ResponseEntity.ok(memberService.mypost(userDetails));
     }
 
-    // 나의 게시글(신청글)
+//     나의 게시글(신청글)
     @GetMapping("/api/myentry")
     public ResponseEntity<MypostResponseDto> myentry(@AuthenticationPrincipal UserDetailsImpl userDetails) {
         return ResponseEntity.ok(memberService.myentry(userDetails));
@@ -281,7 +281,7 @@ public class MemberController {
 
     // 나의 댓글
     @GetMapping("/api/mycomment")
-    public ResponseEntity<List<Comment>> mycomment(@AuthenticationPrincipal UserDetailsImpl userDetails) {
+    public ResponseEntity<MypostCommentResponseDto> mycomment(@AuthenticationPrincipal UserDetailsImpl userDetails) {
         return ResponseEntity.ok(memberService.mycomment(userDetails));
     }
 }

@@ -498,26 +498,80 @@ public class MemberService {
         Member member = memberRepository.findById(userDetails.getMember().getId()).orElseThrow(
                 () -> new RuntimeException("찾을 수 없는 사용자입니다.")
         );
-        List<Board> boards = boardRepository.findByMemberAndBoardType(member, "information");
-        Long totalCount = boardRepository.countByMemberAndBoardType(member, "information");
-        return new MypostResponseDto(totalCount, boards);
+        List<Board> boards = boardRepository.findByMember(member);
+        List<MyListResponseDto> boardInfo = new ArrayList<>();
+        for (Board board : boards) {
+            MyListMemberResponseDto myListMemberResponseDto = new MyListMemberResponseDto(board.getMember().getUsername(),
+                    board.getMember().getNickname(),
+                    board.getMember().getProfile());
+            MyListResponseDto responseDto = new MyListResponseDto(board.getId(),
+                                                                    board.getBoardType(),
+                                                                    board.getTitle(),
+                                                                    board.getContent(),
+                                                                    board.getEndDateAt(),
+                                                                    board.getLikeCount(),
+                                                                    board.getViewCount(),
+                                                                    board.getCommentCount(),
+                                                                    board.getLat(),
+                                                                    board.getLng(),
+                                                                    board.getBoardimage(),
+                                                                    board.getMaxEntry(),
+                                                                    board.getCurrentEntry(),
+                                                                    myListMemberResponseDto);
+            boardInfo.add(responseDto);
+        }
+        Long totalCount = boardRepository.countByMember(member);
+        return new MypostResponseDto(totalCount, boardInfo);
     }
 
     public MypostResponseDto myentry(UserDetailsImpl userDetails) {
         Member member = memberRepository.findById(userDetails.getMember().getId()).orElseThrow(
                 () -> new RuntimeException("찾을 수 없는 사용자입니다.")
         );
-        List<Board> boards = boardRepository.findByMemberAndBoardType(member, "matching");
-        Long totalCount = boardRepository.countByMemberAndBoardType(member, "matching");
-        return new MypostResponseDto(totalCount, boards);
+        List<Entry> entries = entryRepository.findByMember(member);
+        List<MyListResponseDto> boardInfo = new ArrayList<>();
+        for (Entry entry : entries) {
+            MyListMemberResponseDto myListMemberResponseDto = new MyListMemberResponseDto(entry.getBoard().getMember().getUsername(),
+                    entry.getBoard().getMember().getNickname(),
+                    entry.getBoard().getMember().getProfile());
+            MyListResponseDto responseDto = new MyListResponseDto(entry.getBoard().getId(),
+                                                                    entry.getBoard().getBoardType(),
+                                                                    entry.getBoard().getTitle(),
+                                                                    entry.getBoard().getContent(),
+                                                                    entry.getBoard().getEndDateAt(),
+                                                                    entry.getBoard().getLikeCount(),
+                                                                    entry.getBoard().getViewCount(),
+                                                                    entry.getBoard().getCommentCount(),
+                                                                    entry.getBoard().getLat(),
+                                                                    entry.getBoard().getLng(),
+                                                                    entry.getBoard().getBoardimage(),
+                                                                    entry.getBoard().getMaxEntry(),
+                                                                    entry.getBoard().getCurrentEntry(),
+                    myListMemberResponseDto);
+            boardInfo.add(responseDto);
+        }
+        Long totalCount = entryRepository.countByMember(member);
+        return new MypostResponseDto(totalCount, boardInfo);
     }
 
-    public List<Comment> mycomment(UserDetailsImpl userDetails) {
+    public MypostCommentResponseDto mycomment(UserDetailsImpl userDetails) {
         Member member = memberRepository.findById(userDetails.getMember().getId()).orElseThrow(
                 () -> new RuntimeException("찾을 수 없는 사용자입니다.")
         );
-        List<Comment> comment = commentRepository.findAllByMember(member);
-        return comment;
+        List<MyCommentResponseDto> commentList = new ArrayList<>();
+        List<Comment> comments = commentRepository.findAllByMember(member);
+        for (Comment comment : comments){
+            MyListMemberResponseDto myListMemberResponseDto = new MyListMemberResponseDto(comment.getMember().getUsername(),
+                    comment.getMember().getNickname(),
+                    comment.getMember().getProfile());
+            MyCommentResponseDto responseDto = new MyCommentResponseDto(comment.getId(),
+                    comment.getComment(),
+                    comment.getBoardType(),
+                    myListMemberResponseDto);
+            commentList.add(responseDto);
+        }
+        Long totalCount = commentRepository.countByMember(member);
+        return new MypostCommentResponseDto(totalCount, commentList);
     }
 }
 
