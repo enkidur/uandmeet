@@ -273,7 +273,7 @@ public class BoardService {
         Member memberTemp = memberRepostiory.findById(userDetails.getMember().getId())
                 .orElseThrow(() -> new CustomException(ErrorCode.EMPTY_CONTENT));
 
-        Board board = boardRepository.findById(likeDto.getBoardid())
+        Board board = boardRepository.findById(likeDto.getBoardId())
                 .orElseThrow(() -> new CustomException(ErrorCode.EMPTY_CONTENT));
 
         if (board.getMember().getId().equals(memberTemp.getId())) {
@@ -325,7 +325,7 @@ public class BoardService {
     public ResponseEntity<Long> matchingJoin(EntryDto entryDto, UserDetailsImpl userDetails) {
         ResponseEntity<Long> responseEntity = null;
 
-        Board board = boardRepository.findById(entryDto.getBoardid())
+        Board board = boardRepository.findById(entryDto.getBoardId())
                 .orElseThrow(() -> new CustomException(ErrorCode.EMPTY_CONTENT));
 
         Member member = memberRepostiory.findById(userDetails.getMember().getId())
