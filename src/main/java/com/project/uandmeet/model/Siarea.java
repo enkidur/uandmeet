@@ -1,6 +1,7 @@
 package com.project.uandmeet.model;
 
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.project.uandmeet.api.nameChange;
 import lombok.AllArgsConstructor;
 import lombok.Getter;

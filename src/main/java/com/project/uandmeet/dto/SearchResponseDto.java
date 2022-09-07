@@ -10,15 +10,21 @@ import java.time.LocalDateTime;
 public class SearchResponseDto {
 
     private String boardType;
-    private Category category;
+    private String category;
     private Long id;
     private LocalDateTime createdAt;
     private String title;
-    private String centent;
+    private String content;
     private String boardimage;
     private LocalDateTime endDateAt;
     private String city;
     private String gu;
+
+    private String profile;
+
+    private String username;
+
+    private String nickname; // 검색 결과에 해당 게시물을 누가 썻는지 표시하기 위한 닉네임
 
     private Long likeCount;
     private Long commentCount;
@@ -36,13 +42,18 @@ public class SearchResponseDto {
         this.gu = board.getGu().getSigKorNm();
         this.id = board.getId();
         this.createdAt = board.getCreatedAt();
-        this.category = board.getCategory();
+        this.category = board.getCategory().getCategory();
         this.title = board.getTitle();
         this.boardimage = board.getBoardimage();
         this.likeCount = board.getLikeCount();
         this.commentCount = board.getCommentCount();
         this.maxEntry = board.getMaxEntry();
         this.currentEntry = board.getCurrentEntry();
+        this.content=board.getContent();
+        this.nickname=board.getMember().getNickname();
+        this.profile=board.getMember().getProfile();
+        this.username=board.getMember().getUsername();
+        this.boardType=board.getBoardType();
 
     }
 
