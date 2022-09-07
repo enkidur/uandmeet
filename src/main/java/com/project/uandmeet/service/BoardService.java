@@ -1,18 +1,12 @@
 package com.project.uandmeet.service;
 
-import com.project.uandmeet.chat.model.ChatRoom;
-import com.project.uandmeet.chat.repository.ChatRoomRepository;
-import com.project.uandmeet.chat.service.ChatRoomService;
 import com.project.uandmeet.dto.ImageDto;
-import com.project.uandmeet.dto.boardDtoGroup.BoardResponseFinalDto;
+import com.project.uandmeet.dto.boardDtoGroup.*;
 import com.project.uandmeet.dto.commentsDtoGroup.CommentsInquiryDto;
 import com.project.uandmeet.dto.commentsDtoGroup.CommentsRequestDto;
 import com.project.uandmeet.exception.CustomException;
 import com.project.uandmeet.exception.ErrorCode;
 import com.project.uandmeet.dto.MemberDtoGroup.MemberSimpleDto;
-import com.project.uandmeet.dto.boardDtoGroup.BoardRequestDto;
-import com.project.uandmeet.dto.boardDtoGroup.BoardResponseDto;
-import com.project.uandmeet.dto.boardDtoGroup.LikeDto;
 import com.project.uandmeet.model.*;
 import com.project.uandmeet.repository.*;
 import com.project.uandmeet.security.UserDetailsImpl;
@@ -25,7 +19,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.transaction.support.TransactionSynchronizationManager;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.io.IOException;
@@ -42,7 +35,6 @@ public class BoardService {
     private final LikedRepository likedRepository;
     private final EntryRepository entryRepository;
     private final CommentRepository commentRepository;
-    private final ChatRoomRepository chatRoomRepository;
     private final S3Uploader s3Uploader;
     private final String POST_IMAGE_DIR = "static";
 
@@ -82,10 +74,6 @@ public class BoardService {
             try {
                 Board board = new Board(memberTemp, category, siarea, guarea, boardRequestDto, uploadImage.getImageUrl());
                 boardRepository.save(board);
-
-                ChatRoom chatRoom = new ChatRoom(userDetails.getMember(),board);
-                chatRoomRepository.save(chatRoom);
-
                 responseEntity = ResponseEntity.ok(board.getId());
             } catch (Exception e) {
                 throw new CustomException(ErrorCode.INTERNAL_SERVER_ERROR);
@@ -95,17 +83,12 @@ public class BoardService {
 
             try {
                 boardRepository.save(board);
-
-                ChatRoom chatRoom = new ChatRoom(userDetails.getMember(),board);
-                chatRoomRepository.save(chatRoom);
-
                 responseEntity = ResponseEntity.ok(board.getId());
 
             } catch (Exception e) {
                 throw new CustomException(ErrorCode.INTERNAL_SERVER_ERROR);
             }
         }
-
         return responseEntity;
     }
 
@@ -337,88 +320,82 @@ public class BoardService {
         return responseEntity;
     }
 
-
-    //매칭 참여 여부
-    public ResponseEntity<Long> addMatching(Long boardId, UserDetailsImpl userDetails){
+    //매칭 참여
+    @Transactional
+    public ResponseEntity<Long> matchingJoin(EntryDto entryDto, UserDetailsImpl userDetails) {
         ResponseEntity<Long> responseEntity = null;
-        Member member = userDetails.getMember();
-        Board board = boardRepository.findBoardById(boardId);
 
-        if (entryRepository.existsByMemberAndBoard(member,board)){
-            throw new CustomException(ErrorCode.DUPLICATE_APPLY);
+        Board board = boardRepository.findById(entryDto.getBoardid())
+                .orElseThrow(() -> new CustomException(ErrorCode.EMPTY_CONTENT));
+
+        Member member = memberRepostiory.findById(userDetails.getMember().getId())
+                .orElseThrow(() -> new CustomException(ErrorCode.EMPTY_CONTENT));
+        Entry entry =null;
+
+        if (board.getMember().getId().equals(member.getId()))
+        {
+            if(entryDto.getIsMatching()) {
+                if (!entryRepository.findByMemberAndBoard(member, board).isPresent()) {
+                    entry = new Entry(board, member);
+                    try {
+                        entryRepository.save(entry);
+                        board.setCurrentEntry(board.getCurrentEntry() + 1);
+
+                        boardRepository.save(board);
+
+                        responseEntity = ResponseEntity.ok(board.getCurrentEntry());
+
+                    } catch (Exception e) {
+                        throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "서버에서 요청사항을 수행할 수 없습니다.");
+                    }
+                } else
+                    ResponseEntity.status(HttpStatus.valueOf("이미 참여 했습니다."));
+            }
+            else {
+                if (entryRepository.findByMemberAndBoard(member,board).isPresent()) {
+                    entry = entryRepository.findByMemberAndBoard(member,board)
+                            .orElseThrow(() -> new CustomException(ErrorCode.EMPTY_CONTENT));
+
+                    entryRepository.delete(entry);
+
+                    board.setCurrentEntry(board.getCurrentEntry() - 1);
+
+                    boardRepository.save(board);
+
+                    responseEntity = ResponseEntity.ok(board.getCurrentEntry());
+
+                } else {
+                    throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "서버에서 요청사항을 수행할 수 없습니다.");
+                }
+            }
+        } else {
+            throw new CustomException(ErrorCode.INVALID_AUTHORITY);
         }
-        entryRepository.save(Entry.builder()
-                .member(member)
-                .board(board)
-                .isMatching(false)
-                .build());
-        board.setCurrentEntry(board.getCurrentEntry() + 1);
-        boardRepository.save(board);
-        responseEntity = ResponseEntity.ok(board.getCurrentEntry());
+
+
         return responseEntity;
     }
 
-//    //매칭 참여
-//    @Transactional
-//    public ResponseEntity<Long> matchingJoin(Long id, UserDetailsImpl userDetails) {
-//        ResponseEntity<Long> responseEntity = null;
-//
-//        Board board = boardRepository.findById(id)
-//                .orElseThrow(() -> new CustomException(ErrorCode.EMPTY_CONTENT));
-//
-//        Member member = memberRepostiory.findById(userDetails.getMember().getId())
-//                .orElseThrow(() -> new CustomException(ErrorCode.EMPTY_CONTENT));
-//
-//        if (!entryRepository.findByMemberAndBoard(member, board).isPresent()) {
-//            Entry entry = new Entry(board, member);
-//            try {
-//                entryRepository.save(entry);
-//                board.setCurrentEntry(board.getCurrentEntry() + 1);
-//
-//                boardRepository.save(board);
-//
-//                responseEntity = ResponseEntity.ok(board.getCurrentEntry());
-//
-//            } catch (Exception e) {
-//                throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "서버에서 요청사항을 수행할 수 없습니다.");
-//            }
-//        } else
-//            ResponseEntity.status(HttpStatus.valueOf("이미 참여 했습니다."));
-//
-//        return responseEntity;
-//    }
-//
-//    //매칭 참여 취소
-//    @Transactional
-//    public ResponseEntity<Long> matchingCancel(Long id, UserDetailsImpl userDetails) {
-//        ResponseEntity<Long> responseEntity = null;
-//
-//        Board board = boardRepository.findById(id)
-//                .orElseThrow(() -> new CustomException(ErrorCode.EMPTY_CONTENT));
-//
-//        Member member = memberRepostiory.findById(userDetails.getMember().getId())
-//                .orElseThrow(() -> new CustomException(ErrorCode.EMPTY_CONTENT));
-//
-//        Entry entry = entryRepository.findByMemberAndBoard(member, board)
-//                .orElseThrow(() -> new CustomException(ErrorCode.EMPTY_CONTENT));
-//
-//        if (entry != null) {
-//            try {
-//                entryRepository.delete(entry);
-//                board.setCurrentEntry(board.getCurrentEntry() - 1);
-//
-//                boardRepository.save(board);
-//
-//                responseEntity = ResponseEntity.ok(board.getCurrentEntry());
-//
-//            } catch (Exception e) {
-//                throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "서버에서 요청사항을 수행할 수 없습니다.");
-//            }
-//        }
-//
-//        return responseEntity;
-//    }
+    //매칭 참여 취소
+    @Transactional
+    public ResponseEntity<Long> matchingCancel(Long id, UserDetailsImpl userDetails) {
+        ResponseEntity<Long> responseEntity = null;
 
+        Board board = boardRepository.findById(id)
+                .orElseThrow(() -> new CustomException(ErrorCode.EMPTY_CONTENT));
+
+        Member member = memberRepostiory.findById(userDetails.getMember().getId())
+                .orElseThrow(() -> new CustomException(ErrorCode.EMPTY_CONTENT));
+
+        Entry entry = entryRepository.findByMemberAndBoard(member, board)
+                .orElseThrow(() -> new CustomException(ErrorCode.EMPTY_CONTENT));
+
+        if (entry != null) {
+
+        }
+
+        return responseEntity;
+    }
 
     //댓글 작성.
     @Transactional
@@ -557,10 +534,8 @@ public class BoardService {
     }
 
     //공유 게시물 상세 조회
-    @Transactional(readOnly = true)
+    @Transactional
     public BoardResponseDto boardChoiceInfoInquiry(Long id) {
-
-        System.out.println("레플리카:"+ TransactionSynchronizationManager.isCurrentTransactionReadOnly());
 
         //개시판 정보 추출
         Board boards = boardRepository.findById(id)
