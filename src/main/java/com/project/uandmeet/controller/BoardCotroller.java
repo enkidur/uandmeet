@@ -143,14 +143,14 @@ public class BoardCotroller {
 
     //좋아요 유무
     @PostMapping("/board/likes")
-    private ResponseEntity<Long> likeClick(LikeDto likeDto,
+    private ResponseEntity<Long> likeClick(@RequestBody LikeDto likeDto,
                                            @AuthenticationPrincipal UserDetailsImpl userDetails) {
         return boardService.likeClick(likeDto, userDetails);
     }
 
     //매칭참여
     @PostMapping("/board/matchingentry")
-    private ResponseEntity<Long> matchingJoin(EntryDto entryDto,
+    private ResponseEntity<Long> matchingJoin(@RequestBody EntryDto entryDto,
                                               @AuthenticationPrincipal UserDetailsImpl userDetails) {
         return boardService.matchingJoin(entryDto, userDetails);
     }
