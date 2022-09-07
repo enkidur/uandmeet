@@ -11,6 +11,6 @@ import lombok.Setter;
 @NoArgsConstructor
 public class LikeDto {
      private String boardType;
-     private Long boardid;
+     private Long boardId;
      private Boolean isLike;
 }
