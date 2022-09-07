@@ -1,7 +1,10 @@
 package com.project.uandmeet.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import com.project.uandmeet.dto.boardDtoGroup.BoardRequestDto;
 import lombok.*;
+
 
 import javax.persistence.*;
 import java.util.ArrayList;

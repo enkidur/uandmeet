@@ -15,6 +15,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 @Service
 @RequiredArgsConstructor
@@ -23,8 +24,9 @@ public class SearchService {
     private final BoardRepository boardRepository;
 
 
-    public List<SearchResponseDto> queryDslSearch(int page, int size, String sort, String keyword, String city, String gu) {
+    public List<SearchResponseDto> queryDslSearch(String boardType,int page, int size, String sort, String keyword, String city, String gu) {
 
+        // 제목만 검색
         if(sort.equals("title")){
 
             Pageable pageable = PageRequest.of(page, size, Sort.by("id").descending());
@@ -35,29 +37,23 @@ public class SearchService {
 
             BooleanExpression exTitle = qBoard.title.contains(keyword);
 
+            BooleanExpression exType = qBoard.boardType.contains(boardType);
+
             builder.and(exTitle);
+
+            builder.and(exType);
 
             Page<Board> result = boardRepository.findAll(builder, pageable);
 
             List<SearchResponseDto> boardList = new ArrayList<>();
 
             result.stream().forEach(board -> {
-                if(board.getCity().equals(city) && board.getGu().equals(gu)){
+                if(board.getCity().getCtpKorNmAbbreviation().equals(city) && board.getGu().getSigKorNm().equals(gu)){
+
                     Long id = board.getId();
                     Board board1 = boardRepository.findById(id).orElseThrow(() -> new NullPointerException("보드가 없습니다"));
-                    // 검색결과에 매칭,정보가 모두 포함되기에 나눠줌
+
                     SearchResponseDto responseDto = new SearchResponseDto(board1);
-//                    // 게시판 종류가 매칭 게시판일때 && 검색 결과중 BoardType이 matching인 것만 긁어온다.
-//                    if(boardType.equals("matching") && board1.getBoardType().equals("matching")){ // 게시판 종류가 매칭 게시판일 경우
-//                        SearchResponseDto responseDto = new SearchResponseDto(board1);
-//                        boardList.add(responseDto);
-//                    }
-//
-//                    // 게시판 종류가 정보공유 게시판일때 && 검색 결과중 BoardType이 information인 것만 긁어온다.
-//                    else if(boardType.equals("information") && board1.getBoardType().equals("information")){ // 게시판 종류가 정보공유 게시판일 경우
-//                            SearchResponseDto responseDto = new SearchResponseDto(board1);
-//                            boardList.add(responseDto);
-//                    }
 
                     boardList.add(responseDto);
 
@@ -66,10 +62,46 @@ public class SearchService {
             return boardList;
         }
 
+        // 내용만 검색
+        if(sort.equals("content")){
 
+            Pageable pageable = PageRequest.of(page, size, Sort.by("id").descending());
+
+            QBoard qBoard = QBoard.board;
+
+            BooleanBuilder builder = new BooleanBuilder();
+
+            BooleanExpression exContent = qBoard.content.contains(keyword);
+
+            BooleanExpression exType = qBoard.boardType.contains(boardType);
+
+            builder.and(exContent);
+
+            builder.and(exType);
+
+            Page<Board> result = boardRepository.findAll(builder, pageable);
+
+            List<SearchResponseDto> boardList = new ArrayList<>();
+
+            result.stream().forEach(board -> {
+                if(board.getCity().getCtpKorNmAbbreviation().equals(city) && board.getGu().getSigKorNm().equals(gu)){
+
+                    Long id = board.getId();
+                    Board board1 = boardRepository.findById(id).orElseThrow(() -> new NullPointerException("보드가 없습니다"));
+
+                    SearchResponseDto responseDto = new SearchResponseDto(board1);
+
+                    boardList.add(responseDto);
+
+                }
+            });
+            return boardList;
+        }
+
+        //제목+내용 검색
         if (sort.equals("title_Content")) {
 
-            Pageable pageable = PageRequest.of(0, 10, Sort.by("id").descending());
+            Pageable pageable = PageRequest.of(page, size, Sort.by("id").descending());
 
             QBoard qBoard = QBoard.board;
 
@@ -79,16 +111,21 @@ public class SearchService {
 
             BooleanExpression exContent = qBoard.content.contains(keyword);
 
+            BooleanExpression exType = qBoard.boardType.contains(boardType);
+
             BooleanExpression exAll = exTitle.or(exContent);
 
             builder.and(exAll);
+
+            builder.and(exType);
 
             Page<Board> result = boardRepository.findAll(builder, pageable);
 
             List<SearchResponseDto> boardList = new ArrayList<>();
 
             result.stream().forEach(board -> {
-                if(board.getCity().equals(city) && board.getGu().equals(gu)) {
+                if(board.getCity().getCtpKorNmAbbreviation().equals(city) && board.getGu().getSigKorNm().equals(gu)) {
+
                     Long id = board.getId();
                     Board board1 = boardRepository.findById(id).orElseThrow(() -> new NullPointerException("보드가 없습니다"));
 
@@ -97,6 +134,7 @@ public class SearchService {
                     boardList.add(responseDto);
                 }
             });
+
 
             return boardList;
         }

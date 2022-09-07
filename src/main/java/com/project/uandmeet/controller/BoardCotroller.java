@@ -213,18 +213,17 @@ public class BoardCotroller {
 
 
     @GetMapping("/board/search")
-    public ResponseEntity<List<SearchResponseDto>> search(@RequestParam(value = "page") int page,
+    public List<SearchResponseDto> search(@RequestParam(value = "page") int page,
+                                                          @RequestParam(value = "boardType") String boardType,
                                                           @RequestParam(value = "amount") int size,
                                                           @RequestParam(value = "sort") String sort,
                                                           @RequestParam(value = "keyword") String keyword,
                                                           @RequestParam(value = "city") String city,
                                                           @RequestParam(value = "gu") String gu) {
 
-        List<SearchResponseDto> searchResponseDto = searchService.queryDslSearch(page, size, sort, keyword, city, gu);
+        List<SearchResponseDto> searchResponseDto = searchService.queryDslSearch(boardType,page, size, sort, keyword, city, gu);
 
-        return ResponseEntity.status(HttpStatus.CREATED)
-                .body(searchResponseDto);
-
+        return searchResponseDto;
 
     }
 }
