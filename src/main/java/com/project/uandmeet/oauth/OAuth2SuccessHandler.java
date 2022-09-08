@@ -39,10 +39,12 @@ public class OAuth2SuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
 
         String accessToken = jwtTokenProvider.createToken(userDetails.getUsername(), userDetails.getMember().getId());
 
-        String refreshToken = jwtTokenProvider.createRefreshToken();
+        String refreshToken = jwtTokenProvider.createRefreshToken(userDetails.getUsername());
 
         // redis 에 token 저장
-        redisUtil.setDataExpire(userDetails.getUsername(),refreshToken, JwtProperties.REFRESH_EXPIRATION_TIME);
+        redisUtil.setDataExpire(userDetails.getUsername()+JwtProperties.HEADER_ACCESS, JwtProperties.TOKEN_PREFIX + accessToken, JwtProperties.ACCESS_EXPIRATION_TIME);
+        redisUtil.setDataExpire(userDetails.getUsername()+JwtProperties.HEADER_REFRESH, JwtProperties.TOKEN_PREFIX + refreshToken, JwtProperties.REFRESH_EXPIRATION_TIME);
+
 
         String url = makeRedirectUrl(accessToken, refreshToken,username , nickname, profile);
 

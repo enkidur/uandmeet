@@ -66,9 +66,11 @@ public class JwtTokenProvider {
         return token;
     }
 
-    public String createRefreshToken() {
+    public String createRefreshToken(String userPk) {
+        Claims claims = Jwts.claims().setSubject(userPk);
         Date now = new Date();
         String refreshToken= Jwts.builder()
+                .setClaims(claims)//정보저장
                 .setIssuedAt(now)
                 .setExpiration(new Date(now.getTime() + REFRESH_EXPIRATION_TIME))
                 .signWith(SignatureAlgorithm.HS256, secretKey)

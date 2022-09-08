@@ -156,7 +156,7 @@ public class KakaoService {
     private void createToken(Member member) {
 
         String accessToken = jwtTokenProvider.createToken(member.getUsername(), member.getId());
-        String refreshToken = jwtTokenProvider.createRefreshToken();
+        String refreshToken = jwtTokenProvider.createRefreshToken(member.getUsername());
 
 //        String accessToken = JWT.create()
 //                .withSubject(member.getUsername())
@@ -175,14 +175,15 @@ public class KakaoService {
         // Refresh Token DB에 저장
 //        memberService.updateRefreshToken(member.getUsername(), refreshToken);
         // redis 에 token 저장
-        redisUtil.setDataExpire(member.getUsername(),refreshToken,JwtProperties.REFRESH_EXPIRATION_TIME);
+        redisUtil.setDataExpire(member.getUsername()+JwtProperties.HEADER_ACCESS, JwtProperties.TOKEN_PREFIX + accessToken, JwtProperties.ACCESS_EXPIRATION_TIME);
+        redisUtil.setDataExpire(member.getUsername()+JwtProperties.HEADER_REFRESH, JwtProperties.TOKEN_PREFIX + refreshToken, JwtProperties.REFRESH_EXPIRATION_TIME);
 
 
         // token 을 Header 에 발급
         // 재발급떼문에 set 사용
         HttpHeaders headers = new HttpHeaders();
         headers.set(JwtProperties.HEADER_ACCESS, JwtProperties.TOKEN_PREFIX + accessToken);
-        headers.set(JwtProperties.HEADER_REFRESH, JwtProperties.TOKEN_PREFIX + refreshToken);
+//        headers.set(JwtProperties.HEADER_REFRESH, JwtProperties.TOKEN_PREFIX + refreshToken);
     }
 
 //    private void froceLogin(Member member) {

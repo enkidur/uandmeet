@@ -5,21 +5,14 @@ import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-
-import com.project.uandmeet.model.Member;
 import com.project.uandmeet.redis.RedisUtil;
-import com.project.uandmeet.repository.MemberRepository;
-import com.project.uandmeet.security.UserDetailsImpl;
 import io.jsonwebtoken.JwtException;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpHeaders;
 import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.authentication.www.BasicAuthenticationFilter;
-import com.auth0.jwt.JWT;
-import com.auth0.jwt.algorithms.Algorithm;
+
 
 // 인가
 // Security Filter 의 BasicAuthenticationFilter 는 상시 실행되나
@@ -54,10 +47,11 @@ public class JwtAuthorizationFilter extends BasicAuthenticationFilter {
         String token = jwtTokenProvider.setTokenName(request.getHeader(JwtProperties.HEADER_ACCESS));
 
 
-        // 토큰 검증
-//        if (!redisUtil.getData(jwtTokenProvider.getUserPk(token)+JwtProperties.HEADER_ACCESS).equals(token)) {
-//            throw new RuntimeException("잘못된 AccessToken입니다.");
-//        }
+        // 최신 토큰인지 검증
+        if (!redisUtil.getData(jwtTokenProvider.getUserPk(token)+JwtProperties.HEADER_ACCESS).equals(token)) {
+            throw new RuntimeException("잘못된 AccessToken입니다.");
+        }
+
         // 유효한 토큰인지 확인
         if (token != null && jwtTokenProvider.validateToken(token)) {
             // 토큰이 유효하면 토큰으로부터 유저 정보를 받아와서 저장

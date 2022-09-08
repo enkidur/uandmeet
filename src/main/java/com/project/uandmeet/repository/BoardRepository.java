@@ -21,6 +21,6 @@ public  interface BoardRepository extends JpaRepository<Board, Long>, QuerydslPr
     Page<Board> findAllByBoardTypeAndCity(String boardType, Pageable pageable,Siarea City);
     Page<Board> findAllByBoardTypeAndCityAndGu(String boardType, Pageable pageable,Siarea City, Guarea Gu);
 
-    List<Board> findByMember(Member member);
+    List<Board> findByMemberAndBoardType(Member member, String boardType);
     Long countByMember(Member member);
 }
