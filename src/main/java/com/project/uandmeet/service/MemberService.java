@@ -1,8 +1,6 @@
 package com.project.uandmeet.service;
 
 import com.project.uandmeet.dto.*;
-import com.project.uandmeet.exception.CustomException;
-import com.project.uandmeet.exception.ErrorCode;
 import com.project.uandmeet.model.*;
 import com.project.uandmeet.redis.RedisUtil;
 import com.project.uandmeet.repository.*;
@@ -371,7 +369,7 @@ public class MemberService {
                 () -> new RuntimeException("볼 수 없는 정보입니다")
         );
         String gender = member.getGender();
-        List<Long> birth = member.getBirth(); // year, month, day
+        Map<String, Long> birth = member.getBirth(); // year, month, day
         MyPageInfoDto myPageInfoDto = new MyPageInfoDto(username, gender, birth);
         return myPageInfoDto;
     }
@@ -384,7 +382,7 @@ public class MemberService {
                 () -> new RuntimeException("볼 수 없는 정보입니다")
         );
         String gender = requestDto.getGender();
-        List<Long> birth = member.getBirth();
+        Map<String, Long> birth = member.getBirth();
         member.setGender(gender);
         MyPageInfoDto myPageInfoDto = new MyPageInfoDto(username, gender, birth);
         return myPageInfoDto;
@@ -398,10 +396,10 @@ public class MemberService {
                 () -> new RuntimeException("볼 수 없는 정보입니다")
         );
         String gender = member.getGender();
-        List<Long> birth = new ArrayList<>(); // 초기화
-        birth.add(requestDto.getBirthYear());
-        birth.add(requestDto.getBirthMonth());
-        birth.add(requestDto.getBirthDay());
+        Map<String, Long> birth = new HashMap<>();
+        birth.put("birthYear", requestDto.getBirthYear());
+        birth.put("birthMonth", requestDto.getBirthMonth());
+        birth.put("birthDay", requestDto.getBirthDay());
         member.setBirth(birth);
         MyPageInfoDto myPageInfoDto = new MyPageInfoDto(username, gender, birth);
         return myPageInfoDto;

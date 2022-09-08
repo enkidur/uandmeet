@@ -30,7 +30,7 @@ public class Member {
 
     @Column
     @ElementCollection(fetch = FetchType.LAZY)
-    private List<Long> birth;
+    private Map<String, Long> birth;
 //    @Column
 //    private String birth; // yyyy-mm-dd구조
 
