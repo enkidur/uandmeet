@@ -50,7 +50,7 @@ public class MemberService {
     }
 
     // 회원 가입 1. emali check
-    public String checkemail(String username) throws IOException {
+    public String checkemail(String username) {
         checkEmail(username);
 
         // email 중복 확인
@@ -196,9 +196,9 @@ public class MemberService {
         accessTokenResponseMap.put(JwtProperties.HEADER_ACCESS, JwtProperties.TOKEN_PREFIX + accessToken);
         Map<String, String> tokens = accessTokenResponseMap;
         response.setHeader(JwtProperties.HEADER_ACCESS, tokens.get(JwtProperties.HEADER_ACCESS));
-        if (tokens.get(JwtProperties.HEADER_REFRESH) != null) {
-            response.setHeader(JwtProperties.HEADER_REFRESH, tokens.get(JwtProperties.HEADER_REFRESH));
-        }
+//        if (tokens.get(JwtProperties.HEADER_REFRESH) != null) {
+//            response.setHeader(JwtProperties.HEADER_REFRESH, tokens.get(JwtProperties.HEADER_REFRESH));
+//        }
         return tokens;
     }
 
