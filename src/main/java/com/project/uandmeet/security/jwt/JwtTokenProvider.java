@@ -76,9 +76,7 @@ public class JwtTokenProvider {
                 .signWith(SignatureAlgorithm.HS256, secretKey)
                 .compact();
 
-        HttpHeaders headers = new HttpHeaders();
-        headers.set(JwtProperties.HEADER_REFRESH, JwtProperties.TOKEN_PREFIX + refreshToken);
-        response.addHeader("RefreshToken","Bearer " + refreshToken);
+//        response.addHeader("RefreshToken","Bearer " + refreshToken);
         return refreshToken;
     }
 

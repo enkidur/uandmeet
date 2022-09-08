@@ -1,6 +1,5 @@
 package com.project.uandmeet.service;
 
-import com.project.uandmeet.dto.CheckAuthNumDto;
 import com.project.uandmeet.model.Member;
 import com.project.uandmeet.redis.RedisUtil;
 import com.project.uandmeet.repository.MemberRepository;
@@ -12,7 +11,6 @@ import org.springframework.stereotype.Service;
 import javax.mail.*;
 import javax.mail.internet.MimeMessage;
 import java.io.IOException;
-import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
 
