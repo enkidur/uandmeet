@@ -1,16 +1,15 @@
 package com.project.uandmeet.chat.model;
 
-import com.project.uandmeet.chat.dto.ChatMessageRequestDto;
-import com.project.uandmeet.service.MemberService;
+import com.project.uandmeet.model.Member;
 import lombok.*;
 
 import javax.persistence.*;
 
-@Entity
 @Getter
-@Setter
-@NoArgsConstructor
+@Builder
 @AllArgsConstructor
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
+@Entity
 public class ChatMessage {
 
     // 메시지 타입 : 입장, 퇴장, 채팅
@@ -23,36 +22,21 @@ public class ChatMessage {
     private Long id;    //메시지 고유 id
 
     @Column
-    private String roomId;  //채팅방 번호
+    private String boardId; // 게시글 아이디값
 
-    @Enumerated(EnumType.STRING)
+//    @Enumerated(EnumType.STRING)
     @Column
     private MessageType type; // 메시지 타입
 
-    @Column
-    private String sender; // 메시지 보낸사람
+    @ManyToOne
+    @JoinColumn(name = "member_id")
+    private Member member; // 메시지 보낸사람
 
     @Column
     private String message; // 메시지
 
     @Column
-    private long memberCount;   //채팅방 인원수
+    private String createdAt;   //전송시간
 
-    @Builder
-    public ChatMessage(MessageType type, String roomId, String sender, String message, long memberCount) {
-        this.type = type;
-        this.roomId = roomId;
-        this.sender = sender;
-        this.message = message;
-        this.memberCount = memberCount;
-    }
 
-    @Builder
-    public ChatMessage(ChatMessageRequestDto chatMessageRequestDto, MemberService memberService) {
-        this.type = chatMessageRequestDto.getType();
-        this.roomId = chatMessageRequestDto.getRoomId();
-        this.sender =  memberService.getMember(chatMessageRequestDto.getSender()).getNickname();
-        this.message = chatMessageRequestDto.getMessage();
-        this.memberCount = chatMessageRequestDto.getMemberCount();
-    }
 }

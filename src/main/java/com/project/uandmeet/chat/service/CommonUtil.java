@@ -2,7 +2,9 @@ package com.project.uandmeet.chat.service;
 
 import com.project.uandmeet.exception.CustomException;
 import com.project.uandmeet.exception.ErrorCode;
+import com.project.uandmeet.model.Board;
 import com.project.uandmeet.model.Member;
+import com.project.uandmeet.repository.BoardRepository;
 import com.project.uandmeet.security.UserDetailsImpl;
 import com.project.uandmeet.security.jwt.JwtTokenProvider;
 import lombok.RequiredArgsConstructor;

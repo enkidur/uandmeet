@@ -1,6 +1,5 @@
 package com.project.uandmeet.model;
 
-import com.project.uandmeet.chat.model.ChatRoom;
 import com.project.uandmeet.dto.boardDtoGroup.BoardRequestDto;
 import lombok.*;
 
@@ -73,10 +72,6 @@ public class Board extends BaseTime{
 
     @OneToMany(fetch = FetchType.LAZY,mappedBy = "board",cascade = CascadeType.ALL)
     private List<Comment> commentList = new ArrayList<>();
-
-    @OneToOne
-    @JoinColumn(name = "chatroom_id")
-    private ChatRoom chatRoom;
 
     public Board(Member member, Category category, Siarea siarea, Guarea gu, BoardRequestDto.createAndCheck boardRequestDto, String uploadImage)
     {
