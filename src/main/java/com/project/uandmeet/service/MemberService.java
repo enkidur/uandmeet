@@ -11,6 +11,7 @@ import com.project.uandmeet.security.jwt.JwtProperties;
 import com.project.uandmeet.security.jwt.JwtTokenProvider;
 import com.project.uandmeet.service.S3.S3Uploader;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -22,6 +23,7 @@ import java.util.*;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
+@Slf4j
 @Transactional
 @RequiredArgsConstructor
 @Service
@@ -152,17 +154,21 @@ public class MemberService {
 //        jwtTokenProvider.createToken(username);
 //    }
 
-    public Map<String, String> refresh(HttpServletRequest request, HttpServletResponse response, UserDetailsImpl userDetails) {
+    public Map<String, String> refresh(HttpServletRequest request, HttpServletResponse response) {
+
+        //AccessToken
+        String expiredAccessTokenHeader = request.getHeader(JwtProperties.HEADER_ACCESS);
+        String expiredAccessToken = jwtTokenProvider.setTokenName(expiredAccessTokenHeader); // barrer 제거
 
         // refreshToken
-        String authorizationHeader = request.getHeader(JwtProperties.HEADER_REFRESH);
+        String authorizationHeader = redisUtil.getData(jwtTokenProvider.getUserPk(expiredAccessToken)+JwtProperties.HEADER_REFRESH);
 
         if (authorizationHeader == null || !authorizationHeader.startsWith(JwtProperties.TOKEN_PREFIX)) {
-            throw new RuntimeException("JWT Token이 존재하지 않습니다.");
+            throw new RuntimeException("Refresh Token이 존재하지 않습니다.");
         }
-//        if (!redisUtil.getData(userDetails.getUsername() + JwtProperties.HEADER_REFRESH).equals(authorizationHeader)) {
-//            throw new RuntimeException("잘못된 JWT Token입니다.");
-//        }
+        if (!redisUtil.getData(jwtTokenProvider.getUserPk(expiredAccessToken) + JwtProperties.HEADER_ACCESS).equals(expiredAccessTokenHeader)) {
+            throw new RuntimeException("잘못된 JWT Token입니다.");
+        }
 
         // Refresh Token 유효성 검사
         jwtTokenProvider.validateToken(authorizationHeader);
@@ -181,7 +187,7 @@ public class MemberService {
         Date now = new Date();
         Date refreshExpireTime = jwtTokenProvider.ExpireTime(authorizationHeader);
         if (refreshExpireTime.before(new Date(now.getTime() + 1000 * 60 * 60 * 24L))) { // refresh token 만료시간이 특정시간보다 작으면 재발급
-            String newRefreshToken = jwtTokenProvider.createRefreshToken();
+            String newRefreshToken = jwtTokenProvider.createRefreshToken(username);
             accessTokenResponseMap.put(JwtProperties.HEADER_REFRESH, JwtProperties.TOKEN_PREFIX + newRefreshToken);
             redisUtil.setDataExpire(jwtTokenProvider.getUserPk(accessToken) + JwtProperties.HEADER_ACCESS, accessToken, JwtProperties.ACCESS_EXPIRATION_TIME);
             redisUtil.setDataExpire(jwtTokenProvider.getUserPk(accessToken) + JwtProperties.HEADER_REFRESH, newRefreshToken, JwtProperties.REFRESH_EXPIRATION_TIME);
@@ -486,11 +492,11 @@ public class MemberService {
         return reviewRepository.findAllById(memberId);
     }
 
-    public MypostResponseDto mypost(UserDetailsImpl userDetails) {
+    public MypostResponseDto mypostinformation(UserDetailsImpl userDetails) {
         Member member = memberRepository.findById(userDetails.getMember().getId()).orElseThrow(
                 () -> new RuntimeException("찾을 수 없는 사용자입니다.")
         );
-        List<Board> boards = boardRepository.findByMember(member);
+        List<Board> boards = boardRepository.findByMemberAndBoardType(member, "information");
         List<MyListResponseDto> boardInfo = new ArrayList<>();
         for (Board board : boards) {
             MyListMemberResponseDto myListMemberResponseDto = new MyListMemberResponseDto(board.getMember().getUsername(),
@@ -510,6 +516,37 @@ public class MemberService {
                                                                     board.getMaxEntry(),
                                                                     board.getCurrentEntry(),
                                                                     myListMemberResponseDto);
+            boardInfo.add(responseDto);
+        }
+        Long totalCount = boardRepository.countByMember(member);
+        return new MypostResponseDto(totalCount, boardInfo);
+    }
+
+
+    public MypostResponseDto mypostmatching(UserDetailsImpl userDetails) {
+        Member member = memberRepository.findById(userDetails.getMember().getId()).orElseThrow(
+                () -> new RuntimeException("찾을 수 없는 사용자입니다.")
+        );
+        List<Board> boards = boardRepository.findByMemberAndBoardType(member, "matching");
+        List<MyListResponseDto> boardInfo = new ArrayList<>();
+        for (Board board : boards) {
+            MyListMemberResponseDto myListMemberResponseDto = new MyListMemberResponseDto(board.getMember().getUsername(),
+                    board.getMember().getNickname(),
+                    board.getMember().getProfile());
+            MyListResponseDto responseDto = new MyListResponseDto(board.getId(),
+                    board.getBoardType(),
+                    board.getTitle(),
+                    board.getContent(),
+                    board.getEndDateAt(),
+                    board.getLikeCount(),
+                    board.getViewCount(),
+                    board.getCommentCount(),
+                    board.getLat(),
+                    board.getLng(),
+                    board.getBoardimage(),
+                    board.getMaxEntry(),
+                    board.getCurrentEntry(),
+                    myListMemberResponseDto);
             boardInfo.add(responseDto);
         }
         Long totalCount = boardRepository.countByMember(member);
@@ -569,6 +606,10 @@ public class MemberService {
     // 유저의 닉네임으로 유저 조회
     public Member getMember(String nickname) {
         return memberRepository.findByNickname(nickname).orElseThrow(() -> new IllegalArgumentException("회원이 아닙니다."));
+    }
+
+    public void logout(UserDetailsImpl userDetails) {
+        redisUtil.deleteData(userDetails.getUsername()+JwtProperties.HEADER_REFRESH);
     }
 }
 

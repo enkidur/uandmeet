@@ -111,18 +111,18 @@ public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilte
         // Hash 방식
         String accessToken = jwtTokenProvider.createToken(userDetailsImpl.getUsername(), userDetailsImpl.getMember().getId());
 
-        String refreshToken = jwtTokenProvider.createRefreshToken();
+        String refreshToken = jwtTokenProvider.createRefreshToken(userDetailsImpl.getUsername());
 
         // Refresh Token DB에 저장
 //        memberService.updateRefreshToken(userDetailsImpl.getUsername(), refreshToken);
         // AccessToken, Refresh Token Redis 에 저장
-        redisUtil.setDataExpire(userDetailsImpl.getUsername()+JwtProperties.HEADER_ACCESS, accessToken, JwtProperties.ACCESS_EXPIRATION_TIME);
-        redisUtil.setDataExpire(userDetailsImpl.getUsername()+JwtProperties.HEADER_REFRESH, refreshToken, JwtProperties.REFRESH_EXPIRATION_TIME);
+        redisUtil.setDataExpire(userDetailsImpl.getUsername()+JwtProperties.HEADER_ACCESS, JwtProperties.TOKEN_PREFIX + accessToken, JwtProperties.ACCESS_EXPIRATION_TIME);
+        redisUtil.setDataExpire(userDetailsImpl.getUsername()+JwtProperties.HEADER_REFRESH, JwtProperties.TOKEN_PREFIX + refreshToken, JwtProperties.REFRESH_EXPIRATION_TIME);
 
         // token 을 Header 에 발급
         // 재발급떼문에 setHeader 사용
         response.setHeader(JwtProperties.HEADER_ACCESS, JwtProperties.TOKEN_PREFIX + accessToken);
-        response.setHeader(JwtProperties.HEADER_REFRESH, JwtProperties.TOKEN_PREFIX + refreshToken);
+//        response.setHeader(JwtProperties.HEADER_REFRESH, JwtProperties.TOKEN_PREFIX + refreshToken);
 
         response.setHeader("username", userDetailsImpl.getUsername());
         response.setHeader("nickname", userDetailsImpl.getMember().getNickname());
