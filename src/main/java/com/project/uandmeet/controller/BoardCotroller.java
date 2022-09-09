@@ -1,9 +1,8 @@
 package com.project.uandmeet.controller;
 
-import com.project.uandmeet.dto.MainPageDto;
-import com.project.uandmeet.dto.MypageDto;
-import com.project.uandmeet.dto.SearchResponseDto;
+import com.project.uandmeet.dto.*;
 import com.project.uandmeet.dto.boardDtoGroup.*;
+import com.project.uandmeet.dto.boardDtoGroup.LikeDto;
 import com.project.uandmeet.dto.commentsDtoGroup.CommentsInquiryDto;
 import com.project.uandmeet.dto.commentsDtoGroup.CommentsRequestDto;
 import com.project.uandmeet.exception.CustomException;
@@ -196,11 +195,22 @@ public class BoardCotroller {
 
     }
 
-    // mainpage
-    @GetMapping("/api/mainboards/{boardType}/{category}")
-    public ResponseEntity<List<MainPageDto>> mainpage(@PathVariable String boardType,
-                                                      @PathVariable String category) {
-        return ResponseEntity.ok(boardService.mainpage(boardType, category));
+    // mainpage -> information
+    @GetMapping("/api/mainboards/information/{category}")
+    public ResponseEntity<List<MainPageDto>> maininformation(@PathVariable String category) {
+        return ResponseEntity.ok(boardService.maininformation(category));
+    }
+
+    // mainpage -> matching
+    @GetMapping("/api/mainboards/matching/{category}")
+    public ResponseEntity<List<MainPageMatchingDto>> mainmatching(@PathVariable String category) {
+        return ResponseEntity.ok(boardService.mainmatching(category));
+    }
+
+    //     나의 게시글(신청글, 참여글)
+    @GetMapping("/api/mainboards/myentry")
+    public ResponseEntity<List<MainPageEntryDto>> mainmyentry(@AuthenticationPrincipal UserDetailsImpl userDetails) {
+        return ResponseEntity.ok(boardService.mainmyentry(userDetails));
     }
 
 }
