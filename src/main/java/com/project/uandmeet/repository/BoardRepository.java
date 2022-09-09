@@ -23,9 +23,4 @@ public  interface BoardRepository extends JpaRepository<Board, Long>, QuerydslPr
 
     List<Board> findByMemberAndBoardType(Member member, String boardType);
     Long countByMember(Member member);
-
-    List<Board> findByBoardTypeOrderByLikeCount(String boardType);
-    List<Board> findByBoardTypeAndCategoryOrderByLikeCount(String boardtype, Category category);
-
-
 }

@@ -1,8 +1,7 @@
 package com.project.uandmeet.controller;
 
-import com.project.uandmeet.dto.*;
+import com.project.uandmeet.dto.SearchResponseDto;
 import com.project.uandmeet.dto.boardDtoGroup.*;
-import com.project.uandmeet.dto.boardDtoGroup.LikeDto;
 import com.project.uandmeet.dto.commentsDtoGroup.CommentsInquiryDto;
 import com.project.uandmeet.dto.commentsDtoGroup.CommentsRequestDto;
 import com.project.uandmeet.exception.CustomException;
@@ -11,11 +10,9 @@ import com.project.uandmeet.security.UserDetailsImpl;
 import com.project.uandmeet.service.BoardService;
 import com.project.uandmeet.service.SearchService;
 import lombok.RequiredArgsConstructor;
-import org.apache.catalina.User;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.security.core.parameters.P;
 import org.springframework.web.bind.annotation.*;
 
 import java.io.IOException;
@@ -144,15 +141,15 @@ public class BoardCotroller {
 
     //좋아요 유무
     @PostMapping("/board/likes")
-    private ResponseEntity<Long> likeClick(@RequestBody LikeDto likeDto,
-                                           @AuthenticationPrincipal UserDetailsImpl userDetails) {
+    private ResponseEntity<LikeDto.response> likeClick(@RequestBody LikeDto.request likeDto,
+                                                       @AuthenticationPrincipal UserDetailsImpl userDetails) {
         return boardService.likeClick(likeDto, userDetails);
     }
 
     //매칭참여
     @PostMapping("/board/matchingentry")
-    private ResponseEntity<Long> matchingJoin(@RequestBody EntryDto entryDto,
-                                              @AuthenticationPrincipal UserDetailsImpl userDetails) {
+    private ResponseEntity<EntryDto.response> matchingJoin(@RequestBody EntryDto.request entryDto,
+                                                  @AuthenticationPrincipal UserDetailsImpl userDetails) {
         return boardService.matchingJoin(entryDto, userDetails);
     }
 
@@ -194,23 +191,4 @@ public class BoardCotroller {
         return searchResponseDto;
 
     }
-
-    // mainpage -> information
-    @GetMapping("/api/mainboards/information/{category}")
-    public ResponseEntity<List<MainPageDto>> maininformation(@PathVariable String category) {
-        return ResponseEntity.ok(boardService.maininformation(category));
-    }
-
-    // mainpage -> matching
-    @GetMapping("/api/mainboards/matching/{category}")
-    public ResponseEntity<List<MainPageMatchingDto>> mainmatching(@PathVariable String category) {
-        return ResponseEntity.ok(boardService.mainmatching(category));
-    }
-
-    //     나의 게시글(신청글, 참여글)
-    @GetMapping("/api/mainboards/myentry")
-    public ResponseEntity<List<MainPageEntryDto>> mainmyentry(@AuthenticationPrincipal UserDetailsImpl userDetails) {
-        return ResponseEntity.ok(boardService.mainmyentry(userDetails));
-    }
-
 }

@@ -1,8 +1,7 @@
 package com.project.uandmeet.service;
 
-import com.project.uandmeet.dto.*;
+import com.project.uandmeet.dto.ImageDto;
 import com.project.uandmeet.dto.boardDtoGroup.*;
-import com.project.uandmeet.dto.boardDtoGroup.LikeDto;
 import com.project.uandmeet.dto.commentsDtoGroup.CommentsInquiryDto;
 import com.project.uandmeet.dto.commentsDtoGroup.CommentsRequestDto;
 import com.project.uandmeet.exception.CustomException;
@@ -23,8 +22,8 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.io.IOException;
-import java.util.*;
-import java.util.stream.Collectors;
+import java.util.ArrayList;
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor //생성자 미리 생성.
@@ -207,7 +206,7 @@ public class BoardService {
             MemberSimpleDto memberSimpleDto = new MemberSimpleDto(boards.getMember().getNickname(),
                     boards.getMember().getUsername(), boards.getMember().getProfile());
 
-            boardResponseDto = new BoardResponseDto(memberSimpleDto, boards, liked);
+            boardResponseDto = new BoardResponseDto(memberSimpleDto, boards,liked);
             return boardResponseDto;
 
         } else return null;
@@ -267,17 +266,18 @@ public class BoardService {
 
     //게시물 좋아요 유무
     @Transactional
-    public ResponseEntity<Long> likeClick(LikeDto likeDto, UserDetailsImpl userDetails) {
+    public ResponseEntity<LikeDto.response> likeClick(LikeDto.request likeDto, UserDetailsImpl userDetails) {
 
-        ResponseEntity<Long> responseEntity = null;
+        ResponseEntity<LikeDto.response> responseEntity = null;
 
         Member memberTemp = memberRepostiory.findById(userDetails.getMember().getId())
                 .orElseThrow(() -> new CustomException(ErrorCode.EMPTY_CONTENT));
 
         Board board = boardRepository.findById(likeDto.getBoardId())
                 .orElseThrow(() -> new CustomException(ErrorCode.EMPTY_CONTENT));
+        LikeDto.response response=null;
 
-        if (board.getMember().getId().equals(memberTemp.getId())) {
+        if (!board.getMember().getId().equals(memberTemp.getId())) {
             if (likeDto.getIsLike()) {
                 if (!likedRepository.findByBoardAndMember(board, memberTemp).isPresent()) {
 
@@ -288,7 +288,8 @@ public class BoardService {
                         board.setLikeCount(board.getLikeCount() + 1);
                         boardRepository.save(board);
 
-                        responseEntity = ResponseEntity.ok(board.getLikeCount());
+                        response = new LikeDto.response(board.getLikeCount());
+                        responseEntity = ResponseEntity.ok(response);
 
                     } catch (Exception e) {
                         throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "서버에서 요청사항을 수행할 수 없습니다.");
@@ -309,7 +310,9 @@ public class BoardService {
 
                     boardRepository.save(board);
 
-                    responseEntity = ResponseEntity.ok(board.getLikeCount());
+                    response = new LikeDto.response(board.getLikeCount());
+                    responseEntity = ResponseEntity.ok(response);
+
                 } else {
                     throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "해당 요청사항을 수행할 수 없습니다.");
                 }
@@ -323,18 +326,20 @@ public class BoardService {
 
     //매칭 참여
     @Transactional
-    public ResponseEntity<Long> matchingJoin(EntryDto entryDto, UserDetailsImpl userDetails) {
-        ResponseEntity<Long> responseEntity = null;
+    public ResponseEntity<EntryDto.response> matchingJoin(EntryDto.request entryDto, UserDetailsImpl userDetails) {
+        ResponseEntity<EntryDto.response> responseEntity = null;
 
         Board board = boardRepository.findById(entryDto.getBoardId())
                 .orElseThrow(() -> new CustomException(ErrorCode.EMPTY_CONTENT));
 
         Member member = memberRepostiory.findById(userDetails.getMember().getId())
                 .orElseThrow(() -> new CustomException(ErrorCode.EMPTY_CONTENT));
-        Entry entry = null;
+        Entry entry =null;
+        EntryDto.response response= null;
 
-        if (!board.getMember().getId().equals(member.getId())) {
-            if (entryDto.getIsMatching()) {
+        if (!board.getMember().getId().equals(member.getId()))
+        {
+            if(entryDto.getIsMatching()) {
                 if (!entryRepository.findByMemberAndBoard(member, board).isPresent()) {
                     entry = new Entry(board, member);
                     try {
@@ -342,17 +347,18 @@ public class BoardService {
                         board.setCurrentEntry(board.getCurrentEntry() + 1);
 
                         boardRepository.save(board);
-
-                        responseEntity = ResponseEntity.ok(board.getCurrentEntry());
+                        response = new EntryDto.response(board.getCurrentEntry());
+                        responseEntity = ResponseEntity.ok(response);
 
                     } catch (Exception e) {
                         throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "서버에서 요청사항을 수행할 수 없습니다.");
                     }
                 } else
                     ResponseEntity.status(HttpStatus.valueOf("이미 참여 했습니다."));
-            } else {
-                if (entryRepository.findByMemberAndBoard(member, board).isPresent()) {
-                    entry = entryRepository.findByMemberAndBoard(member, board)
+            }
+            else {
+                if (entryRepository.findByMemberAndBoard(member,board).isPresent()) {
+                    entry = entryRepository.findByMemberAndBoard(member,board)
                             .orElseThrow(() -> new CustomException(ErrorCode.EMPTY_CONTENT));
 
                     entryRepository.delete(entry);
@@ -361,7 +367,8 @@ public class BoardService {
 
                     boardRepository.save(board);
 
-                    responseEntity = ResponseEntity.ok(board.getCurrentEntry());
+                    response = new EntryDto.response(board.getCurrentEntry());
+                    responseEntity = ResponseEntity.ok(response);
 
                 } else {
                     throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "서버에서 요청사항을 수행할 수 없습니다.");
@@ -370,8 +377,6 @@ public class BoardService {
         } else {
             throw new CustomException(ErrorCode.INVALID_AUTHORITY);
         }
-
-
         return responseEntity;
     }
 
@@ -607,147 +612,6 @@ public class BoardService {
         } else {
             return new CustomException(ErrorCode.INVALID_AUTHORITY);
         }
-    }
-
-    public List<MainPageDto> maininformation(String category) {
-        List<MainPageDto> temp = new ArrayList<>();
-        List<MainPageDto> mainPage = new ArrayList<>();
-        if (category.equals("all")) {
-            List<Board> mains = boardRepository.findByBoardTypeOrderByLikeCount("information");
-            for (Board main : mains) {
-                MainPageDto mainPageDto = new MainPageDto(main.getId(),
-                        main.getTitle(),
-                        main.getContent(),
-                        main.getMember().getNickname());
-                temp.add(mainPageDto);
-            }
-            if (temp.size() < 5) {
-                mainPage.addAll(temp);
-            } else {
-                for (int i = 0; i < 4; i++) {
-                    mainPage.add(temp.get(i));
-                }
-            }
-            return mainPage;
-        } else {
-            Category mainCategory = categoryRepository.findAllByCategory(category).orElseThrow(
-                    () -> new RuntimeException("찾을 수 없는 카테고리입니다.")
-            );
-            List<Board> mains = boardRepository.findByBoardTypeAndCategoryOrderByLikeCount("information", mainCategory);
-                for (Board main : mains) {
-                    MainPageDto mainPageDto = new MainPageDto(main.getId(),
-                            main.getTitle(),
-                            main.getContent(),
-                            main.getMember().getNickname());
-                    temp.add(mainPageDto);
-                }
-            if (temp.size() < 5) {
-                mainPage.addAll(temp);
-            } else {
-                for (int i = 0; i < 4; i++) {
-                    mainPage.add(temp.get(i));
-                }
-            }
-            return mainPage;
-        }
-    }
-
-    public List<MainPageMatchingDto> mainmatching(String category) {
-        List<MainPageMatchingDto> temp = new ArrayList<>();
-        List<MainPageMatchingDto> mainPage = new ArrayList<>();
-        if (category.equals("all")) {
-            List<Board> mains = boardRepository.findByBoardTypeOrderByLikeCount("matching");
-            for (Board main : mains) {
-                MainPageMatchingDto mainPageDto = new MainPageMatchingDto(main.getCategory().getCategory(),
-                        main.getId(),
-                        main.getTitle(),
-                        main.getContent(),
-                        main.getMember().getNickname(),
-                        main.getEndDateAt(),
-                        main.getCurrentEntry(),
-                        main.getMaxEntry());
-                temp.add(mainPageDto);
-            }
-            if (temp.size() < 5) {
-                mainPage.addAll(temp);
-            } else {
-                for (int i = 0; i < 4; i++) {
-                    mainPage.add(temp.get(i));
-                }
-            }
-            return mainPage;
-        } else {
-            Category mainCategory = categoryRepository.findAllByCategory(category).orElseThrow(
-                    () -> new RuntimeException("찾을 수 없는 카테고리입니다.")
-            );
-            List<Board> mains = boardRepository.findByBoardTypeAndCategoryOrderByLikeCount("matching", mainCategory);
-            for (Board main : mains) {
-                MainPageMatchingDto mainPageDto = new MainPageMatchingDto(main.getCategory().getCategory(),
-                        main.getId(),
-                        main.getTitle(),
-                        main.getContent(),
-                        main.getMember().getNickname(),
-                        main.getEndDateAt(),
-                        main.getCurrentEntry(),
-                        main.getMaxEntry());
-                temp.add(mainPageDto);
-            }
-            if (temp.size() < 5) {
-                mainPage.addAll(temp);
-            } else {
-                for (int i = 0; i < 4; i++) {
-                    mainPage.add(temp.get(i));
-                }
-            }
-            return mainPage;
-        }
-    }
-
-
-    public List<MainPageEntryDto> mainmyentry(UserDetailsImpl userDetails) {
-        Member member = memberRepostiory.findById(userDetails.getMember().getId()).orElseThrow(
-                () -> new RuntimeException("찾을 수 없는 사용자입니다.")
-        );
-        List<Entry> entries = entryRepository.findByMember(member);
-        List<Board> boards = boardRepository.findByMemberAndBoardType(member, "matching");
-        List<MainPageEntryDto> temp = new ArrayList<>();
-        List<MainPageEntryDto> boardInfo = new ArrayList<>();
-        for (Entry entry : entries) {
-            MainPageEntryDto responseDto = new MainPageEntryDto(
-                    "entryPost",
-                    entry.getBoard().getId(),
-                    entry.getBoard().getTitle(),
-                    entry.getBoard().getMaxEntry(),
-                    entry.getBoard().getCurrentEntry(),
-                    entry.isMatching(),
-                    entry.getCreatedAt(),
-                    entry.getModifiedAt());
-            temp.add(responseDto);
-        }
-        for (Board board : boards) {
-            MainPageEntryDto responseDto = new MainPageEntryDto(
-                    "myPost",
-                    board.getId(),
-                    board.getTitle(),
-                    board.getMaxEntry(),
-                    board.getCurrentEntry(),
-                    null,
-                    board.getCreatedAt(),
-                    board.getModifiedAt());
-            temp.add(responseDto);
-        }
-        Comparator<MainPageEntryDto> comparator = (prod1, prod2) ->
-                String.valueOf(prod1.getCreatedAt())
-                        .compareTo(String.valueOf(prod2.getCreatedAt()));
-        Collections.sort(temp, comparator);
-        if (temp.size() < 5) {
-            boardInfo.addAll(temp);
-        } else {
-            for (int i =0; i < 4; i++) {
-                boardInfo.add(temp.get(i));
-            }
-        }
-        return boardInfo;
     }
 
 /*
