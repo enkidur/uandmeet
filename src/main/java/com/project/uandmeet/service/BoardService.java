@@ -1,6 +1,8 @@
 package com.project.uandmeet.service;
 
 import com.project.uandmeet.dto.ImageDto;
+import com.project.uandmeet.dto.MainPageDto;
+import com.project.uandmeet.dto.MypageDto;
 import com.project.uandmeet.dto.boardDtoGroup.*;
 import com.project.uandmeet.dto.commentsDtoGroup.CommentsInquiryDto;
 import com.project.uandmeet.dto.commentsDtoGroup.CommentsRequestDto;
@@ -23,6 +25,7 @@ import org.springframework.web.server.ResponseStatusException;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 @Service
@@ -608,6 +611,36 @@ public class BoardService {
         } else {
             return new CustomException(ErrorCode.INVALID_AUTHORITY);
         }
+    }
+
+    public List<MainPageDto> mainpage(String boardType, String category) {
+        List<MainPageDto> mainPage = new ArrayList<>();
+        if (boardType.equals("all")) {
+            List<Board> mains = boardRepository.findByBoardTypeOrderByLikeCount(boardType);
+            for (int i = 0; i < 3; i++) {
+                Board main = mains.get(i);
+                MainPageDto mainPageDto = new MainPageDto(main.getId(),
+                        main.getTitle(),
+                        main.getContent(),
+                        main.getMember().getNickname());
+                mainPage.add(mainPageDto);
+            }
+            return mainPage;
+        } else {
+            Category mainCategory = categoryRepository.findAllByCategory(category).orElseThrow(
+                    ()->new RuntimeException("찾을 수 없는 카테고리입니다.")
+            );
+            List<Board> mains = boardRepository.findByBoardTypeAndCategoryOrderByLikeCount(boardType, mainCategory);
+            for (int i = 0; i < 3; i++) {
+                Board main = mains.get(i);
+                MainPageDto mainPageDto = new MainPageDto(main.getId(),
+                        main.getTitle(),
+                        main.getContent(),
+                        main.getMember().getNickname());
+                mainPage.add(mainPageDto);
+            }
+        }
+        return mainPage;
     }
 
 /*

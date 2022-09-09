@@ -1,5 +1,7 @@
 package com.project.uandmeet.controller;
 
+import com.project.uandmeet.dto.MainPageDto;
+import com.project.uandmeet.dto.MypageDto;
 import com.project.uandmeet.dto.SearchResponseDto;
 import com.project.uandmeet.dto.boardDtoGroup.*;
 import com.project.uandmeet.dto.commentsDtoGroup.CommentsInquiryDto;
@@ -193,4 +195,12 @@ public class BoardCotroller {
         return searchResponseDto;
 
     }
+
+    // mainpage
+    @GetMapping("/api/mainboards/{boardType}/{category}")
+    public ResponseEntity<List<MainPageDto>> mainpage(@PathVariable String boardType,
+                                                      @PathVariable String category) {
+        return ResponseEntity.ok(boardService.mainpage(boardType, category));
+    }
+
 }

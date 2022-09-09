@@ -70,8 +70,9 @@ public class KakaoService {
         MultiValueMap<String, String> body = new LinkedMultiValueMap<>();
         body.add("grant_type", "authorization_code");
         // rest Api key
-        body.add("client_id", "5d309e8e3962145e21700ba232a4d3bc");
-        body.add("redirect_uri", "http://localhost:3000/user/kakao/callback");
+        body.add("client_id", "77c5975ead488c768a11d49f9320425c");
+        body.add("redirect_uri", "http://localhost:8000/api/kakaoLogin");
+//        body.add("redirect_uri", "http://localhost:3000/api/kakaoLogin");
         body.add("code", code);
 
         // HTTP 요청 보내기
