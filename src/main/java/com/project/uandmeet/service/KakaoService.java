@@ -1,7 +1,5 @@
 package com.project.uandmeet.service;
 
-import com.auth0.jwt.JWT;
-import com.auth0.jwt.algorithms.Algorithm;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -17,17 +15,12 @@ import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestTemplate;
-
-import java.util.Date;
 import java.util.UUID;
 
 @Transactional
@@ -56,7 +49,7 @@ public class KakaoService {
 //        froceLogin(member);
 
         // 4. accessToken, refreshToken 발급
-        createToken(member);
+//        createToken(member);
 
     }
 
@@ -70,9 +63,9 @@ public class KakaoService {
         MultiValueMap<String, String> body = new LinkedMultiValueMap<>();
         body.add("grant_type", "authorization_code");
         // rest Api key
-        body.add("client_id", "77c5975ead488c768a11d49f9320425c");
-        body.add("redirect_uri", "http://localhost:8000/api/kakaoLogin");
-//        body.add("redirect_uri", "http://localhost:3000/api/kakaoLogin");
+        body.add("client_id", "e789d33a46a6c7fd347b5f73e7669177");
+        body.add("redirect_uri", "http://localhost:8000/user/kakao/callback");
+//        body.add("redirect_uri", "http://localhost:3000/user/kakao/callback");
         body.add("code", code);
 
         // HTTP 요청 보내기
@@ -118,7 +111,7 @@ public class KakaoService {
                 .get("nickname").asText();
         String email = jsonNode.get("kakao_account")
                 .get("email").asText();
-
+            System.out.println("jsonNode :"+jsonNode);
         System.out.println("카카오 사용자 정보: " + nickname + ", " + email);
         KakaoUserInfoDto kakaoUserInfoDto = new KakaoUserInfoDto(nickname, email);
         return kakaoUserInfoDto;
@@ -148,8 +141,9 @@ public class KakaoService {
             member = new Member(nickname, encodedPassword, username);
             member.setLoginto("kakao");
             memberRepository.save(member);
+            createToken(member);
         } else {
-            throw new RuntimeException("이미 존재하는 계정입니다.");
+            createToken(member);
         }
         return member;
     }

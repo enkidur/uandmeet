@@ -13,9 +13,7 @@ import com.project.uandmeet.repository.*;
 import com.project.uandmeet.security.UserDetailsImpl;
 import com.project.uandmeet.service.S3.S3Uploader;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Sort;
+import org.springframework.data.domain.*;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -668,7 +666,7 @@ public class BoardService {
                         main.getMaxEntry());
                 temp.add(mainPageDto);
             }
-            if (temp.size() < 5) {
+            if (temp.size() < 5) { // Page or Slice 로 해결가능
                 mainPage.addAll(temp);
             } else {
                 for (int i = 0; i < 4; i++) {

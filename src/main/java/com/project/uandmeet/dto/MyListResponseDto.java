@@ -1,5 +1,7 @@
 package com.project.uandmeet.dto;
 
+import com.project.uandmeet.model.Guarea;
+import com.project.uandmeet.model.Siarea;
 import lombok.Getter;
 
 import java.util.List;
@@ -9,6 +11,7 @@ public class MyListResponseDto {
     private Long boardId;
     //정보공유 : information,  매칭:matching 둘중 하나.
     private String boardType;
+    private String category;
     private String title;
     private String content;
     private String endDateAt;
@@ -18,6 +21,8 @@ public class MyListResponseDto {
     private Long viewCount;
     //댓글 수
     private Long commentCount;
+    private Siarea city;
+    private Guarea gu;
     //경도
     private String lat;
     //위도
@@ -29,15 +34,18 @@ public class MyListResponseDto {
     private Long currentEntry;
     private MyListMemberResponseDto writer;
 
-    public MyListResponseDto(Long boardId, String boardType, String title, String content, String endDateAt, Long likeCount, Long viewCount, Long commentCount, String lat, String lng, String boardimage, Long maxEntry, Long currentEntry, MyListMemberResponseDto writer) {
+    public MyListResponseDto(Long boardId, String boardType, String category, String title, String content, String endDateAt, Long likeCount, Long viewCount, Long commentCount, Siarea city, Guarea gu,String lat, String lng, String boardimage, Long maxEntry, Long currentEntry, MyListMemberResponseDto writer) {
         this.boardId = boardId;
         this.boardType = boardType;
+        this.category = category;
         this.title = title;
         this.content = content;
         this.endDateAt = endDateAt;
         this.likeCount = likeCount;
         this.viewCount = viewCount;
         this.commentCount = commentCount;
+        this.city = city;
+        this.gu = gu;
         this.lat = lat;
         this.lng = lng;
         this.boardimage = boardimage;

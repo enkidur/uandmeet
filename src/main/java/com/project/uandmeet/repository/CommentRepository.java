@@ -3,6 +3,8 @@ package com.project.uandmeet.repository;
 import com.project.uandmeet.model.Board;
 import com.project.uandmeet.model.Comment;
 import com.project.uandmeet.model.Member;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
@@ -16,6 +18,8 @@ public interface CommentRepository extends JpaRepository<Comment, Long>
 
     Optional<Comment> findByIdAndBoard(Long id, Long boardId);
     List<Comment> findAllByMember(Member member);
+    Page<Comment> findAllByMember(Member member, Pageable pageable);
+
     Long countByMember(Member member);
 
     List<Comment> findByBoardOrderByCreatedAtDesc(Board board);
