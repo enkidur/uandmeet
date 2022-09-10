@@ -40,10 +40,10 @@ public class Member {
     @Column
     private String profile; // 이미지
 
-//    @OneToMany(mappedBy = "member", fetch = FetchType.LAZY)
+    //    @OneToMany(mappedBy = "member", fetch = FetchType.LAZY)
     @Column
     @ElementCollection(fetch = FetchType.LAZY)
-    private Map<String, String> concern;
+    private List<String> concern;
 
     @OneToMany(fetch = FetchType.LAZY,mappedBy = "member")
     private List<Star> star;
@@ -80,10 +80,11 @@ public class Member {
 
     // kakaoUser
     @Builder
-    public Member(String nickname, String encodedPassword, String email) {
+    public Member(String nickname, String encodedPassword, String email, String gender) {
         this.nickname = nickname;
         this.password = encodedPassword;
         this.username = email;
+        this.gender = gender;
     }
 
 

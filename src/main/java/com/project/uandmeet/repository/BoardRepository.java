@@ -3,6 +3,7 @@ package com.project.uandmeet.repository;
 import com.project.uandmeet.model.*;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Slice;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.querydsl.QuerydslPredicateExecutor;
 import org.springframework.stereotype.Repository;
@@ -22,10 +23,12 @@ public  interface BoardRepository extends JpaRepository<Board, Long>, QuerydslPr
     Page<Board> findAllByBoardTypeAndCityAndGu(String boardType, Pageable pageable,Siarea City, Guarea Gu);
 
     List<Board> findByMemberAndBoardType(Member member, String boardType);
-    Long countByMember(Member member);
-
+    Page<Board> findByMemberAndBoardType(Member member,  String boardType, Pageable pageable);
+    Long countByMemberAndAndBoardType(Member member, String boardType);
     List<Board> findByBoardTypeOrderByLikeCount(String boardType);
+    Slice<Board> findByBoardTypeOrderByLikeCount(String boardType, Pageable pageable);
     List<Board> findByBoardTypeAndCategoryOrderByLikeCount(String boardtype, Category category);
+    Slice<Board> findByBoardTypeAndCategoryOrderByLikeCount(String boardtype, Category category, Pageable pageable);
 
 
 }

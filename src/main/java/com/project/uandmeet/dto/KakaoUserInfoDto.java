@@ -7,9 +7,12 @@ import lombok.Getter;
         private String id;
         private String nickname;
         private String email;
+        private String profile;
+        private String gender;
 
-        public KakaoUserInfoDto(String nickname, String email) {
+        public KakaoUserInfoDto(String nickname, String email, String gender) {
             this.nickname = nickname;
             this.email =email;
+            this.gender = gender;
         }
 }

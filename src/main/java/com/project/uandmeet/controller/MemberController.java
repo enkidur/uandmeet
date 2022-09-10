@@ -2,8 +2,6 @@ package com.project.uandmeet.controller;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.project.uandmeet.dto.*;
-import com.project.uandmeet.model.Board;
-import com.project.uandmeet.model.Comment;
 import com.project.uandmeet.model.Review;
 import com.project.uandmeet.security.UserDetailsImpl;
 import com.project.uandmeet.service.EmailService;
@@ -187,12 +185,9 @@ public class MemberController {
     public ResponseEntity<MypageDto> concernedit(@AuthenticationPrincipal UserDetailsImpl userDetails,
                                                  @RequestBody ConcernDto requestDto) {
         return ResponseEntity.ok(memberService.concernedit(userDetails,
-                requestDto.getConcern1En(),
-                requestDto.getConcern1Kor(),
-                requestDto.getConcern2En(),
-                requestDto.getConcern2Kor(),
-                requestDto.getConcern3En(),
-                requestDto.getConcern3Kor() ));
+                requestDto.getConcern1(),
+                requestDto.getConcern2(),
+                requestDto.getConcern3()));
     }
 
     //myInfo 페이지
@@ -255,11 +250,11 @@ public class MemberController {
     }
 
     // kakao login
-    @GetMapping("/api/kakaoLogin")
+    @GetMapping("/user/kakao/callback")
     public ResponseEntity<String> kakaoLogin(@RequestParam String code) throws JsonProcessingException {
         // authorizedCode: 카카오 서버로부터 받은 인가 코드
         kakaoService.kakaoLogin(code);
-        return ResponseEntity.ok("redirect:/login");
+        return ResponseEntity.ok("완료");
     }
 
     // OAuth 로그인을 해도 UserDetailsImpl
@@ -271,27 +266,39 @@ public class MemberController {
         return "user";
     }
 
-    // 나의 게시글
+    // 나의 게시글 -> 정보게시글
     @GetMapping("/api/mypost/information")
-    public ResponseEntity<MypostResponseDto> mypostinformation(@AuthenticationPrincipal UserDetailsImpl userDetails) {
-        return ResponseEntity.ok(memberService.mypostinformation(userDetails));
+    public ResponseEntity<MyPostInfoResponseDto> mypostinformation(@AuthenticationPrincipal UserDetailsImpl userDetails,
+                                                                   @RequestParam int page,
+                                                                   @RequestParam int amount) {
+        page -= 1;
+        return ResponseEntity.ok(memberService.mypostinformation(userDetails, page, amount));
     }
 
-    // 나의 게시글
+    // 나의 게시글 -> 매칭게시글
     @GetMapping("/api/mypost/matching")
-    public ResponseEntity<MypostResponseDto> mypostmatching(@AuthenticationPrincipal UserDetailsImpl userDetails) {
-        return ResponseEntity.ok(memberService.mypostmatching(userDetails));
+    public ResponseEntity<MypostResponseDto> mypostmatching(@AuthenticationPrincipal UserDetailsImpl userDetails,
+                                                            @RequestParam int page,
+                                                            @RequestParam int amount) {
+        page -= 1;
+        return ResponseEntity.ok(memberService.mypostmatching(userDetails, page, amount));
     }
 
-//     나의 게시글(신청글)
+    // 나의 게시글(신청글)
     @GetMapping("/api/myentry")
-    public ResponseEntity<MypostResponseDto> myentry(@AuthenticationPrincipal UserDetailsImpl userDetails) {
-        return ResponseEntity.ok(memberService.myentry(userDetails));
+    public ResponseEntity<MypostResponseDto> myentry(@AuthenticationPrincipal UserDetailsImpl userDetails,
+                                                     @RequestParam int page,
+                                                     @RequestParam int amount) {
+        page -= 1;
+        return ResponseEntity.ok(memberService.myentry(userDetails, page, amount));
     }
 
     // 나의 댓글
     @GetMapping("/api/mycomment")
-    public ResponseEntity<MypostCommentResponseDto> mycomment(@AuthenticationPrincipal UserDetailsImpl userDetails) {
-        return ResponseEntity.ok(memberService.mycomment(userDetails));
+    public ResponseEntity<MypostCommentResponseDto> mycomment(@AuthenticationPrincipal UserDetailsImpl userDetails,
+                                                              @RequestParam int page,
+                                                              @RequestParam int amount) {
+        page -= 1;
+        return ResponseEntity.ok(memberService.mycomment(userDetails, page, amount));
     }
 }
