@@ -1,6 +1,8 @@
 package com.project.uandmeet.repository;
 
 import com.project.uandmeet.model.*;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
@@ -14,5 +16,7 @@ public interface EntryRepository extends JpaRepository <Entry, Long> {
     Long countByMember(Member memberId);
     Long countByMemberAndCategory(Member memberId, Category category);
 
+    //    List<Entry> findByMember(Member userId);
     List<Entry> findByMember(Member userId);
+    Page<Entry> findByMember(Member userId, Pageable pageable);
 }
