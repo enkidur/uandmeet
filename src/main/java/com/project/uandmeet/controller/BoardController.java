@@ -1,8 +1,7 @@
 package com.project.uandmeet.controller;
 
-import com.project.uandmeet.dto.*;
+import com.project.uandmeet.dto.SearchResponseDto;
 import com.project.uandmeet.dto.boardDtoGroup.*;
-import com.project.uandmeet.dto.boardDtoGroup.LikeDto;
 import com.project.uandmeet.dto.commentsDtoGroup.CommentsInquiryDto;
 import com.project.uandmeet.dto.commentsDtoGroup.CommentsRequestDto;
 import com.project.uandmeet.exception.CustomException;
@@ -65,7 +64,7 @@ public class BoardController {
         } else
             return boardChoiceInquiry;
     }
-
+/*
     //매칭 게시물 상세 조회 (로그인 후 )
     @GetMapping("/api/boards/matching/login/{id}")
     private BoardResponseDto boardChoiceLoginInquiry(@PathVariable("id") Long id,
@@ -76,7 +75,7 @@ public class BoardController {
             throw new CustomException(ErrorCode.CAN_NOT_CREATE_ROOM);
         } else
             return boardChoiceLoginInquiry;
-    }
+    }*/
 
     //매칭 개시물 수정
     @PutMapping("/api/board/matching/{id}")
@@ -112,6 +111,7 @@ public class BoardController {
             return boardChoiceInfoInquiry;
     }
 
+/*
     //공유 게시물 상세 조회(로그인 후)
     @GetMapping("/api/boards/information/login/{id}")
     private BoardResponseDto boardChoiceInfoLoginInquiry(@PathVariable("id") Long id,
@@ -123,6 +123,7 @@ public class BoardController {
         } else
             return boardChoiceInfoLoginInquiry;
     }
+*/
 
     //공유 개시물 수정
     @PutMapping("/api/board/information/{id}")
@@ -142,15 +143,23 @@ public class BoardController {
 
     //좋아요 유무
     @PostMapping("/board/likes")
-    private ResponseEntity<Long> likeClick(@RequestBody LikeDto likeDto,
-                                           @AuthenticationPrincipal UserDetailsImpl userDetails) {
+    private ResponseEntity<LikeDto.response> likeClick(@RequestBody LikeDto.request likeDto,
+                                                       @AuthenticationPrincipal UserDetailsImpl userDetails) {
         return boardService.likeClick(likeDto, userDetails);
     }
 
+    @PostMapping("/board/statecheck/{id}")
+    private ResponseEntity<StateCheckDto> stateCheck(@PathVariable("id") Long id,
+                                                     @AuthenticationPrincipal UserDetailsImpl userDetails) {
+        return boardService.stateCheck(id,userDetails);
+    }
+
+
+
     //매칭참여
     @PostMapping("/board/matchingentry")
-    private ResponseEntity<Long> matchingJoin(@RequestBody EntryDto entryDto,
-                                              @AuthenticationPrincipal UserDetailsImpl userDetails) {
+    private ResponseEntity<EntryDto.response> matchingJoin(@RequestBody EntryDto.request entryDto,
+                                                  @AuthenticationPrincipal UserDetailsImpl userDetails) {
         return boardService.matchingJoin(entryDto, userDetails);
     }
 
@@ -192,23 +201,4 @@ public class BoardController {
         return searchResponseDto;
 
     }
-
-    // mainpage -> information
-    @GetMapping("/api/mainboards/information/{category}")
-    public ResponseEntity<List<MainPageDto>> maininformation(@PathVariable String category) {
-        return ResponseEntity.ok(boardService.maininformation(category));
-    }
-
-    // mainpage -> matching
-    @GetMapping("/api/mainboards/matching/{category}")
-    public ResponseEntity<List<MainPageMatchingDto>> mainmatching(@PathVariable String category) {
-        return ResponseEntity.ok(boardService.mainmatching(category));
-    }
-
-    //     나의 게시글(신청글, 참여글)
-    @GetMapping("/api/mainboards/myentry")
-    public ResponseEntity<List<MainPageEntryDto>> mainmyentry(@AuthenticationPrincipal UserDetailsImpl userDetails) {
-        return ResponseEntity.ok(boardService.mainmyentry(userDetails));
-    }
-
 }
