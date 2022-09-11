@@ -138,7 +138,7 @@ public class MemberController {
     // 8. 클라이언트는 새롭게 받은 Access Token 을 기존의 Access Token 에 덮어쓰게 된다.
     @GetMapping("/api/refresh")
     public ResponseEntity<Map<String, String>> refresh(HttpServletRequest request,
-                                                       HttpServletResponse response) {
+                                                       HttpServletResponse response) throws JsonProcessingException {
         Map<String, String> tokens = memberService.refresh(request, response);
         return ResponseEntity.ok(tokens);
     }
@@ -307,5 +307,11 @@ public class MemberController {
                                                               @RequestParam int amount) {
         page -= 1;
         return ResponseEntity.ok(memberService.mycommentmatching(userDetails, page, amount));
+    }
+
+    @GetMapping("/api/test")
+    public void token(HttpServletRequest request,
+                      HttpServletResponse response) throws JsonProcessingException {
+        memberService.token(request, response);
     }
 }

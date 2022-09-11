@@ -4,13 +4,12 @@ import com.auth0.jwt.JWT;
 import com.auth0.jwt.JWTVerifier;
 import com.auth0.jwt.algorithms.Algorithm;
 import com.auth0.jwt.interfaces.DecodedJWT;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.project.uandmeet.exception.CustomException;
 import com.project.uandmeet.exception.ErrorCode;
 import com.project.uandmeet.security.UserDetailsImpl;
-import io.jsonwebtoken.Claims;
-import io.jsonwebtoken.Jws;
-import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.SignatureAlgorithm;
+import io.jsonwebtoken.*;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -29,6 +28,7 @@ import javax.servlet.http.HttpServletResponse;
 import java.security.Key;
 import java.util.Base64;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.Optional;
 
 import static com.project.uandmeet.security.jwt.JwtProperties.*;
@@ -140,9 +140,29 @@ public class JwtTokenProvider {
 
     // 토큰에서 회원 정보 추출
     public String getUserPk(String jwtToken) {
-        return Jwts.parser().setSigningKey(secretKey).parseClaimsJws(setTokenName(jwtToken)).getBody().getSubject();
+//        try {
+            return Jwts.parser().setSigningKey(secretKey).parseClaimsJws(setTokenName(jwtToken)).getBody().getSubject();
+//        } catch (SecurityException e) {
+//            log.info("Invalid JWT signature.");
+//            throw new JwtException("잘못된 JWT 시그니처");
+//        } catch (MalformedJwtException e) {
+//            log.info("Invalid JWT token.");
+//            throw new JwtException("유효하지 않은 JWT 토큰");
+//        } catch (ExpiredJwtException e) {
+//            log.info("Expired JWT token.");
+//            throw new JwtException("토큰 기한 만료");
+//        } catch (UnsupportedJwtException e) {
+//            log.info("Unsupported JWT token.");
+//        } catch (IllegalArgumentException e) {
+//            log.info("JWT token compact of handler are invalid.");
+//            throw new JwtException("JWT token compact of handler are invalid.");
+//        }
+//        return null;
     }
 
+//    public String getUsername(String jwtToken) {
+//        return Jwts.parser().setSigningKey(secretKey).parseClaimsJws(setTokenName(jwtToken)).getBody().getSubject();
+//    }
     // JWT 토큰에서 인증 정보 조회
     public Authentication getAuthentication(String jwtToken) {
 //        UserDetailsImpl userDetailsImpl = new UserDetailsImpl()
@@ -165,10 +185,25 @@ public class JwtTokenProvider {
         try {
             Jws<Claims> claims = Jwts.parser().setSigningKey(secretKey).parseClaimsJws(setTokenName(jwtToken));
             return !claims.getBody().getExpiration().before(new Date());
-        } catch (Exception e) {
-            return false;
+        } catch (SecurityException e) {
+            log.info("Invalid JWT signature.");
+            throw new JwtException("잘못된 JWT 시그니처");
+        } catch (MalformedJwtException e) {
+            log.info("Invalid JWT token.");
+            throw new JwtException("유효하지 않은 JWT 토큰");
+        } catch (ExpiredJwtException e) {
+            log.info("Expired JWT token.");
+            throw new JwtException("토큰 기한 만료");
+        } catch (UnsupportedJwtException e) {
+            log.info("Unsupported JWT token.");
+        } catch (IllegalArgumentException e) {
+            log.info("JWT token compact of handler are invalid.");
+            throw new JwtException("JWT token compact of handler are invalid.");
         }
+        return false;
     }
+
+
 
     // 만료 기간 확인
     public Date ExpireTime(String token){
@@ -181,6 +216,14 @@ public class JwtTokenProvider {
         return bearerToken.replace(TOKEN_PREFIX, "");
     }
 
+    // 만료 accessToken 정보 추출
+    public String getExpiredAccessTokenPk(String token) throws JsonProcessingException {
+        String[] splitJwt = token.split("\\.");
+        Base64.Decoder decoder = Base64.getDecoder();
+        String payload = new String(decoder.decode(splitJwt[1].getBytes()));
+        HashMap<String, String> payloadMap = new ObjectMapper().readValue(payload, HashMap.class);
+        return payloadMap.get("sub");
+    }
 
 
 }

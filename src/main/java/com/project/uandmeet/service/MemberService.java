@@ -1,5 +1,7 @@
 package com.project.uandmeet.service;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.project.uandmeet.dto.*;
 import com.project.uandmeet.model.*;
 import com.project.uandmeet.redis.RedisUtil;
@@ -158,19 +160,19 @@ public class MemberService {
 //        jwtTokenProvider.createToken(username);
 //    }
 
-    public Map<String, String> refresh(HttpServletRequest request, HttpServletResponse response) {
+    public Map<String, String> refresh(HttpServletRequest request, HttpServletResponse response) throws JsonProcessingException {
 
         //AccessToken
         String expiredAccessTokenHeader = request.getHeader(JwtProperties.HEADER_ACCESS);
         String expiredAccessToken = jwtTokenProvider.setTokenName(expiredAccessTokenHeader); // barrer 제거
-
+        String expiredAccessTokenName = jwtTokenProvider.getExpiredAccessTokenPk(expiredAccessToken);
         // refreshToken
-        String authorizationHeader = redisUtil.getData(jwtTokenProvider.getUserPk(expiredAccessToken)+JwtProperties.HEADER_REFRESH);
+        String authorizationHeader = redisUtil.getData(expiredAccessTokenName + JwtProperties.HEADER_REFRESH);
 
         if (authorizationHeader == null || !authorizationHeader.startsWith(JwtProperties.TOKEN_PREFIX)) {
             throw new JwtException("Refresh Token이 존재하지 않습니다.");
         }
-        if (!redisUtil.getData(jwtTokenProvider.getUserPk(expiredAccessToken) + JwtProperties.HEADER_ACCESS).equals(expiredAccessTokenHeader)) {
+        if (!redisUtil.getData(expiredAccessTokenName + JwtProperties.HEADER_ACCESS).equals(expiredAccessTokenHeader)) {
             throw new JwtException("잘못된 JWT Token입니다.");
         }
 
@@ -693,5 +695,17 @@ public class MemberService {
 
     public void logout(UserDetailsImpl userDetails) {
         redisUtil.deleteData(userDetails.getUsername()+JwtProperties.HEADER_REFRESH);
+    }
+
+    public void token(HttpServletRequest request,
+                         HttpServletResponse response) throws JsonProcessingException {
+        String[] splitJwt = request.getHeader(JwtProperties.HEADER_ACCESS).split("\\.");
+        System.out.println(splitJwt[1]);
+        Base64.Decoder decoder = Base64.getDecoder();
+        String payload = new String(decoder.decode(splitJwt[1].getBytes()));
+        System.out.println(payload);
+        HashMap<String, String> payloadMap = new ObjectMapper().readValue(payload, HashMap.class);
+        String username = payloadMap.get("sub");
+        System.out.println(username);
     }
 }
