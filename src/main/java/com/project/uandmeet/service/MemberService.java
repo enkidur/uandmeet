@@ -1,6 +1,9 @@
 package com.project.uandmeet.service;
 
 import com.project.uandmeet.dto.*;
+import com.project.uandmeet.dto.boardDtoGroup.EntryDto;
+import com.project.uandmeet.exception.CustomException;
+import com.project.uandmeet.exception.ErrorCode;
 import com.project.uandmeet.model.*;
 import com.project.uandmeet.redis.RedisUtil;
 import com.project.uandmeet.repository.*;
@@ -14,6 +17,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -32,6 +36,7 @@ import java.util.stream.Collectors;
 public class MemberService {
     private final MemberRepository memberRepository;
     private final EntryRepository entryRepository;
+    private final LikedRepository likedRepository;
     private final ReviewRepository reviewRepository;
     private final BoardRepository boardRepository;
     private final CommentRepository commentRepository;
@@ -141,9 +146,36 @@ public class MemberService {
 
 
     // 회원 탈퇴
+    @Transactional
     public String withdraw(UserDetailsImpl userDetails, String password) {
         if (userDetails.getPassword().equals(passwordEncoder.encode(password))) {
             String username = userDetails.getUsername();
+
+            List<Entry> entries = entryRepository.findByMember(userDetails.getMember());
+            List<Liked> likeds = likedRepository.findByMember(userDetails.getMember());
+
+            //매칭 참여 했던 것들 지우기.
+            for(Entry entry : entries) {
+                Board board = boardRepository.findById(entry.getBoard().getId())
+                        .orElseGet(() -> null);
+
+                if (board != null) {
+                    board.setCurrentEntry(board.getCurrentEntry() - 1);
+                    boardRepository.save(board);
+                }
+            }
+
+            //좋아요 참여 했던 것들 지우기.
+            for(Entry entry : entries) {
+                Board board = boardRepository.findById(entry.getBoard().getId())
+                        .orElseGet(() -> null);
+
+                if (board != null) {
+                    board.setCurrentEntry(board.getCurrentEntry() - 1);
+                    boardRepository.save(board);
+                }
+            }
+
             memberRepository.deleteByUsername(username);
         }
         return "회원탈퇴 완료";
