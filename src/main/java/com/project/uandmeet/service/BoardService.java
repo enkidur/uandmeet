@@ -606,6 +606,40 @@ public class BoardService {
             return new CustomException(ErrorCode.INVALID_AUTHORITY);
         }
     }
+    @Transactional
+    public ResponseEntity<StateCheckDto> stateCheck(Long id, UserDetailsImpl userDetails) {
+
+        //로그인 유저 정보.
+        Member member = memberRepostiory.findById(userDetails.getMember().getId())
+                .orElseThrow(() -> new CustomException(ErrorCode.EMPTY_CONTENT));
+
+        Board board = boardRepository.findById(id)
+                .orElseThrow(() -> new CustomException(ErrorCode.EMPTY_CONTENT));
+        Boolean matchingState = false;
+        Boolean likeState =false;
+        Liked liked = null;
+        Entry entry = null;
+        StateCheckDto stateCheckDto = null;
+
+
+        if(board.getBoardType().equals("matching")){
+            liked = likedRepository.findByBoardAndMember(board,member)
+                    .orElseGet(()-> null);
+            entry = entryRepository.findByMemberAndBoard(member,board)
+                    .orElseGet(()-> null);
+        }
+        else
+            entry = entryRepository.findByMemberAndBoard(member,board)
+                    .orElseGet(()-> null);
+
+        if(liked != null)
+            likeState =liked.getIsLike();
+        if(entry != null)
+            matchingState = entry.isMatching();
+
+        stateCheckDto = new StateCheckDto(board.getBoardType(),matchingState,likeState);
+        return ResponseEntity.ok(stateCheckDto);
+    }
 
     public List<MainPageDto> maininformation(String category) {
         List<MainPageDto> temp = new ArrayList<>();
