@@ -29,7 +29,7 @@ public class Liked {
     @JoinColumn(name = "board_id")
     private Board board;
 
-    public Liked(LikeDto.request likeDto, Member memberTemp, Board board) {
+    public Liked(LikeDto likeDto, Member memberTemp, Board board) {
         this.member = memberTemp;
         this.board = board;
         this.isLike = likeDto.getIsLike();

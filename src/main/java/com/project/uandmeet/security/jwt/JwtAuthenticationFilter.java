@@ -78,6 +78,7 @@ public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilte
         // Tip: 인증 프로바이더의 디폴트 암호화 방식은 BCryptPasswordEncoder
         // 결론은 인증 프로바이더에게 알려줄 필요가 없음.
 
+
         // 2. 정상인지 AuthenticationManager 로 login 시도하여 PrincipalDetailsService 호출되어 loadUserByUsername 메서드 실행
         // 값이 정상이라면 authentication 리턴 -> db 의 username, password 와 일치
         // Authentication 에는 user 의 login 정보가 담김
