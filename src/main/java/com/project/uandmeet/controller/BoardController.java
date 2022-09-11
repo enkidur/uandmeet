@@ -155,7 +155,7 @@ public class BoardController {
     }
 
     //댓글작성
-    @PostMapping("/api/board/{id}/comments")
+        @PostMapping("/api/board/{id}/comments")
     private ResponseEntity<CommentsInquiryDto> commentsNew(@PathVariable("id") Long id,
                                                            @RequestBody CommentsRequestDto commentsRequestDto,
                                                            @AuthenticationPrincipal UserDetailsImpl userDetails) {

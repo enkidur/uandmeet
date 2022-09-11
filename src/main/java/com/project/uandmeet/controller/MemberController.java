@@ -185,9 +185,7 @@ public class MemberController {
     public ResponseEntity<MypageDto> concernedit(@AuthenticationPrincipal UserDetailsImpl userDetails,
                                                  @RequestBody ConcernDto requestDto) {
         return ResponseEntity.ok(memberService.concernedit(userDetails,
-                requestDto.getConcern1(),
-                requestDto.getConcern2(),
-                requestDto.getConcern3()));
+                requestDto.getConcerns()));
     }
 
     //myInfo 페이지
