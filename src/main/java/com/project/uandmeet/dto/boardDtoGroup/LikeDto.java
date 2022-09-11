@@ -1,16 +1,27 @@
 package com.project.uandmeet.dto.boardDtoGroup;
 
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 
-@Getter
-@Setter
-@AllArgsConstructor
-@NoArgsConstructor
+
 public class LikeDto {
-     private String boardType;
-     private Long boardId;
-     private Boolean isLike;
+
+     @ToString
+     @Getter
+     @Setter
+     @AllArgsConstructor
+     @NoArgsConstructor
+     public static class request {
+          private String boardType;
+          private Long boardId;
+          private Boolean isLike;
+     }
+
+     @ToString
+     @Getter
+     @Setter
+     @NoArgsConstructor
+     @AllArgsConstructor
+     public static class response {
+          private Long likeCount;
+     }
 }
