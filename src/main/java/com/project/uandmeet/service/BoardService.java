@@ -101,7 +101,7 @@ public class BoardService {
         else if (page <= 0)
             page = 0;
 
-        Sort sort = Sort.by("createdAt").ascending();
+        Sort sort = Sort.by("createdAt").descending();
         PageRequest pageRequest = PageRequest.of(page, amount, sort);
         Page<Board> boardPage;
         Category category = null;
@@ -183,7 +183,7 @@ public class BoardService {
         } else return null;
     }
 
-    //매칭 게시물 상세 조회 (로그인 후 )
+ /*   //매칭 게시물 상세 조회 (로그인 후 )
     @Transactional
     public BoardResponseDto boardChoiceLoginInquiry(Long id, UserDetailsImpl userDetails) {
 
@@ -210,7 +210,7 @@ public class BoardService {
 
         } else return null;
     }
-
+*/
 
     //게시물 삭제.
     @Transactional
@@ -501,7 +501,7 @@ public class BoardService {
         else if (page <= 0)
             page = 0;
 
-        Sort sortInfo = Sort.by("createdAt").ascending();
+        Sort sortInfo = Sort.by("createdAt").descending();
         PageRequest pageRequest = PageRequest.of(page, amount, sortInfo);
         Page<Board> boardPage;
         Category category = null;
@@ -556,7 +556,7 @@ public class BoardService {
         } else return null;
     }
 
-    //공유 게시물 상세 조회 (로그인 후)
+/*    //공유 게시물 상세 조회 (로그인 후)
     @Transactional
     public BoardResponseDto boardChoiceInfoLoginInquiry(Long id, UserDetailsImpl userDetails) {
 
@@ -583,7 +583,7 @@ public class BoardService {
             boardResponseDto = new BoardResponseDto(memberSimpleDto, boards, liked);
             return boardResponseDto;
         } else return null;
-    }
+    }*/
 
     //공유 게시물 수정
     @Transactional

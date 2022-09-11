@@ -66,7 +66,7 @@ public class BoardController {
             return boardChoiceInquiry;
     }
 
-    //매칭 게시물 상세 조회 (로그인 후 )
+/*    //매칭 게시물 상세 조회 (로그인 후 )
     @GetMapping("/api/boards/matching/login/{id}")
     private BoardResponseDto boardChoiceLoginInquiry(@PathVariable("id") Long id,
                                                      @AuthenticationPrincipal UserDetailsImpl userDetails) {
@@ -76,7 +76,7 @@ public class BoardController {
             throw new CustomException(ErrorCode.CAN_NOT_CREATE_ROOM);
         } else
             return boardChoiceLoginInquiry;
-    }
+    }*/
 
     //매칭 개시물 수정
     @PutMapping("/api/board/matching/{id}")
@@ -112,7 +112,7 @@ public class BoardController {
             return boardChoiceInfoInquiry;
     }
 
-    //공유 게시물 상세 조회(로그인 후)
+/*    //공유 게시물 상세 조회(로그인 후)
     @GetMapping("/api/boards/information/login/{id}")
     private BoardResponseDto boardChoiceInfoLoginInquiry(@PathVariable("id") Long id,
                                                          @AuthenticationPrincipal UserDetailsImpl userDetails) {
@@ -122,7 +122,7 @@ public class BoardController {
             throw new CustomException(ErrorCode.CAN_NOT_CREATE_ROOM);
         } else
             return boardChoiceInfoLoginInquiry;
-    }
+    }*/
 
 
     //공유 개시물 수정
