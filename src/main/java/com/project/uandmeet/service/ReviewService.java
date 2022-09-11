@@ -37,7 +37,7 @@ public class ReviewService {
         Board board = boardRepository.findById(requestDto.getBoardId()).orElseThrow(
                 () -> new RuntimeException("찾을 수 없는 게시글입니다.")
         );
-        Review review = new Review(board, from, board.getMember(), requestDto.getNum(), requestDto.getScore() ,requestDto.getReview());
+        Review review = new Review(board, from.getId(), board.getMember(), requestDto.getNum(), requestDto.getScore() ,requestDto.getReview());
         reviewRepository.save(review);
         return new ReviewDto(board.getId(),
                 from.getId(),

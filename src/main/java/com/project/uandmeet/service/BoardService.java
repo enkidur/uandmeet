@@ -80,6 +80,7 @@ public class BoardService {
         } else {
             Board board = new Board(memberTemp, category, siarea, guarea, boardRequestDto);
 
+            System.out.println(board);
             try {
                 boardRepository.save(board);
                 responseEntity = ResponseEntity.ok(board.getId());
@@ -619,14 +620,6 @@ public class BoardService {
                         main.getMember().getNickname());
                 temp.add(mainPageDto);
             }
-            if (temp.size() < 5) {
-                mainPage.addAll(temp);
-            } else {
-                for (int i = 0; i < 4; i++) {
-                    mainPage.add(temp.get(i));
-                }
-            }
-            return mainPage;
         } else {
             Category mainCategory = categoryRepository.findAllByCategory(category).orElseThrow(
                     () -> new RuntimeException("찾을 수 없는 카테고리입니다.")
@@ -639,15 +632,15 @@ public class BoardService {
                         main.getMember().getNickname());
                 temp.add(mainPageDto);
             }
-            if (temp.size() < 5) {
-                mainPage.addAll(temp);
-            } else {
-                for (int i = 0; i < 4; i++) {
-                    mainPage.add(temp.get(i));
-                }
-            }
-            return mainPage;
         }
+        if (temp.size() < 5) {
+            mainPage.addAll(temp);
+        } else {
+            for (int i = 0; i < 4; i++) {
+                mainPage.add(temp.get(i));
+            }
+        }
+        return mainPage;
     }
 
     public List<MainPageMatchingDto> mainmatching(String category) {
@@ -666,14 +659,6 @@ public class BoardService {
                         main.getMaxEntry());
                 temp.add(mainPageDto);
             }
-            if (temp.size() < 5) { // Page or Slice 로 해결가능
-                mainPage.addAll(temp);
-            } else {
-                for (int i = 0; i < 4; i++) {
-                    mainPage.add(temp.get(i));
-                }
-            }
-            return mainPage;
         } else {
             Category mainCategory = categoryRepository.findAllByCategory(category).orElseThrow(
                     () -> new RuntimeException("찾을 수 없는 카테고리입니다.")
@@ -690,15 +675,15 @@ public class BoardService {
                         main.getMaxEntry());
                 temp.add(mainPageDto);
             }
-            if (temp.size() < 5) {
-                mainPage.addAll(temp);
-            } else {
-                for (int i = 0; i < 4; i++) {
-                    mainPage.add(temp.get(i));
-                }
-            }
-            return mainPage;
         }
+        if (temp.size() < 5) { // Page or Slice 로 해결가능
+            mainPage.addAll(temp);
+        } else {
+            for (int i = 0; i < 4; i++) {
+                mainPage.add(temp.get(i));
+            }
+        }
+        return mainPage;
     }
 
 
@@ -741,7 +726,7 @@ public class BoardService {
         if (temp.size() < 5) {
             boardInfo.addAll(temp);
         } else {
-            for (int i =0; i < 4; i++) {
+            for (int i = 0; i < 4; i++) {
                 boardInfo.add(temp.get(i));
             }
         }

@@ -1,5 +1,6 @@
 package com.project.uandmeet.security.jwt;
 
+import com.project.uandmeet.exception.ErrorCode;
 import io.jsonwebtoken.JwtException;
 import org.springframework.http.HttpStatus;
 //import org.springframework.security.oauth2.jwt.JwtException;
@@ -22,9 +23,9 @@ public class JwtExceptionFilter extends GenericFilterBean {
         try {
             chain.doFilter(request, response); // go to JwtAuthenticationFilter
         } catch (JwtException e) {
-            setErrorResponse(HttpStatus.OK, response, e);
-        } catch (NoSuchElementException e) {
-            setErrorResponse(HttpStatus.BAD_REQUEST, response, e);
+//            setErrorResponse(HttpStatus.OK, response, e);
+//        } catch (NoSuchElementException e) {
+            setErrorResponse(HttpStatus.UNAUTHORIZED, response, e);
         }
     }
 
@@ -32,7 +33,7 @@ public class JwtExceptionFilter extends GenericFilterBean {
         ((HttpServletResponse)response).setStatus(status.value());
         response.setContentType("application/json; charset=UTF-8");
 
-        JwtExceptionResponse jwtExceptionResponse = new JwtExceptionResponse(false, e.getMessage());
+        JwtExceptionResponse jwtExceptionResponse = new JwtExceptionResponse(401,HttpStatus.UNAUTHORIZED ,ErrorCode.INVALID_AUTH_TOKEN, e.getMessage());
         response.getWriter().write(jwtExceptionResponse.convertToJson());
     }
 }

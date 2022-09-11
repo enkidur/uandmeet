@@ -8,6 +8,7 @@ import com.project.uandmeet.security.UserDetailsImpl;
 import com.project.uandmeet.security.jwt.JwtProperties;
 import com.project.uandmeet.security.jwt.JwtTokenProvider;
 import com.project.uandmeet.service.S3.S3Uploader;
+import io.jsonwebtoken.JwtException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -21,6 +22,7 @@ import org.springframework.transaction.annotation.Transactional;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -103,11 +105,11 @@ public class MemberService {
         return "password check 완료";
     }
 
-    public String signup(MemberRequestDto requestDto) throws IOException {
+    public String signup(MemberRequestDto requestDto) {
         String username = requestDto.getUsername();
         String[] emailadress = username.split("@");
         String id = emailadress[0];
-        String uuid = UUID.randomUUID().toString().substring(0, 3);
+        String uuid = UUID.randomUUID().toString().substring(0, 5);
         String uniqueId = id + uuid;
         // 이메일 패턴 체크
         checkEmail(username);
@@ -166,10 +168,10 @@ public class MemberService {
         String authorizationHeader = redisUtil.getData(jwtTokenProvider.getUserPk(expiredAccessToken)+JwtProperties.HEADER_REFRESH);
 
         if (authorizationHeader == null || !authorizationHeader.startsWith(JwtProperties.TOKEN_PREFIX)) {
-            throw new RuntimeException("Refresh Token이 존재하지 않습니다.");
+            throw new JwtException("Refresh Token이 존재하지 않습니다.");
         }
         if (!redisUtil.getData(jwtTokenProvider.getUserPk(expiredAccessToken) + JwtProperties.HEADER_ACCESS).equals(expiredAccessTokenHeader)) {
-            throw new RuntimeException("잘못된 JWT Token입니다.");
+            throw new JwtException("잘못된 JWT Token입니다.");
         }
 
         // Refresh Token 유효성 검사
@@ -300,10 +302,7 @@ public class MemberService {
 
 
     // 활동내역 -> 관심사 수정
-    public MypageDto concernedit(UserDetailsImpl userDetails,
-                                 String concern1,
-                                 String concern2,
-                                 String concern3) {
+    public MypageDto concernedit(UserDetailsImpl userDetails, String[] concerns) {
         Long userId = userDetails.getMember().getId();
         Member member = memberRepository.findById(userId).orElseThrow(
                 () -> new RuntimeException("수정 권한이 없습니다.")
@@ -312,9 +311,14 @@ public class MemberService {
         Long cnt = entryRepository.countByMember(member); // 참여한 매칭 수
         String nickname = member.getNickname(); // 고민중
         List<String> concern = new ArrayList<>(); // 초기화
-        concern.add(concern1);
-        concern.add(concern2);
-        concern.add(concern3);
+        int idx = 0;
+        for(String e : concerns) {
+            if(idx > 2) {
+                break;
+            }
+            concern.add(e);
+            idx++;
+        }
         member.setConcern(concern);
         Map<String, Long> joinCnt = new HashMap<>();
         for (int i = 0; i < cnt; i++) {
@@ -383,8 +387,8 @@ public class MemberService {
                 () -> new RuntimeException("볼 수 없는 정보입니다")
         );
         String gender = requestDto.getGender();
-        Map<String, Long> birth = member.getBirth();
         member.setGender(gender);
+        Map<String, Long> birth = member.getBirth();
         MyPageInfoDto myPageInfoDto = new MyPageInfoDto(username, gender, birth);
         return myPageInfoDto;
     }
@@ -417,9 +421,9 @@ public class MemberService {
         String nickname = member.getNickname();
         Double sum = 0D;
         for (int i = 0; i < review.size(); i++) {
-            sum += review.get(i).getTo().getStar().get(i).getStar();
+            sum += review.get(i).getEvaluation_items();
         }
-        Double star = sum/review.size();
+        Double star = sum/review.size(); // 평균 별점
         String profile = member.getProfile();
         ProfileDto profileDto = new ProfileDto(nickname, star, profile);
         return profileDto;
@@ -435,7 +439,7 @@ public class MemberService {
         String nickname = member.getNickname();
         Double sum = 0D;
         for (int i = 0; i < review.size(); i++) {
-            sum += review.get(i).getTo().getStar().get(i).getStar();
+            sum += review.get(i).getEvaluation_items();
         }
         Double star = sum/review.size();
         if (requestDto.getData() != null) {
@@ -504,7 +508,7 @@ public class MemberService {
 
     public MyPostInfoResponseDto mypostinformation(UserDetailsImpl userDetails, int page, int amount) {
         // page 함수
-        Sort.Direction direction = Sort.Direction.ASC;
+        Sort.Direction direction = Sort.Direction.DESC;
         String sortby ="createdAt";
         Sort sort = Sort.by(direction, sortby);
         Pageable pageable = PageRequest.of(page, amount, sort);
@@ -539,7 +543,7 @@ public class MemberService {
 
     public MypostResponseDto mypostmatching(UserDetailsImpl userDetails, int page, int amount) {
         // page 함수
-        Sort.Direction direction = Sort.Direction.ASC;
+        Sort.Direction direction = Sort.Direction.DESC;
         String sortby ="createdAt";
         Sort sort = Sort.by(direction, sortby);
         Pageable pageable = PageRequest.of(page, amount, sort);
@@ -580,7 +584,7 @@ public class MemberService {
 
     public MypostResponseDto myentry(UserDetailsImpl userDetails, int page, int amount) {
         // page 함수
-        Sort.Direction direction = Sort.Direction.ASC;
+        Sort.Direction direction = Sort.Direction.DESC;
         String sortby ="createdAt";
         Sort sort = Sort.by(direction, sortby);
         Pageable pageable = PageRequest.of(page, amount, sort);
@@ -619,9 +623,9 @@ public class MemberService {
         return new MypostResponseDto(totalCount, boardInfo);
     }
 
-    public MypostCommentResponseDto mycomment(UserDetailsImpl userDetails, int page, int amount) {
+    public MypostCommentResponseDto mycommentinformation(UserDetailsImpl userDetails, int page, int amount) {
         // page 함수
-        Sort.Direction direction = Sort.Direction.ASC;
+        Sort.Direction direction = Sort.Direction.DESC;
         String sortby ="createdAt";
         Sort sort = Sort.by(direction, sortby);
         Pageable pageable = PageRequest.of(page, amount, sort);
@@ -631,22 +635,56 @@ public class MemberService {
         );
         List<MyCommentResponseDto> commentList = new ArrayList<>();
 //        List<Comment> comments = commentRepository.findAllByMember(member);
-        Page<Comment> comments = commentRepository.findAllByMember(member, pageable);
+        Page<Comment> comments = commentRepository.findAllByMemberAndBoardType(member, "information",pageable);
         for (Comment comment : comments){
             MyListMemberResponseDto myListMemberResponseDto = new MyListMemberResponseDto(comment.getMember().getUsername(),
                     comment.getMember().getNickname(),
                     comment.getMember().getProfile());
-            MyCommentResponseDto responseDto = new MyCommentResponseDto(comment.getId(),
+            MyCommentResponseDto responseDto = new MyCommentResponseDto(
+                    comment.getId(),
+                    comment.getBoard().getTitle(),
                     comment.getBoard().getId(),
-                    comment.getCreatedAt(),
+                    comment.getCreatedAt().format(DateTimeFormatter.ofPattern("yyyy/MM/dd HH:mm")),
                     comment.getComment(),
                     comment.getBoardType(),
                     myListMemberResponseDto);
             commentList.add(responseDto);
         }
-        Long totalCount = commentRepository.countByMember(member);
-        return new MypostCommentResponseDto(totalCount, commentList);
+        Long informationCount = commentRepository.countByMemberAndBoardType(member, "information");
+        return new MypostCommentResponseDto(informationCount, commentList);
     }
+
+    public MypostCommentResponseDto mycommentmatching(UserDetailsImpl userDetails, int page, int amount) {
+        // page 함수
+        Sort.Direction direction = Sort.Direction.DESC;
+        String sortby ="createdAt";
+        Sort sort = Sort.by(direction, sortby);
+        Pageable pageable = PageRequest.of(page, amount, sort);
+
+        Member member = memberRepository.findById(userDetails.getMember().getId()).orElseThrow(
+                () -> new RuntimeException("찾을 수 없는 사용자입니다.")
+        );
+        List<MyCommentResponseDto> commentList = new ArrayList<>();
+//        List<Comment> comments = commentRepository.findAllByMember(member);
+        Page<Comment> comments = commentRepository.findAllByMemberAndBoardType(member, "matching",pageable);
+        for (Comment comment : comments){
+            MyListMemberResponseDto myListMemberResponseDto = new MyListMemberResponseDto(comment.getMember().getUsername(),
+                    comment.getMember().getNickname(),
+                    comment.getMember().getProfile());
+            MyCommentResponseDto responseDto = new MyCommentResponseDto(
+                    comment.getId(),
+                    comment.getBoard().getTitle(),
+                    comment.getBoard().getId(),
+                    comment.getCreatedAt().format(DateTimeFormatter.ofPattern("yyyy/MM/dd HH:mm")),
+                    comment.getComment(),
+                    comment.getBoardType(),
+                    myListMemberResponseDto);
+            commentList.add(responseDto);
+        }
+        Long matchingCount = commentRepository.countByMemberAndBoardType(member, "matching");
+        return new MypostCommentResponseDto(matchingCount, commentList);
+    }
+
 
     // 유저의 닉네임으로 유저 조회
     public Member getMember(String nickname) {
