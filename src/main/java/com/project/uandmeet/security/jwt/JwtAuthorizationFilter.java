@@ -5,6 +5,7 @@ import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+
 import com.project.uandmeet.redis.RedisUtil;
 import io.jsonwebtoken.JwtException;
 import lombok.extern.slf4j.Slf4j;
@@ -58,9 +59,8 @@ public class JwtAuthorizationFilter extends BasicAuthenticationFilter {
             // 토큰이 유효하면 토큰으로부터 유저 정보를 받아와서 저장
             Authentication authentication = jwtTokenProvider.getAuthentication(token);
             SecurityContextHolder.getContext().setAuthentication(authentication);
-        }
-        else if(token != null && !jwtTokenProvider.validateToken(token)){
-                throw new JwtException("access token 이 만료 되었습니다.");
+        } else if (token != null && !jwtTokenProvider.validateToken(token)) {
+            throw new JwtException("access token 이 만료 되었습니다.");
         }
         chain.doFilter(request, response);
     }

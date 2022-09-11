@@ -7,10 +7,7 @@ import com.auth0.jwt.interfaces.DecodedJWT;
 import com.project.uandmeet.exception.CustomException;
 import com.project.uandmeet.exception.ErrorCode;
 import com.project.uandmeet.security.UserDetailsImpl;
-import io.jsonwebtoken.Claims;
-import io.jsonwebtoken.Jws;
-import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.SignatureAlgorithm;
+import io.jsonwebtoken.*;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -165,10 +162,28 @@ public class JwtTokenProvider {
         try {
             Jws<Claims> claims = Jwts.parser().setSigningKey(secretKey).parseClaimsJws(setTokenName(jwtToken));
             return !claims.getBody().getExpiration().before(new Date());
-        } catch (Exception e) {
-            return false;
+//        } catch (Exception e) {
+//            return false;
+//        }
+        } catch (SecurityException e) {
+            log.info("Invalid JWT signature.");
+            throw new JwtException("잘못된 JWT 시그니처");
+        } catch (MalformedJwtException e) {
+            log.info("Invalid JWT token.");
+            throw new JwtException("유효하지 않은 JWT 토큰");
+        } catch (ExpiredJwtException e) {
+            log.info("Expired JWT token.");
+            throw new JwtException("토큰 기한 만료");
+        } catch (UnsupportedJwtException e) {
+            log.info("Unsupported JWT token.");
+        } catch (IllegalArgumentException e) {
+            log.info("JWT token compact of handler are invalid.");
+            throw new JwtException("JWT token compact of handler are invalid.");
         }
+        return false;
     }
+
+
 
     // 만료 기간 확인
     public Date ExpireTime(String token){
