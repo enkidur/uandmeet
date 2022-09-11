@@ -30,7 +30,6 @@ public class KakaoService {
 
     private final MemberRepository memberRepository;
     private final BCryptPasswordEncoder passwordEncoder;
-    private final MemberService memberService;
     private final JwtTokenProvider jwtTokenProvider;
     private final RedisUtil redisUtil;
 

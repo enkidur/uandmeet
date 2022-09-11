@@ -1,6 +1,10 @@
 package com.project.uandmeet.service;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.project.uandmeet.dto.*;
+import com.project.uandmeet.exception.CustomException;
+import com.project.uandmeet.exception.ErrorCode;
 import com.project.uandmeet.model.*;
 import com.project.uandmeet.redis.RedisUtil;
 import com.project.uandmeet.repository.*;
@@ -158,20 +162,25 @@ public class MemberService {
 //        jwtTokenProvider.createToken(username);
 //    }
 
-    public Map<String, String> refresh(HttpServletRequest request, HttpServletResponse response) {
+    public String refresh(HttpServletRequest request, HttpServletResponse response) throws JsonProcessingException {
 
         //AccessToken
         String expiredAccessTokenHeader = request.getHeader(JwtProperties.HEADER_ACCESS);
-        String expiredAccessToken = jwtTokenProvider.setTokenName(expiredAccessTokenHeader); // barrer 제거
-
-        // refreshToken
-        String authorizationHeader = redisUtil.getData(jwtTokenProvider.getUserPk(expiredAccessToken)+JwtProperties.HEADER_REFRESH);
-
-        if (authorizationHeader == null || !authorizationHeader.startsWith(JwtProperties.TOKEN_PREFIX)) {
-            throw new JwtException("Refresh Token이 존재하지 않습니다.");
+//        String expiredAccessToken = jwtTokenProvider.setTokenName(expiredAccessTokenHeader); // barrer 제거
+        if (expiredAccessTokenHeader == null || !expiredAccessTokenHeader.startsWith(JwtProperties.TOKEN_PREFIX)) {
+            throw new CustomException(ErrorCode.EMPTY_CONTENT);
         }
-        if (!redisUtil.getData(jwtTokenProvider.getUserPk(expiredAccessToken) + JwtProperties.HEADER_ACCESS).equals(expiredAccessTokenHeader)) {
-            throw new JwtException("잘못된 JWT Token입니다.");
+        String expiredAccessTokenName = jwtTokenProvider.getExpiredAccessTokenPk(expiredAccessTokenHeader);
+        // refreshToken
+        String authorizationHeader = redisUtil.getData(expiredAccessTokenName + JwtProperties.HEADER_REFRESH);
+
+//        if (authorizationHeader == null || !authorizationHeader.startsWith(JwtProperties.TOKEN_PREFIX)) {
+////            throw new JwtException("Refresh Token이 존재하지 않습니다.");
+//            throw new CustomException(ErrorCode.EMPTY_CONTENT);
+//        }
+        if (!redisUtil.getData(expiredAccessTokenName + JwtProperties.HEADER_ACCESS).equals(expiredAccessTokenHeader)) {
+//            throw new JwtException("잘못된 JWT Token입니다.");
+            throw new CustomException(ErrorCode.INVALID_TOKEN);
         }
 
         // Refresh Token 유효성 검사
@@ -184,7 +193,7 @@ public class MemberService {
         // Access Token 재발급
         String accessToken = jwtTokenProvider.createToken(username, userId);
 
-        Map<String, String> accessTokenResponseMap = new HashMap<>();
+//        Map<String, String> accessTokenResponseMap = new HashMap<>();
 
         // 현재시간과 Refresh Token 만료날짜를 통해 남은 만료기간 계산 (만료기간 전 재발급이 필요없다면 삭제)
         // Refresh Token 만료시간 계산해 특정 시간 미만일 시 refresh token 도 재발급
@@ -192,18 +201,18 @@ public class MemberService {
         Date refreshExpireTime = jwtTokenProvider.ExpireTime(authorizationHeader);
         if (refreshExpireTime.before(new Date(now.getTime() + 1000 * 60 * 60 * 24L))) { // refresh token 만료시간이 특정시간보다 작으면 재발급
             String newRefreshToken = jwtTokenProvider.createRefreshToken(username);
-            accessTokenResponseMap.put(JwtProperties.HEADER_REFRESH, JwtProperties.TOKEN_PREFIX + newRefreshToken);
-            redisUtil.setDataExpire(jwtTokenProvider.getUserPk(accessToken) + JwtProperties.HEADER_ACCESS, accessToken, JwtProperties.ACCESS_EXPIRATION_TIME);
-            redisUtil.setDataExpire(jwtTokenProvider.getUserPk(accessToken) + JwtProperties.HEADER_REFRESH, newRefreshToken, JwtProperties.REFRESH_EXPIRATION_TIME);
+//            accessTokenResponseMap.put(JwtProperties.HEADER_REFRESH, JwtProperties.TOKEN_PREFIX + newRefreshToken);
+            redisUtil.setDataExpire(jwtTokenProvider.getUserPk(accessToken) + JwtProperties.HEADER_ACCESS, JwtProperties.TOKEN_PREFIX + accessToken, JwtProperties.ACCESS_EXPIRATION_TIME);
+            redisUtil.setDataExpire(jwtTokenProvider.getUserPk(accessToken) + JwtProperties.HEADER_REFRESH, JwtProperties.TOKEN_PREFIX + newRefreshToken, JwtProperties.REFRESH_EXPIRATION_TIME);
         }
 
-        accessTokenResponseMap.put(JwtProperties.HEADER_ACCESS, JwtProperties.TOKEN_PREFIX + accessToken);
-        Map<String, String> tokens = accessTokenResponseMap;
-        response.setHeader(JwtProperties.HEADER_ACCESS, tokens.get(JwtProperties.HEADER_ACCESS));
+//        accessTokenResponseMap.put(JwtProperties.HEADER_ACCESS, JwtProperties.TOKEN_PREFIX + accessToken);
+//        Map<String, String> tokens = accessTokenResponseMap;
+        response.setHeader(JwtProperties.HEADER_ACCESS, JwtProperties.TOKEN_PREFIX + accessToken);
 //        if (tokens.get(JwtProperties.HEADER_REFRESH) != null) {
 //            response.setHeader(JwtProperties.HEADER_REFRESH, tokens.get(JwtProperties.HEADER_REFRESH));
 //        }
-        return tokens;
+        return "재발급 성공";
     }
 
     public String findpassword(String username) {
@@ -694,4 +703,5 @@ public class MemberService {
     public void logout(UserDetailsImpl userDetails) {
         redisUtil.deleteData(userDetails.getUsername()+JwtProperties.HEADER_REFRESH);
     }
+
 }

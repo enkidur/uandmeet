@@ -137,10 +137,9 @@ public class MemberController {
     // 7. 서버는 Refresh Token 유효성 체크를 하게 되고, 새로운 Access Token 을 발급한다.
     // 8. 클라이언트는 새롭게 받은 Access Token 을 기존의 Access Token 에 덮어쓰게 된다.
     @GetMapping("/api/refresh")
-    public ResponseEntity<Map<String, String>> refresh(HttpServletRequest request,
-                                                       HttpServletResponse response) {
-        Map<String, String> tokens = memberService.refresh(request, response);
-        return ResponseEntity.ok(tokens);
+    public ResponseEntity<String> refresh(HttpServletRequest request,
+                                                       HttpServletResponse response) throws JsonProcessingException {
+        return ResponseEntity.ok(memberService.refresh(request, response));
     }
 
     //  password 찾기 1. password 찾기 -> 인증번호 발송
@@ -308,4 +307,5 @@ public class MemberController {
         page -= 1;
         return ResponseEntity.ok(memberService.mycommentmatching(userDetails, page, amount));
     }
+
 }
