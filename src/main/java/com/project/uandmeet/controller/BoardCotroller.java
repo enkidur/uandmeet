@@ -64,7 +64,7 @@ public class BoardCotroller {
         } else
             return boardChoiceInquiry;
     }
-
+/*
     //매칭 게시물 상세 조회 (로그인 후 )
     @GetMapping("/api/boards/matching/login/{id}")
     private BoardResponseDto boardChoiceLoginInquiry(@PathVariable("id") Long id,
@@ -75,7 +75,7 @@ public class BoardCotroller {
             throw new CustomException(ErrorCode.CAN_NOT_CREATE_ROOM);
         } else
             return boardChoiceLoginInquiry;
-    }
+    }*/
 
     //매칭 개시물 수정
     @PutMapping("/api/board/matching/{id}")
@@ -111,6 +111,7 @@ public class BoardCotroller {
             return boardChoiceInfoInquiry;
     }
 
+/*
     //공유 게시물 상세 조회(로그인 후)
     @GetMapping("/api/boards/information/login/{id}")
     private BoardResponseDto boardChoiceInfoLoginInquiry(@PathVariable("id") Long id,
@@ -122,6 +123,7 @@ public class BoardCotroller {
         } else
             return boardChoiceInfoLoginInquiry;
     }
+*/
 
     //공유 개시물 수정
     @PutMapping("/api/board/information/{id}")
@@ -145,6 +147,14 @@ public class BoardCotroller {
                                                        @AuthenticationPrincipal UserDetailsImpl userDetails) {
         return boardService.likeClick(likeDto, userDetails);
     }
+
+    @PostMapping("/board/statecheck/{id}")
+    private ResponseEntity<StateCheckDto> stateCheck(@PathVariable("id") Long id,
+                                                     @AuthenticationPrincipal UserDetailsImpl userDetails) {
+        return boardService.stateCheck(id,userDetails);
+    }
+
+
 
     //매칭참여
     @PostMapping("/board/matchingentry")

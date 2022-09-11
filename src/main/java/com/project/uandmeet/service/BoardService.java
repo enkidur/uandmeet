@@ -24,6 +24,7 @@ import org.springframework.web.server.ResponseStatusException;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor //생성자 미리 생성.
@@ -184,7 +185,7 @@ public class BoardService {
         } else return null;
     }
 
-    //매칭 게시물 상세 조회 (로그인 후 )
+ /*   //매칭 게시물 상세 조회 (로그인 후 )
     @Transactional
     public BoardResponseDto boardChoiceLoginInquiry(Long id, UserDetailsImpl userDetails) {
 
@@ -211,7 +212,7 @@ public class BoardService {
 
         } else return null;
     }
-
+*/
 
     //게시물 삭제.
     @Transactional
@@ -558,7 +559,7 @@ public class BoardService {
         } else return null;
     }
 
-    //공유 게시물 상세 조회 (로그인 후)
+ /*   //공유 게시물 상세 조회 (로그인 후)
     @Transactional
     public BoardResponseDto boardChoiceInfoLoginInquiry(Long id, UserDetailsImpl userDetails) {
 
@@ -586,7 +587,7 @@ public class BoardService {
             return boardResponseDto;
         } else return null;
     }
-
+*/
     //공유 게시물 수정
     @Transactional
     public CustomException boardInfoUpdate(Long id, BoardRequestDto.updateInfo boardRequestInfoUpdateDto,
@@ -612,6 +613,41 @@ public class BoardService {
         } else {
             return new CustomException(ErrorCode.INVALID_AUTHORITY);
         }
+    }
+
+    @Transactional
+    public ResponseEntity<StateCheckDto> stateCheck(Long id, UserDetailsImpl userDetails) {
+
+        //로그인 유저 정보.
+        Member member = memberRepostiory.findById(userDetails.getMember().getId())
+                .orElseThrow(() -> new CustomException(ErrorCode.EMPTY_CONTENT));
+
+        Board board = boardRepository.findById(id)
+                .orElseThrow(() -> new CustomException(ErrorCode.EMPTY_CONTENT));
+        Boolean matchingState = false;
+        Boolean likeState =false;
+        Liked liked = null;
+        Entry entry = null;
+        StateCheckDto stateCheckDto = null;
+
+
+        if(board.getBoardType().equals("matching")){
+            liked = likedRepository.findByBoardAndMember(board,member)
+                    .orElseGet(()-> null);
+            entry = entryRepository.findByMemberAndBoard(member,board)
+                    .orElseGet(()-> null);
+        }
+        else
+            entry = entryRepository.findByMemberAndBoard(member,board)
+                    .orElseGet(()-> null);
+
+        if(liked != null)
+            likeState =liked.getIsLike();
+        if(entry != null)
+            matchingState = entry.isMatching();
+
+        stateCheckDto = new StateCheckDto(board.getBoardType(),matchingState,likeState);
+        return ResponseEntity.ok(stateCheckDto);
     }
 
 /*
