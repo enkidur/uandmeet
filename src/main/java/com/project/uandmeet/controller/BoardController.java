@@ -124,6 +124,7 @@ public class BoardController {
             return boardChoiceInfoLoginInquiry;
     }
 
+
     //공유 개시물 수정
     @PutMapping("/api/board/information/{id}")
     private CustomException boardInfoUpdate(@PathVariable("id") Long id,
@@ -142,15 +143,23 @@ public class BoardController {
 
     //좋아요 유무
     @PostMapping("/board/likes")
-    private ResponseEntity<Long> likeClick(@RequestBody LikeDto likeDto,
-                                           @AuthenticationPrincipal UserDetailsImpl userDetails) {
+    private ResponseEntity<LikeDto.response> likeClick(@RequestBody LikeDto.request likeDto,
+                                                       @AuthenticationPrincipal UserDetailsImpl userDetails) {
         return boardService.likeClick(likeDto, userDetails);
     }
 
+    @PostMapping("/board/statecheck/{id}")
+    private ResponseEntity<StateCheckDto> stateCheck(@PathVariable("id") Long id,
+                                                     @AuthenticationPrincipal UserDetailsImpl userDetails) {
+        return boardService.stateCheck(id,userDetails);
+    }
+
+
+
     //매칭참여
     @PostMapping("/board/matchingentry")
-    private ResponseEntity<Long> matchingJoin(@RequestBody EntryDto entryDto,
-                                              @AuthenticationPrincipal UserDetailsImpl userDetails) {
+    private ResponseEntity<EntryDto.response> matchingJoin(@RequestBody EntryDto.request entryDto,
+                                                           @AuthenticationPrincipal UserDetailsImpl userDetails) {
         return boardService.matchingJoin(entryDto, userDetails);
     }
 

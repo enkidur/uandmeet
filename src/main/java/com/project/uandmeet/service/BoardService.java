@@ -265,17 +265,18 @@ public class BoardService {
 
     //게시물 좋아요 유무
     @Transactional
-    public ResponseEntity<Long> likeClick(LikeDto likeDto, UserDetailsImpl userDetails) {
+    public ResponseEntity<LikeDto.response> likeClick(LikeDto.request likeDto, UserDetailsImpl userDetails) {
 
-        ResponseEntity<Long> responseEntity = null;
+        ResponseEntity<LikeDto.response> responseEntity = null;
 
         Member memberTemp = memberRepostiory.findById(userDetails.getMember().getId())
                 .orElseThrow(() -> new CustomException(ErrorCode.EMPTY_CONTENT));
 
         Board board = boardRepository.findById(likeDto.getBoardId())
                 .orElseThrow(() -> new CustomException(ErrorCode.EMPTY_CONTENT));
+        LikeDto.response response=null;
 
-        if (board.getMember().getId().equals(memberTemp.getId())) {
+        if (!board.getMember().getId().equals(memberTemp.getId())) {
             if (likeDto.getIsLike()) {
                 if (!likedRepository.findByBoardAndMember(board, memberTemp).isPresent()) {
 
@@ -286,7 +287,8 @@ public class BoardService {
                         board.setLikeCount(board.getLikeCount() + 1);
                         boardRepository.save(board);
 
-                        responseEntity = ResponseEntity.ok(board.getLikeCount());
+                        response = new LikeDto.response(board.getLikeCount());
+                        responseEntity = ResponseEntity.ok(response);
 
                     } catch (Exception e) {
                         throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "서버에서 요청사항을 수행할 수 없습니다.");
@@ -307,7 +309,9 @@ public class BoardService {
 
                     boardRepository.save(board);
 
-                    responseEntity = ResponseEntity.ok(board.getLikeCount());
+                    response = new LikeDto.response(board.getLikeCount());
+                    responseEntity = ResponseEntity.ok(response);
+
                 } else {
                     throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "해당 요청사항을 수행할 수 없습니다.");
                 }
@@ -321,15 +325,16 @@ public class BoardService {
 
     //매칭 참여
     @Transactional
-    public ResponseEntity<Long> matchingJoin(EntryDto entryDto, UserDetailsImpl userDetails) {
-        ResponseEntity<Long> responseEntity = null;
+    public ResponseEntity<EntryDto.response> matchingJoin(EntryDto.request entryDto, UserDetailsImpl userDetails) {
+        ResponseEntity<EntryDto.response> responseEntity = null;
 
         Board board = boardRepository.findById(entryDto.getBoardId())
                 .orElseThrow(() -> new CustomException(ErrorCode.EMPTY_CONTENT));
 
         Member member = memberRepostiory.findById(userDetails.getMember().getId())
                 .orElseThrow(() -> new CustomException(ErrorCode.EMPTY_CONTENT));
-        Entry entry = null;
+        Entry entry =null;
+        EntryDto.response response= null;
 
         if (!board.getMember().getId().equals(member.getId())) {
             if (entryDto.getIsMatching()) {
@@ -340,17 +345,18 @@ public class BoardService {
                         board.setCurrentEntry(board.getCurrentEntry() + 1);
 
                         boardRepository.save(board);
-
-                        responseEntity = ResponseEntity.ok(board.getCurrentEntry());
+                        response = new EntryDto.response(board.getCurrentEntry());
+                        responseEntity = ResponseEntity.ok(response);
 
                     } catch (Exception e) {
                         throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "서버에서 요청사항을 수행할 수 없습니다.");
                     }
                 } else
                     ResponseEntity.status(HttpStatus.valueOf("이미 참여 했습니다."));
-            } else {
-                if (entryRepository.findByMemberAndBoard(member, board).isPresent()) {
-                    entry = entryRepository.findByMemberAndBoard(member, board)
+            }
+            else {
+                if (entryRepository.findByMemberAndBoard(member,board).isPresent()) {
+                    entry = entryRepository.findByMemberAndBoard(member,board)
                             .orElseThrow(() -> new CustomException(ErrorCode.EMPTY_CONTENT));
 
                     entryRepository.delete(entry);
@@ -359,7 +365,8 @@ public class BoardService {
 
                     boardRepository.save(board);
 
-                    responseEntity = ResponseEntity.ok(board.getCurrentEntry());
+                    response = new EntryDto.response(board.getCurrentEntry());
+                    responseEntity = ResponseEntity.ok(response);
 
                 } else {
                     throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "서버에서 요청사항을 수행할 수 없습니다.");
@@ -368,8 +375,6 @@ public class BoardService {
         } else {
             throw new CustomException(ErrorCode.INVALID_AUTHORITY);
         }
-
-
         return responseEntity;
     }
 
