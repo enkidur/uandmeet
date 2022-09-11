@@ -6,6 +6,7 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import com.project.uandmeet.redis.RedisUtil;
+import io.jsonwebtoken.JwtException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -36,7 +37,7 @@ public class JwtAuthorizationFilter extends BasicAuthenticationFilter {
             throws IOException, ServletException {
         String header = request.getHeader(JwtProperties.HEADER_ACCESS);
         // 로그인, 리프레시 요청이라면 토큰 검사하지 않음
-        if (request.getServletPath().equals("/login") || request.getServletPath().equals("/api/refresh") || request.getServletPath().equals("/api/loginForm") || request.getServletPath().equals("/api/kakaoLogin")) {
+        if (request.getServletPath().equals("/login") || request.getServletPath().equals("/refresh")) {
             chain.doFilter(request, response);
         }
 
@@ -57,14 +58,13 @@ public class JwtAuthorizationFilter extends BasicAuthenticationFilter {
             // 토큰이 유효하면 토큰으로부터 유저 정보를 받아와서 저장
             Authentication authentication = jwtTokenProvider.getAuthentication(token);
             SecurityContextHolder.getContext().setAuthentication(authentication);
+        } else if(token != null && !jwtTokenProvider.validateToken(token)){
+            String result = jwtTokenProvider.resolveRefreshToken(request);
+
+            if(result == null){
+                throw new JwtException("access token 이 만료 되었습니다.");
+            }
         }
-//        else if(token != null && !jwtTokenProvider.validateToken(token)){
-//            String result = jwtTokenProvider.resolveRefreshToken(request);
-//
-//            if(result == null){
-//                throw new JwtException("access token 이 만료 되었습니다.");
-//            }
-//        }
         chain.doFilter(request, response);
     }
 }

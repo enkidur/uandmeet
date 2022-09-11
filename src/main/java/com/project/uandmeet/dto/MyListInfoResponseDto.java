@@ -20,7 +20,7 @@ public class MyListInfoResponseDto {
     private Long commentCount;
 
     private String boardimage;
-    private LocalDateTime createdAt;
+    private LocalDateTime endDateAt;
 
     private MyListMemberResponseDto writer;
 
@@ -34,7 +34,7 @@ public class MyListInfoResponseDto {
         this.viewCount = viewCount;
         this.commentCount = commentCount;
         this.boardimage = boardimage;
-        this.createdAt = createdAt;
+        this.endDateAt = createdAt;
         this.writer = writer;
     }
 }

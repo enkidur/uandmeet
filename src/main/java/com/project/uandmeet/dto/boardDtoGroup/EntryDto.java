@@ -1,15 +1,28 @@
 package com.project.uandmeet.dto.boardDtoGroup;
 
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 
-@Getter
-@Setter
-@AllArgsConstructor
-@NoArgsConstructor
+
+
 public class EntryDto {
-    private Long boardId;
-    private Boolean isMatching;
+    public static response response;
+
+    @ToString
+    @Getter
+    @Setter
+    @NoArgsConstructor
+    @AllArgsConstructor
+    public static class request {
+        private Long boardId;
+        private Boolean isMatching;
+    }
+
+    @ToString
+    @Getter
+    @Setter
+    @NoArgsConstructor
+    @AllArgsConstructor
+    public static class response {
+        private Long currentEntry;
+    }
 }
