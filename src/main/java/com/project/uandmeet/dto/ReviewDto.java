@@ -17,7 +17,6 @@ public class ReviewDto {
 
     private Long toId;
     private String toNickname;
-    private String toProfile;
 
     //리뷰 메시지
     private String message;
@@ -27,12 +26,11 @@ public class ReviewDto {
 
     private int num;
 
-    public ReviewDto(Long board, Long from, Long boardUserId, String toNickname, String toProfile, int num, Long score, String review) {
+    public ReviewDto(Long board, Long from, Long boardUserId, String toNickname, int num, Long score, String review) {
         this.board = board;
         this.from = from;
         this.toId = boardUserId;
         this.toNickname = toNickname;
-        this.toProfile = toProfile;
         this.num = num;
         this.evaluation_items = score;
         this.message = review;

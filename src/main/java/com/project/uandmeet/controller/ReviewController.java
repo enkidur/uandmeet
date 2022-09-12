@@ -16,6 +16,8 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.text.ParseException;
+
 @RestController
 @RequiredArgsConstructor
 public class ReviewController {
@@ -32,7 +34,7 @@ public class ReviewController {
     //review 작성
     @PostMapping("/api/review")
     public ResponseEntity<ReviewDto> createReview(@AuthenticationPrincipal UserDetailsImpl userDetails,
-                                                  @RequestBody ReviewRequestDto requestDto) {
+                                                  @RequestBody ReviewRequestDto requestDto) throws ParseException {
         return ResponseEntity.ok(reviewService.createReview(userDetails, requestDto));
     }
 }

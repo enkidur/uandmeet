@@ -19,4 +19,5 @@ public interface EntryRepository extends JpaRepository <Entry, Long> {
     //    List<Entry> findByMember(Member userId);
     List<Entry> findByMember(Member userId);
     Page<Entry> findByMember(Member userId, Pageable pageable);
+    boolean existsByMemberAndAndBoard(Member member, Board board);
 }

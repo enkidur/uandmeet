@@ -1,5 +1,6 @@
 package com.project.uandmeet.repository;
 
+import com.project.uandmeet.model.Board;
 import com.project.uandmeet.model.Member;
 import com.project.uandmeet.model.Review;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -12,4 +13,5 @@ public interface ReviewRepository extends JpaRepository<Review, Long> {
     Long countByTo(Member to);
     Long countByToAndNum(Member to, int i);
     List<Review> findByTo(Member to);
+    boolean existsByToAndBoard(Member to, Board board);
 }

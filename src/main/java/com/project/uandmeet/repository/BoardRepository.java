@@ -9,6 +9,7 @@ import org.springframework.data.querydsl.QuerydslPredicateExecutor;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public  interface BoardRepository extends JpaRepository<Board, Long>, QuerydslPredicateExecutor<Board> {
@@ -28,7 +29,8 @@ public  interface BoardRepository extends JpaRepository<Board, Long>, QuerydslPr
     List<Board> findByBoardTypeOrderByLikeCount(String boardType);
     Slice<Board> findByBoardTypeOrderByLikeCount(String boardType, Pageable pageable);
     List<Board> findByBoardTypeAndCategoryOrderByLikeCount(String boardtype, Category category);
-    Slice<Board> findByBoardTypeAndCategoryOrderByLikeCount(String boardtype, Category category, Pageable pageable);
+    Optional<Board> findByBoardTypeAndId(String boardType, Long boardId);
+
 
 
 }
