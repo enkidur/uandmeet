@@ -1,6 +1,7 @@
 package com.project.uandmeet.service;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.project.uandmeet.dto.*;
 import com.project.uandmeet.exception.CustomException;
 import com.project.uandmeet.exception.ErrorCode;
@@ -40,6 +41,7 @@ public class MemberService {
     private final ReviewRepository reviewRepository;
     private final BoardRepository boardRepository;
     private final CommentRepository commentRepository;
+    private final LikedRepository likedRepository;
     private final BCryptPasswordEncoder passwordEncoder;
     private final EmailService emailService;
     private final RedisUtil redisUtil;
@@ -146,9 +148,36 @@ public class MemberService {
 
 
     // 회원 탈퇴
+    @Transactional
     public String withdraw(UserDetailsImpl userDetails, String password) {
         if (userDetails.getPassword().equals(passwordEncoder.encode(password))) {
             String username = userDetails.getUsername();
+
+            List<Entry> entries = entryRepository.findByMember(userDetails.getMember());
+            List<Liked> likeds = likedRepository.findByMember(userDetails.getMember());
+
+            //매칭 참여 했던 것들 지우기.
+            for(Entry entry : entries) {
+                Board board = boardRepository.findById(entry.getBoard().getId())
+                        .orElseGet(() -> null);
+
+                if (board != null) {
+                    board.setCurrentEntry(board.getCurrentEntry() - 1);
+                    boardRepository.save(board);
+                }
+            }
+
+            //좋아요 참여 했던 것들 지우기.
+            for(Entry entry : entries) {
+                Board board = boardRepository.findById(entry.getBoard().getId())
+                        .orElseGet(() -> null);
+
+                if (board != null) {
+                    board.setCurrentEntry(board.getCurrentEntry() - 1);
+                    boardRepository.save(board);
+                }
+            }
+
             memberRepository.deleteByUsername(username);
         }
         return "회원탈퇴 완료";
