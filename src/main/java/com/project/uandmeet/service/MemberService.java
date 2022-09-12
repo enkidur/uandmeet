@@ -1,7 +1,6 @@
 package com.project.uandmeet.service;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.project.uandmeet.dto.*;
 import com.project.uandmeet.exception.CustomException;
 import com.project.uandmeet.exception.ErrorCode;
@@ -174,12 +173,8 @@ public class MemberService {
         // refreshToken
         String authorizationHeader = redisUtil.getData(expiredAccessTokenName + JwtProperties.HEADER_REFRESH);
 
-//        if (authorizationHeader == null || !authorizationHeader.startsWith(JwtProperties.TOKEN_PREFIX)) {
-////            throw new JwtException("Refresh Token이 존재하지 않습니다.");
-//            throw new CustomException(ErrorCode.EMPTY_CONTENT);
-//        }
+        // 최신 토큰인지 검사
         if (!redisUtil.getData(expiredAccessTokenName + JwtProperties.HEADER_ACCESS).equals(expiredAccessTokenHeader)) {
-//            throw new JwtException("잘못된 JWT Token입니다.");
             throw new CustomException(ErrorCode.INVALID_TOKEN);
         }
 
@@ -703,5 +698,4 @@ public class MemberService {
     public void logout(UserDetailsImpl userDetails) {
         redisUtil.deleteData(userDetails.getUsername()+JwtProperties.HEADER_REFRESH);
     }
-
 }

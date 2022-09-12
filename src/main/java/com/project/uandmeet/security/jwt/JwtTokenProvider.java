@@ -140,13 +140,9 @@ public class JwtTokenProvider {
 
     // 토큰에서 회원 정보 추출
     public String getUserPk(String jwtToken) {
-
         return Jwts.parser().setSigningKey(secretKey).parseClaimsJws(setTokenName(jwtToken)).getBody().getSubject();
     }
 
-    //    public String getUsername(String jwtToken) {
-//        return Jwts.parser().setSigningKey(secretKey).parseClaimsJws(setTokenName(jwtToken)).getBody().getSubject();
-//    }
     // JWT 토큰에서 인증 정보 조회
     public Authentication getAuthentication(String jwtToken) {
 //        UserDetailsImpl userDetailsImpl = new UserDetailsImpl()
@@ -187,7 +183,6 @@ public class JwtTokenProvider {
         }
         return false;
     }
-
 
     // 만료 기간 확인
     public Date ExpireTime(String token) {
