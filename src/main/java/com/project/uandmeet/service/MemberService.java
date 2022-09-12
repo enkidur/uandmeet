@@ -1,10 +1,6 @@
 package com.project.uandmeet.service;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.project.uandmeet.dto.*;
-import com.project.uandmeet.exception.CustomException;
-import com.project.uandmeet.exception.ErrorCode;
 import com.project.uandmeet.model.*;
 import com.project.uandmeet.redis.RedisUtil;
 import com.project.uandmeet.repository.*;
@@ -703,5 +699,4 @@ public class MemberService {
     public void logout(UserDetailsImpl userDetails) {
         redisUtil.deleteData(userDetails.getUsername()+JwtProperties.HEADER_REFRESH);
     }
-
 }

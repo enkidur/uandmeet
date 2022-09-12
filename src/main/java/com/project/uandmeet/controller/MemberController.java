@@ -307,5 +307,4 @@ public class MemberController {
         page -= 1;
         return ResponseEntity.ok(memberService.mycommentmatching(userDetails, page, amount));
     }
-
 }
