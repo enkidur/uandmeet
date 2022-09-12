@@ -48,14 +48,13 @@ public class MemberService {
     private final JwtTokenProvider jwtTokenProvider;
     private final S3Uploader s3Uploader;
     private final String POST_IMAGE_DIR = "static";
-    private String authNumber; // 난수 번호
-    private int emailCnt; // email 인증 횟수
+    private int emailCnt = 0; // email 인증 횟수
 
     // 난수 생성
-    public void makeRandomNumber() {
+    public String makeRandomNumber() {
         String checkNum = UUID.randomUUID().toString().substring(0, 6);
         System.out.println("임시 비밀번호 : " + checkNum);
-        authNumber = checkNum;
+        return checkNum;
     }
 
     // 회원 가입 1. emali check
@@ -142,7 +141,7 @@ public class MemberService {
     public void checkDuplicateEmail(String username) {
         Optional<Member> member = memberRepository.findByUsername(username);
         if (member.isPresent()) {
-            throw new IllegalArgumentException("이미 존재하는 계정입니다.");
+            throw new CustomException(ErrorCode.DUPLICATE_USERNAME);
         }
     }
 
@@ -240,16 +239,15 @@ public class MemberService {
     }
 
     public String findpassword(String username) {
-        if (emailCnt < 4) {
-            emailCnt += 1;
-            int restCnt = 3 - emailCnt;
-            // 비밀번호 난수 생성
-            makeRandomNumber();
+        redisUtil.setDataExpire("passAuth" + username, makeRandomNumber(),60 * 3L);
+        redisUtil.setDataExpire("passCnt" + username, String.valueOf(emailCnt),60 * 60L);
+        if (Integer.parseInt(redisUtil.getData("Cnt" + username)) < 4) {
+            redisUtil.setDataExpire("Cnt" + username, String.valueOf(emailCnt + 1),60 * 60L);
+            int restCnt = 3 - Integer.parseInt(redisUtil.getData("Cnt" + username));
 
             Member member = memberRepository.findByUsername(username).orElseThrow(
                     () -> new IllegalArgumentException("해당 아이디가 없습니다.")
             );
-            member.setPassword(passwordEncoder.encode(authNumber));
 
             //인증메일 보내기
             String setFrom = "wjdgns5488@naver.com"; // email-config에 설정한 자신의 이메일 주소를 입력
@@ -271,27 +269,20 @@ public class MemberService {
                             "		<b style=\"color: #00CFFF\">'인증 번호'</b> 를 입력하여 비밀번호 찾기를 완료해 주세요.<br />" +
                             "		감사합니다." +
                             "	</p>" +
-                            "          <div style=\"text-align: center;\"><h1><b style=\"color: #00CFFF\" >" + authNumber + "<br /><h1></div>" +
+                            "          <div style=\"text-align: center;\"><h1><b style=\"color: #00CFFF\" >" + redisUtil.getData("passAuth" + username) + "<br /><h1></div>" +
                             "	<div style=\"border-top: 1px solid #DDD; padding: 5px;\"></div>" +
                             "<br>" +
                             "남은 인증 횟수 : " + restCnt +
                             " </div>";
 
-            emailService.mailSend(setFrom, toMail, title, content);
-            // 유효 시간(3분)동안 {fromEmail, authKey} 저장
-            redisUtil.setDataExpire(authNumber, setFrom, 60 * 3L);
-            // 횟수
-            redisUtil.setDataExpire("Cnt" + authNumber, String.valueOf(emailCnt), 60 * 60L);
-            // 유효 시간(1시간)동안 {toEmail, emailCnt} 저장
-            redisUtil.setDataExpire(toMail, String.valueOf(emailCnt), 60 * 60L);
-            return "인증 번호 :" + authNumber + "남은 횟수 :" + restCnt;
+            return "인증 번호 :" + redisUtil.getData("passAuth" + username) + "남은 횟수 :" + restCnt;
         }
         return "인증 횟수를 초과하였습니다. 1시간 뒤에 다시 시도해 주세요.";
     }
 
     // 인증 체크
-    public String findCheck(String authNum) {
-        return String.valueOf(authNum.equals(authNumber));
+    public String findCheck(String authNum, String username) {
+        return String.valueOf(authNum.equals(redisUtil.getData("passAuth" + username)));
     }
 
     // 비밀번호 변경
@@ -490,7 +481,7 @@ public class MemberService {
         public String changepass (UserDetailsImpl userDetails, PasswordChangeDto passwordChangeDto){
             Long userId = userDetails.getMember().getId();
             Member member = memberRepository.findById(userId).orElseThrow(
-                    () -> new RuntimeException("해당 권한이 없습니다.")
+                    () -> new CustomException(ErrorCode.MEMBER_NOT_FOUND)
             );
             if (!passwordEncoder.encode(passwordChangeDto.getPasswordCheck()).equals(member.getPassword()) && !passwordChangeDto.getNewPassword().equals(passwordChangeDto.getNewPasswordCheck())) {
                 throw new RuntimeException("비밀번호가 일치하지 않습니다.");

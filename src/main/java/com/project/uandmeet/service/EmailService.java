@@ -74,15 +74,6 @@ public class EmailService {
         return "인증 횟수를 초과하였습니다. 1시간 뒤에 다시 시도해 주세요.";
     }
 
-
-
-    public void checkDuplicateEmail(String username) {
-        Optional<Member> member = memberRepository.findByUsername(username);
-        if (member.isPresent()) {
-            throw new IllegalArgumentException("이미 존재하는 계정입니다.");
-        }
-    }
-
     //이메일 전송 메소드
     public void mailSend(String setFrom, String toMail, String title, String content) {
         MimeMessage message = mailSender.createMimeMessage();

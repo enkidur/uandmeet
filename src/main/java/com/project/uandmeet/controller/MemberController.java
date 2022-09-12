@@ -122,7 +122,7 @@ public class MemberController {
     }
 
     // 회원 탈퇴
-    @DeleteMapping("/api/withdraw")
+    @PostMapping("/api/withdraw")
     public ResponseEntity<String> withdraw(@AuthenticationPrincipal UserDetailsImpl userDetails,
                                            @RequestBody PasswordDto requestDto) {
         return ResponseEntity.ok(memberService.withdraw(userDetails, requestDto.getPassword()));
@@ -153,7 +153,7 @@ public class MemberController {
     // password 찾기 2. password 인증번호 확인
     @PostMapping("/api/findCheck")
     public ResponseEntity<String> findCheck(@RequestBody AuthNumDto requestDto) {
-        memberService.findCheck(requestDto.getAuthNum());
+        memberService.findCheck(requestDto.getAuthNum(), requestDto.getUsername());
         return ResponseEntity.ok("인증 완료");
     }
 
@@ -217,7 +217,7 @@ public class MemberController {
     // profile 수정
     @PutMapping("/api/mypage/profile")
     public ResponseEntity<ProfileDto> profileedit(@AuthenticationPrincipal UserDetailsImpl userDetails,
-                                                  @RequestBody ProfileEditRequestDto requestDto) throws IOException {
+                                                  @ModelAttribute ProfileEditRequestDto requestDto) throws IOException {
         return ResponseEntity.ok(memberService.profileedit(userDetails, requestDto));
     }
 
@@ -231,12 +231,6 @@ public class MemberController {
     @GetMapping("/api/userinfo/review")
     public ResponseEntity<List<Review>> Review(@RequestBody MemberIdRequestDto requestDto) {
         return ResponseEntity.ok(memberService.Review(requestDto.getMemberId()));
-    }
-
-    // login test
-    @GetMapping("/api/loginForm")
-    public String loginFrom() {
-        return "login.html";
     }
 
     // password 변경
