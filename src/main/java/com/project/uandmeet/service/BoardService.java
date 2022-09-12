@@ -80,6 +80,7 @@ public class BoardService {
         } else {
             Board board = new Board(memberTemp, category, siarea, guarea, boardRequestDto);
 
+            System.out.println(board);
             try {
                 boardRepository.save(board);
                 responseEntity = ResponseEntity.ok(board.getId());
@@ -205,7 +206,7 @@ public class BoardService {
             MemberSimpleDto memberSimpleDto = new MemberSimpleDto(boards.getMember().getNickname(),
                     boards.getMember().getUsername(), boards.getMember().getProfile());
 
-            boardResponseDto = new BoardResponseDto(memberSimpleDto, boards, liked);
+            boardResponseDto = new BoardResponseDto(memberSimpleDto, boards,liked);
             return boardResponseDto;
 
         } else return null;
@@ -336,8 +337,9 @@ public class BoardService {
         Entry entry =null;
         EntryDto.response response= null;
 
-        if (!board.getMember().getId().equals(member.getId())) {
-            if (entryDto.getIsMatching()) {
+        if (!board.getMember().getId().equals(member.getId()))
+        {
+            if(entryDto.getIsMatching()) {
                 if (!entryRepository.findByMemberAndBoard(member, board).isPresent()) {
                     entry = new Entry(board, member);
                     try {
@@ -658,14 +660,6 @@ public class BoardService {
                         main.getMember().getNickname());
                 temp.add(mainPageDto);
             }
-            if (temp.size() < 5) {
-                mainPage.addAll(temp);
-            } else {
-                for (int i = 0; i < 4; i++) {
-                    mainPage.add(temp.get(i));
-                }
-            }
-            return mainPage;
         } else {
             Category mainCategory = categoryRepository.findAllByCategory(category).orElseThrow(
                     () -> new RuntimeException("찾을 수 없는 카테고리입니다.")
@@ -678,15 +672,15 @@ public class BoardService {
                         main.getMember().getNickname());
                 temp.add(mainPageDto);
             }
-            if (temp.size() < 5) {
-                mainPage.addAll(temp);
-            } else {
-                for (int i = 0; i < 4; i++) {
-                    mainPage.add(temp.get(i));
-                }
-            }
-            return mainPage;
         }
+        if (temp.size() < 5) {
+            mainPage.addAll(temp);
+        } else {
+            for (int i = 0; i < 4; i++) {
+                mainPage.add(temp.get(i));
+            }
+        }
+        return mainPage;
     }
 
     public List<MainPageMatchingDto> mainmatching(String category) {
@@ -705,14 +699,6 @@ public class BoardService {
                         main.getMaxEntry());
                 temp.add(mainPageDto);
             }
-            if (temp.size() < 5) { // Page or Slice 로 해결가능
-                mainPage.addAll(temp);
-            } else {
-                for (int i = 0; i < 4; i++) {
-                    mainPage.add(temp.get(i));
-                }
-            }
-            return mainPage;
         } else {
             Category mainCategory = categoryRepository.findAllByCategory(category).orElseThrow(
                     () -> new RuntimeException("찾을 수 없는 카테고리입니다.")
@@ -729,15 +715,15 @@ public class BoardService {
                         main.getMaxEntry());
                 temp.add(mainPageDto);
             }
-            if (temp.size() < 5) {
-                mainPage.addAll(temp);
-            } else {
-                for (int i = 0; i < 4; i++) {
-                    mainPage.add(temp.get(i));
-                }
-            }
-            return mainPage;
         }
+        if (temp.size() < 5) { // Page or Slice 로 해결가능
+            mainPage.addAll(temp);
+        } else {
+            for (int i = 0; i < 4; i++) {
+                mainPage.add(temp.get(i));
+            }
+        }
+        return mainPage;
     }
 
 
@@ -780,14 +766,13 @@ public class BoardService {
         if (temp.size() < 5) {
             boardInfo.addAll(temp);
         } else {
-            for (int i =0; i < 4; i++) {
+            for (int i = 0; i < 4; i++) {
                 boardInfo.add(temp.get(i));
             }
         }
         return boardInfo;
     }
-
-/*
+    /*
     @Transactional
     public BoardResponseFinalDto boardMatchingmypageAllInquiry(String type,
                                                                String cate,

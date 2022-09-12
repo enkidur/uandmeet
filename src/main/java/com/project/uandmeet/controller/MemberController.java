@@ -293,12 +293,27 @@ public class MemberController {
         return ResponseEntity.ok(memberService.myentry(userDetails, page, amount));
     }
 
-    // 나의 댓글
-    @GetMapping("/api/mycomment")
-    public ResponseEntity<MypostCommentResponseDto> mycomment(@AuthenticationPrincipal UserDetailsImpl userDetails,
+    // 나의 댓글 -> information
+    @GetMapping("/api/mycomment/information")
+    public ResponseEntity<MypostCommentResponseDto> mycommentinformation(@AuthenticationPrincipal UserDetailsImpl userDetails,
                                                               @RequestParam int page,
                                                               @RequestParam int amount) {
         page -= 1;
-        return ResponseEntity.ok(memberService.mycomment(userDetails, page, amount));
+        return ResponseEntity.ok(memberService.mycommentinformation(userDetails, page, amount));
+    }
+
+    // 나의 댓글 -> matching
+    @GetMapping("/api/mycomment/matching")
+    public ResponseEntity<MypostCommentResponseDto> mycommentmatching(@AuthenticationPrincipal UserDetailsImpl userDetails,
+                                                              @RequestParam int page,
+                                                              @RequestParam int amount) {
+        page -= 1;
+        return ResponseEntity.ok(memberService.mycommentmatching(userDetails, page, amount));
+    }
+
+    @GetMapping("/api/test")
+    public void token(HttpServletRequest request,
+                      HttpServletResponse response) throws JsonProcessingException {
+        memberService.token(request, response);
     }
 }

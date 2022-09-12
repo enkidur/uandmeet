@@ -8,6 +8,7 @@ import com.project.uandmeet.oauth.OAuth2SuccessHandler;
 import com.project.uandmeet.redis.RedisUtil;
 import com.project.uandmeet.security.jwt.JwtAuthenticationFilter;
 import com.project.uandmeet.security.jwt.JwtAuthorizationFilter;
+import com.project.uandmeet.exception.JwtTokenExceptionFilter;
 import com.project.uandmeet.security.jwt.JwtTokenProvider;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -93,7 +94,8 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
                 // 그 외 어떤 요청이든 '인증'
                 .and()
                 .addFilter(new JwtAuthenticationFilter(authenticationManager(),redisUtil, jwtTokenProvider)) // AuthenticatonManager 파라미터 필요
-                .addFilter(new JwtAuthorizationFilter(authenticationManager(), jwtTokenProvider));// AuthenticatonManager 파라미터 필요
+                .addFilter(new JwtAuthorizationFilter(authenticationManager(), jwtTokenProvider))// AuthenticatonManager 파라미터 필요
+                .addFilterBefore(new JwtTokenExceptionFilter(), JwtAuthenticationFilter.class);
 //                .addFilterBefore(new JwtAuthenticationFilter(authenticationManager), UsernamePasswordAuthenticationFilter.class)
 
 

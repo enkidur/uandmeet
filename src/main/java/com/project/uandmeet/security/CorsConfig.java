@@ -22,6 +22,7 @@ public class CorsConfig {
         config.addExposedHeader("username");
         config.addExposedHeader("nickname");
         config.addExposedHeader("profile");
+        config.addExposedHeader("loginto");
         config.addExposedHeader("Authorization");
         source.registerCorsConfiguration("/**",config); // resource 에 등록 url /api/** 는 모두 config 를 따름
         return new CorsFilter(source); // source 를 하나 만듦

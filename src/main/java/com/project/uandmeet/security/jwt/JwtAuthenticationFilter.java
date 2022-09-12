@@ -127,6 +127,7 @@ public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilte
         response.setHeader("username", userDetailsImpl.getUsername());
         response.setHeader("nickname", userDetailsImpl.getMember().getNickname());
         response.setHeader("profile", userDetailsImpl.getMember().getProfile());
+        response.setHeader("loginto", userDetailsImpl.getMember().getLoginto());
     }
 
 }
