@@ -157,7 +157,7 @@ public class MemberService {
             List<Liked> likeds = likedRepository.findByMember(userDetails.getMember());
 
             //매칭 참여 했던 것들 지우기.
-            for(Entry entry : entries) {
+            for (Entry entry : entries) {
                 Board board = boardRepository.findById(entry.getBoard().getId())
                         .orElseGet(() -> null);
 
@@ -168,7 +168,7 @@ public class MemberService {
             }
 
             //좋아요 참여 했던 것들 지우기.
-            for(Entry entry : entries) {
+            for (Entry entry : entries) {
                 Board board = boardRepository.findById(entry.getBoard().getId())
                         .orElseGet(() -> null);
 
@@ -319,211 +319,209 @@ public class MemberService {
         List<String> concern = member.getConcern();
         Long cnt = entryRepository.countByMember(member); // 참여한 매칭
         Map<String, Long> joinCnt = new HashMap<>();
-        for (int i = 0; i < cnt; i++) {
-            if (entry.get(0).getBoard().getCategory().getCategory() == null) {
-                MypageDto mypageDto = new MypageDto(nickname, concern);
-                return mypageDto;
-            } else {
-                String category = entry.get(i).getCategory().getCategory();
-                Long categoryCnt = entryRepository.countByMemberAndCategory(member, entry.get(i).getCategory());
-                joinCnt.put(category, categoryCnt);
-            }
-        }
-        MypageDto mypageDto = new MypageDto(nickname, concern, joinCnt);
-        return mypageDto;
-    }
-
-
-    // 활동내역 -> 관심사 수정
-    public MypageDto concernedit(UserDetailsImpl userDetails, String[] concerns) {
-        Long userId = userDetails.getMember().getId();
-        Member member = memberRepository.findById(userId).orElseThrow(
-                () -> new RuntimeException("수정 권한이 없습니다.")
-        );
-        List<Entry> entry = entryRepository.findByMember(member); // 참여한 매칭 리스트
-        Long cnt = entryRepository.countByMember(member); // 참여한 매칭 수
-        String nickname = member.getNickname(); // 고민중
-        List<String> concern = new ArrayList<>(); // 초기화
-        int idx = 0;
-        for(String e : concerns) {
-            if(idx > 2) {
-                break;
-            }
-            concern.add(e);
-            idx++;
-        }
-        member.setConcern(concern);
-        Map<String, Long> joinCnt = new HashMap<>();
-        for (int i = 0; i < cnt; i++) {
-            if (entry.get(0).getBoard().getCategory().getCategory() == null) {
-                MypageDto mypageDto = new MypageDto(nickname, concern);
-                return mypageDto;
-            } else {
-                String category = entry.get(i).getCategory().getCategory();
-                Long categoryCnt = entryRepository.countByMemberAndCategory(member, entry.get(i).getCategory());
-                joinCnt.put(category, categoryCnt);
-            }
-        }
-        MypageDto mypageDto = new MypageDto(nickname, concern, joinCnt);
-        return mypageDto;
-    }
-
-
-    // 활동 페이지 -> 닉네임 수정
-    public MypageDto nicknameedit(UserDetailsImpl userDetails, String nickname) {
-        Long userId = userDetails.getMember().getId();
-        Member member = memberRepository.findById(userId).orElseThrow(
-                () -> new RuntimeException("수정 권한이 없습니다.")
-        );
-        List<Entry> entry = entryRepository.findByMember(member); // 참여한 매칭 리스트
-        Long cnt = entryRepository.countByMember(member); // 참여한 매칭
-        List<String> concern = member.getConcern();
-        Map<String, Long> joinCnt = new HashMap<>();
-        for (int i = 0; i < cnt; i++) {
-            if (entry.get(0).getBoard().getCategory().getCategory() == null) {
-                MypageDto mypageDto = new MypageDto(nickname, concern);
-                return mypageDto;
-            } else {
-                String category = entry.get(i).getCategory().getCategory();
-                Long categoryCnt = entryRepository.countByMemberAndCategory(member, entry.get(i).getCategory());
-                joinCnt.put(category, categoryCnt);
-            }
-        }
-        Member usingnickname = memberRepository.findByNickname(nickname).orElse(null);
-        if (usingnickname == null) {
-            member.setNickname(nickname);
+        if (cnt == 0) {
+            return new MypageDto(nickname, concern);
         } else {
-            throw new RuntimeException("이미 존재하는 닉네임입니다.");
+            for (int i = 0; i < cnt; i++) {
+                String category = entry.get(i).getCategory().getCategory();
+                Long categoryCnt = entryRepository.countByMemberAndCategory(member, entry.get(i).getCategory());
+                joinCnt.put(category, categoryCnt);
+            }
+            return new MypageDto(nickname, concern, joinCnt);
         }
-        MypageDto mypageDto = new MypageDto(nickname, concern, joinCnt);
-        return mypageDto;
     }
 
-    // memberInfo 조회
-    public MyPageInfoDto myinfo(UserDetailsImpl userDetails) {
-        String username = userDetails.getUsername();
-        Long userId = userDetails.getMember().getId();
-        Member member = memberRepository.findById(userId).orElseThrow(
-                () -> new RuntimeException("볼 수 없는 정보입니다")
-        );
-        String gender = member.getGender();
-        Map<String, Long> birth = member.getBirth(); // year, month, day
-        MyPageInfoDto myPageInfoDto = new MyPageInfoDto(username, gender, birth);
-        return myPageInfoDto;
-    }
 
-    // info -> gender 수정
-    public MyPageInfoDto genderedit(UserDetailsImpl userDetails, InfoeditRequestDto requestDto) {
-        String username = userDetails.getUsername();
-        Long userId = userDetails.getMember().getId();
-        Member member = memberRepository.findById(userId).orElseThrow(
-                () -> new RuntimeException("볼 수 없는 정보입니다")
-        );
-        String gender = requestDto.getGender();
-        member.setGender(gender);
-        Map<String, Long> birth = member.getBirth();
-        MyPageInfoDto myPageInfoDto = new MyPageInfoDto(username, gender, birth);
-        return myPageInfoDto;
-    }
-
-    // info -> birth 수정
-    public MyPageInfoDto birthedit(UserDetailsImpl userDetails, InfoeditRequestDto requestDto) {
-        String username = userDetails.getUsername();
-        Long userId = userDetails.getMember().getId();
-        Member member = memberRepository.findById(userId).orElseThrow(
-                () -> new RuntimeException("볼 수 없는 정보입니다")
-        );
-        String gender = member.getGender();
-        Map<String, Long> birth = new HashMap<>();
-        birth.put("birthYear", requestDto.getBirthYear());
-        birth.put("birthMonth", requestDto.getBirthMonth());
-        birth.put("birthDay", requestDto.getBirthDay());
-        member.setBirth(birth);
-        MyPageInfoDto myPageInfoDto = new MyPageInfoDto(username, gender, birth);
-        return myPageInfoDto;
-    }
-
-    // profile 조회
-    public ProfileDto profile(UserDetailsImpl userDetails) {
-        Long userId = userDetails.getMember().getId();
-        Member member = memberRepository.findById(userId).orElseThrow(
-                () -> new RuntimeException("볼수 없는 정보입니다")
-        );
-        List<Review> review = reviewRepository.findByTo(member);
-
-        String nickname = member.getNickname();
-        Double sum = 0D;
-        for (int i = 0; i < review.size(); i++) {
-            sum += review.get(i).getEvaluation_items();
+        // 활동내역 -> 관심사 수정
+        public MypageDto concernedit (UserDetailsImpl userDetails, String[]concerns){
+            Long userId = userDetails.getMember().getId();
+            Member member = memberRepository.findById(userId).orElseThrow(
+                    () -> new RuntimeException("수정 권한이 없습니다.")
+            );
+            List<Entry> entry = entryRepository.findByMember(member); // 참여한 매칭 리스트
+            Long cnt = entryRepository.countByMember(member); // 참여한 매칭 수
+            String nickname = member.getNickname(); // 고민중
+            List<String> concern = new ArrayList<>(); // 초기화
+            int idx = 0;
+            for (String e : concerns) {
+                if (idx > 2) {
+                    break;
+                }
+                concern.add(e);
+                idx++;
+            }
+            member.setConcern(concern);
+            Map<String, Long> joinCnt = new HashMap<>();
+            if (cnt == 0) {
+                System.out.println(concern);
+                log.info(String.valueOf(concern));
+                return new MypageDto(nickname, concern);
+            }
+            for (int i = 0; i < cnt; i++) {
+                String category = entry.get(i).getCategory().getCategory();
+                Long categoryCnt = entryRepository.countByMemberAndCategory(member, entry.get(i).getCategory());
+                joinCnt.put(category, categoryCnt);
+            }
+            return new MypageDto(nickname, concern, joinCnt);
         }
-        Double star = sum/review.size(); // 평균 별점
-        String profile = member.getProfile();
-        ProfileDto profileDto = new ProfileDto(nickname, star, profile);
-        return profileDto;
-    }
 
-    // profile 수정
-    public ProfileDto profileedit(UserDetailsImpl userDetails, ProfileEditRequestDto requestDto) throws IOException {
-        Long userId = userDetails.getMember().getId();
-        Member member = memberRepository.findById(userId).orElseThrow(
-                () -> new RuntimeException("볼수 없는 정보입니다")
-        );
-        List<Review> review = reviewRepository.findByTo(member);
-        String nickname = member.getNickname();
-        Double sum = 0D;
-        for (int i = 0; i < review.size(); i++) {
-            sum += review.get(i).getEvaluation_items();
+
+        // 활동 페이지 -> 닉네임 수정
+        public MypageDto nicknameedit (UserDetailsImpl userDetails, String nickname){
+            Long userId = userDetails.getMember().getId();
+            Member member = memberRepository.findById(userId).orElseThrow(
+                    () -> new RuntimeException("수정 권한이 없습니다.")
+            );
+            List<Entry> entry = entryRepository.findByMember(member); // 참여한 매칭 리스트
+            Long cnt = entryRepository.countByMember(member); // 참여한 매칭
+            List<String> concern = member.getConcern();
+            Map<String, Long> joinCnt = new HashMap<>();
+            for (int i = 0; i < cnt; i++) {
+                if (entry.get(0).getBoard().getCategory().getCategory() == null) {
+                    MypageDto mypageDto = new MypageDto(nickname, concern);
+                    return mypageDto;
+                } else {
+                    String category = entry.get(i).getCategory().getCategory();
+                    Long categoryCnt = entryRepository.countByMemberAndCategory(member, entry.get(i).getCategory());
+                    joinCnt.put(category, categoryCnt);
+                }
+            }
+            Member usingnickname = memberRepository.findByNickname(nickname).orElse(null);
+            if (usingnickname == null) {
+                member.setNickname(nickname);
+            } else {
+                throw new RuntimeException("이미 존재하는 닉네임입니다.");
+            }
+            MypageDto mypageDto = new MypageDto(nickname, concern, joinCnt);
+            return mypageDto;
         }
-        Double star = sum/review.size();
-        if (requestDto.getData() != null) {
-            ImageDto uploadImage = s3Uploader.upload(requestDto.getData(), POST_IMAGE_DIR);
-            member.setProfile(uploadImage.getImageUrl());
-            ProfileDto profileDto = new ProfileDto(nickname, star, uploadImage.getImageUrl());
-            return profileDto;
-        } else {
-            ProfileDto profileDto = new ProfileDto(nickname, star);
+
+        // memberInfo 조회
+        public MyPageInfoDto myinfo (UserDetailsImpl userDetails){
+            String username = userDetails.getUsername();
+            Long userId = userDetails.getMember().getId();
+            Member member = memberRepository.findById(userId).orElseThrow(
+                    () -> new RuntimeException("볼 수 없는 정보입니다")
+            );
+            String gender = member.getGender();
+            Map<String, Long> birth = member.getBirth(); // year, month, day
+            MyPageInfoDto myPageInfoDto = new MyPageInfoDto(username, gender, birth);
+            return myPageInfoDto;
+        }
+
+        // info -> gender 수정
+        public MyPageInfoDto genderedit (UserDetailsImpl userDetails, InfoeditRequestDto requestDto){
+            String username = userDetails.getUsername();
+            Long userId = userDetails.getMember().getId();
+            Member member = memberRepository.findById(userId).orElseThrow(
+                    () -> new RuntimeException("볼 수 없는 정보입니다")
+            );
+            String gender = requestDto.getGender();
+            member.setGender(gender);
+            Map<String, Long> birth = member.getBirth();
+            MyPageInfoDto myPageInfoDto = new MyPageInfoDto(username, gender, birth);
+            return myPageInfoDto;
+        }
+
+        // info -> birth 수정
+        public MyPageInfoDto birthedit (UserDetailsImpl userDetails, InfoeditRequestDto requestDto){
+            String username = userDetails.getUsername();
+            Long userId = userDetails.getMember().getId();
+            Member member = memberRepository.findById(userId).orElseThrow(
+                    () -> new RuntimeException("볼 수 없는 정보입니다")
+            );
+            String gender = member.getGender();
+            Map<String, Long> birth = new HashMap<>();
+            birth.put("birthYear", requestDto.getBirthYear());
+            birth.put("birthMonth", requestDto.getBirthMonth());
+            birth.put("birthDay", requestDto.getBirthDay());
+            member.setBirth(birth);
+            MyPageInfoDto myPageInfoDto = new MyPageInfoDto(username, gender, birth);
+            return myPageInfoDto;
+        }
+
+        // profile 조회
+        public ProfileDto profile (UserDetailsImpl userDetails){
+            Long userId = userDetails.getMember().getId();
+            Member member = memberRepository.findById(userId).orElseThrow(
+                    () -> new RuntimeException("볼수 없는 정보입니다")
+            );
+            List<Review> review = reviewRepository.findByTo(member);
+
+            String nickname = member.getNickname();
+            Double sum = 0D;
+            for (int i = 0; i < review.size(); i++) {
+                sum += review.get(i).getEvaluation_items();
+            }
+            Double star = sum / review.size(); // 평균 별점
+            String profile = member.getProfile();
+            ProfileDto profileDto = new ProfileDto(nickname, star, profile);
             return profileDto;
         }
-    }
 
-    // password 변경
-    public String changepass(UserDetailsImpl userDetails, PasswordChangeDto passwordChangeDto) {
-        Long userId = userDetails.getMember().getId();
-        Member member = memberRepository.findById(userId).orElseThrow(
-                () -> new RuntimeException("해당 권한이 없습니다.")
-        );
-        if (!passwordEncoder.encode(passwordChangeDto.getPasswordCheck()).equals(member.getPassword()) && !passwordChangeDto.getNewPassword().equals(passwordChangeDto.getNewPasswordCheck())) {
-            throw new RuntimeException("비밀번호가 일치하지 않습니다.");
-        } else {
-            member.setPassword(passwordEncoder.encode(passwordChangeDto.getNewPassword()));
+        // profile 수정
+        public ProfileDto profileedit (UserDetailsImpl userDetails, ProfileEditRequestDto requestDto) throws IOException
+        {
+            Long userId = userDetails.getMember().getId();
+            Member member = memberRepository.findById(userId).orElseThrow(
+                    () -> new RuntimeException("볼수 없는 정보입니다")
+            );
+            List<Review> review = reviewRepository.findByTo(member);
+            String nickname = member.getNickname();
+            Double sum = 0D;
+            for (int i = 0; i < review.size(); i++) {
+                sum += review.get(i).getEvaluation_items();
+            }
+            Double star = sum / review.size();
+            if (requestDto.getData() != null) {
+                ImageDto uploadImage = s3Uploader.upload(requestDto.getData(), POST_IMAGE_DIR);
+                member.setProfile(uploadImage.getImageUrl());
+                ProfileDto profileDto = new ProfileDto(nickname, star, uploadImage.getImageUrl());
+                return profileDto;
+            } else {
+                ProfileDto profileDto = new ProfileDto(nickname, star);
+                return profileDto;
+            }
         }
-        return "비밀번호 변경 완료";
-    }
 
-    public void join(MemberRequestDto requestDto) {
-        Member member = new Member(requestDto.getUsername(), passwordEncoder.encode(requestDto.getPassword()));
-        memberRepository.save(member);
-    }
+        // password 변경
+        public String changepass (UserDetailsImpl userDetails, PasswordChangeDto passwordChangeDto){
+            Long userId = userDetails.getMember().getId();
+            Member member = memberRepository.findById(userId).orElseThrow(
+                    () -> new RuntimeException("해당 권한이 없습니다.")
+            );
+            if (!passwordEncoder.encode(passwordChangeDto.getPasswordCheck()).equals(member.getPassword()) && !passwordChangeDto.getNewPassword().equals(passwordChangeDto.getNewPasswordCheck())) {
+                throw new RuntimeException("비밀번호가 일치하지 않습니다.");
+            } else {
+                member.setPassword(passwordEncoder.encode(passwordChangeDto.getNewPassword()));
+            }
+            return "비밀번호 변경 완료";
+        }
 
-    public SimpleReviewResponseDto simpleReview(Long memberId) {
-        Member member = memberRepository.findById(memberId).orElseThrow(
-                () -> new RuntimeException("찾을 수 없는 사용자입니다.")
-        );
-        Map<Integer, Long> reviews = new HashMap<>();
-        Map<Integer, Long> sortedReview = new HashMap<>();
-        Long reviewCnt = reviewRepository.countByTo(member);
-        System.out.println(reviewCnt);
-        for (int i = 0; i < reviewCnt; i++) {
-            Long numCnt = reviewRepository.countByToAndNum(member, i);
-            reviews.put(i, numCnt);
+        public void join (MemberRequestDto requestDto){
+            Member member = new Member(requestDto.getUsername(), passwordEncoder.encode(requestDto.getPassword()));
+            memberRepository.save(member);
         }
-        List<Map.Entry<Integer, Long>> highs =
-                reviews.entrySet().stream().sorted(Map.Entry.comparingByValue()).collect(Collectors.toList());
-        for (int j = Math.toIntExact(reviewCnt) - 1; j > reviewCnt - 6; j--) {
-            Map.Entry<Integer, Long> high = highs.get(j);
-            System.out.println("key" + high.getKey() + "value" + high.getValue());
-            sortedReview.put(high.getKey(), high.getValue());
-        }
+
+        public SimpleReviewResponseDto simpleReview (Long memberId){
+            Member member = memberRepository.findById(memberId).orElseThrow(
+                    () -> new RuntimeException("찾을 수 없는 사용자입니다.")
+            );
+            Map<Integer, Long> reviews = new HashMap<>();
+            Map<Integer, Long> sortedReview = new HashMap<>();
+            Long reviewCnt = reviewRepository.countByTo(member);
+            System.out.println(reviewCnt);
+            for (int i = 0; i < reviewCnt; i++) {
+                Long numCnt = reviewRepository.countByToAndNum(member, i);
+                reviews.put(i, numCnt);
+            }
+            List<Map.Entry<Integer, Long>> highs =
+                    reviews.entrySet().stream().sorted(Map.Entry.comparingByValue()).collect(Collectors.toList());
+            for (int j = Math.toIntExact(reviewCnt) - 1; j > reviewCnt - 6; j--) {
+                Map.Entry<Integer, Long> high = highs.get(j);
+                System.out.println("key" + high.getKey() + "value" + high.getValue());
+                sortedReview.put(high.getKey(), high.getValue());
+            }
 //        for (int i = 1; i <=5; i++) {
 //            Long numCnt = reviewRepository.countByToAndNum(member, i);
 //            plusReview.put(i, numCnt);
@@ -532,199 +530,199 @@ public class MemberService {
 //            Long numCnt = reviewRepository.countByToAndNum(member, i+10);
 //            minusReview.put(i, numCnt);
 //        }
-        return new SimpleReviewResponseDto(sortedReview);
-    }
+            return new SimpleReviewResponseDto(sortedReview);
+        }
 
-    public List<Review> Review(Long memberId) {
-        return reviewRepository.findAllById(memberId);
-    }
+        public List<Review> Review (Long memberId){
+            return reviewRepository.findAllById(memberId);
+        }
 
-    public MyPostInfoResponseDto mypostinformation(UserDetailsImpl userDetails, int page, int amount) {
-        // page 함수
-        Sort.Direction direction = Sort.Direction.DESC;
-        String sortby ="createdAt";
-        Sort sort = Sort.by(direction, sortby);
-        Pageable pageable = PageRequest.of(page, amount, sort);
+        public MyPostInfoResponseDto mypostinformation (UserDetailsImpl userDetails,int page, int amount){
+            // page 함수
+            Sort.Direction direction = Sort.Direction.DESC;
+            String sortby = "createdAt";
+            Sort sort = Sort.by(direction, sortby);
+            Pageable pageable = PageRequest.of(page, amount, sort);
 
-        Member member = memberRepository.findById(userDetails.getMember().getId()).orElseThrow(
-                () -> new RuntimeException("찾을 수 없는 사용자입니다.")
-        );
+            Member member = memberRepository.findById(userDetails.getMember().getId()).orElseThrow(
+                    () -> new RuntimeException("찾을 수 없는 사용자입니다.")
+            );
 //        List<Board> boards = boardRepository.findByMemberAndBoardType(member, "information");
-        Page<Board> boards = boardRepository.findByMemberAndBoardType(member, "information", pageable);
-        List<MyListInfoResponseDto> boardInfo = new ArrayList<>();
-        for (Board board : boards) {
-            MyListMemberResponseDto myListMemberResponseDto = new MyListMemberResponseDto(board.getMember().getUsername(),
-                    board.getMember().getNickname(),
-                    board.getMember().getProfile());
-            MyListInfoResponseDto responseDto = new MyListInfoResponseDto(board.getId(),
-                    board.getBoardType(),
-                    board.getCategory().getCategory(),
-                    board.getTitle(),
-                    board.getContent(),
-                    board.getLikeCount(),
-                    board.getViewCount(),
-                    board.getCommentCount(),
-                    board.getBoardimage(),
-                    board.getCreatedAt(),
-                    myListMemberResponseDto);
-            boardInfo.add(responseDto);
+            Page<Board> boards = boardRepository.findByMemberAndBoardType(member, "information", pageable);
+            List<MyListInfoResponseDto> boardInfo = new ArrayList<>();
+            for (Board board : boards) {
+                MyListMemberResponseDto myListMemberResponseDto = new MyListMemberResponseDto(board.getMember().getUsername(),
+                        board.getMember().getNickname(),
+                        board.getMember().getProfile());
+                MyListInfoResponseDto responseDto = new MyListInfoResponseDto(board.getId(),
+                        board.getBoardType(),
+                        board.getCategory().getCategory(),
+                        board.getTitle(),
+                        board.getContent(),
+                        board.getLikeCount(),
+                        board.getViewCount(),
+                        board.getCommentCount(),
+                        board.getBoardimage(),
+                        board.getCreatedAt(),
+                        myListMemberResponseDto);
+                boardInfo.add(responseDto);
+            }
+            Long informationCount = boardRepository.countByMemberAndAndBoardType(member, "information");
+            return new MyPostInfoResponseDto(informationCount, boardInfo);
         }
-        Long informationCount = boardRepository.countByMemberAndAndBoardType(member, "information");
-        return new MyPostInfoResponseDto(informationCount, boardInfo);
-    }
 
 
-    public MypostResponseDto mypostmatching(UserDetailsImpl userDetails, int page, int amount) {
-        // page 함수
-        Sort.Direction direction = Sort.Direction.DESC;
-        String sortby ="createdAt";
-        Sort sort = Sort.by(direction, sortby);
-        Pageable pageable = PageRequest.of(page, amount, sort);
+        public MypostResponseDto mypostmatching (UserDetailsImpl userDetails,int page, int amount){
+            // page 함수
+            Sort.Direction direction = Sort.Direction.DESC;
+            String sortby = "createdAt";
+            Sort sort = Sort.by(direction, sortby);
+            Pageable pageable = PageRequest.of(page, amount, sort);
 
-        Member member = memberRepository.findById(userDetails.getMember().getId()).orElseThrow(
-                () -> new RuntimeException("찾을 수 없는 사용자입니다.")
-        );
+            Member member = memberRepository.findById(userDetails.getMember().getId()).orElseThrow(
+                    () -> new RuntimeException("찾을 수 없는 사용자입니다.")
+            );
 //        List<Board> boards = boardRepository.findByMemberAndBoardType(member, "matching");
-        Page<Board> boards = boardRepository.findByMemberAndBoardType(member, "matching", pageable);
-        List<MyListResponseDto> boardInfo = new ArrayList<>();
-        for (Board board : boards) {
-            MyListMemberResponseDto myListMemberResponseDto = new MyListMemberResponseDto(board.getMember().getUsername(),
-                    board.getMember().getNickname(),
-                    board.getMember().getProfile());
-            MyListResponseDto responseDto = new MyListResponseDto(board.getId(),
-                    board.getBoardType(),
-                    board.getCategory().getCategory(),
-                    board.getTitle(),
-                    board.getContent(),
-                    board.getEndDateAt(),
-                    board.getLikeCount(),
-                    board.getViewCount(),
-                    board.getCommentCount(),
-                    board.getCity(),
-                    board.getGu(),
-                    board.getLat(),
-                    board.getLng(),
-                    board.getBoardimage(),
-                    board.getMaxEntry(),
-                    board.getCurrentEntry(),
-                    board.getCreatedAt(),
-                    myListMemberResponseDto);
-            boardInfo.add(responseDto);
+            Page<Board> boards = boardRepository.findByMemberAndBoardType(member, "matching", pageable);
+            List<MyListResponseDto> boardInfo = new ArrayList<>();
+            for (Board board : boards) {
+                MyListMemberResponseDto myListMemberResponseDto = new MyListMemberResponseDto(board.getMember().getUsername(),
+                        board.getMember().getNickname(),
+                        board.getMember().getProfile());
+                MyListResponseDto responseDto = new MyListResponseDto(board.getId(),
+                        board.getBoardType(),
+                        board.getCategory().getCategory(),
+                        board.getTitle(),
+                        board.getContent(),
+                        board.getEndDateAt(),
+                        board.getLikeCount(),
+                        board.getViewCount(),
+                        board.getCommentCount(),
+                        board.getCity(),
+                        board.getGu(),
+                        board.getLat(),
+                        board.getLng(),
+                        board.getBoardimage(),
+                        board.getMaxEntry(),
+                        board.getCurrentEntry(),
+                        board.getCreatedAt(),
+                        myListMemberResponseDto);
+                boardInfo.add(responseDto);
+            }
+            Long matchingCount = boardRepository.countByMemberAndAndBoardType(member, "matching");
+            return new MypostResponseDto(matchingCount, boardInfo);
         }
-        Long matchingCount = boardRepository.countByMemberAndAndBoardType(member, "matching");
-        return new MypostResponseDto(matchingCount, boardInfo);
-    }
 
-    public MypostResponseDto myentry(UserDetailsImpl userDetails, int page, int amount) {
-        // page 함수
-        Sort.Direction direction = Sort.Direction.DESC;
-        String sortby ="createdAt";
-        Sort sort = Sort.by(direction, sortby);
-        Pageable pageable = PageRequest.of(page, amount, sort);
+        public MypostResponseDto myentry (UserDetailsImpl userDetails,int page, int amount){
+            // page 함수
+            Sort.Direction direction = Sort.Direction.DESC;
+            String sortby = "createdAt";
+            Sort sort = Sort.by(direction, sortby);
+            Pageable pageable = PageRequest.of(page, amount, sort);
 
-        Member member = memberRepository.findById(userDetails.getMember().getId()).orElseThrow(
-                () -> new RuntimeException("찾을 수 없는 사용자입니다.")
-        );
+            Member member = memberRepository.findById(userDetails.getMember().getId()).orElseThrow(
+                    () -> new RuntimeException("찾을 수 없는 사용자입니다.")
+            );
 //        List<Entry> entries = entryRepository.findByMember(member);
-        Page<Entry> entries = entryRepository.findByMember(member, pageable);
-        List<MyListResponseDto> boardInfo = new ArrayList<>();
-        for (Entry entry : entries) {
-            MyListMemberResponseDto myListMemberResponseDto = new MyListMemberResponseDto(entry.getBoard().getMember().getUsername(),
-                    entry.getBoard().getMember().getNickname(),
-                    entry.getBoard().getMember().getProfile());
-            MyListResponseDto responseDto = new MyListResponseDto(entry.getBoard().getId(),
-                    entry.getBoard().getBoardType(),
-                    entry.getBoard().getCategory().getCategory(),
-                    entry.getBoard().getTitle(),
-                    entry.getBoard().getContent(),
-                    entry.getBoard().getEndDateAt(),
-                    entry.getBoard().getLikeCount(),
-                    entry.getBoard().getViewCount(),
-                    entry.getBoard().getCommentCount(),
-                    entry.getBoard().getCity(),
-                    entry.getBoard().getGu(),
-                    entry.getBoard().getLat(),
-                    entry.getBoard().getLng(),
-                    entry.getBoard().getBoardimage(),
-                    entry.getBoard().getMaxEntry(),
-                    entry.getBoard().getCurrentEntry(),
-                    entry.getBoard().getCreatedAt(),
-                    myListMemberResponseDto);
-            boardInfo.add(responseDto);
+            Page<Entry> entries = entryRepository.findByMember(member, pageable);
+            List<MyListResponseDto> boardInfo = new ArrayList<>();
+            for (Entry entry : entries) {
+                MyListMemberResponseDto myListMemberResponseDto = new MyListMemberResponseDto(entry.getBoard().getMember().getUsername(),
+                        entry.getBoard().getMember().getNickname(),
+                        entry.getBoard().getMember().getProfile());
+                MyListResponseDto responseDto = new MyListResponseDto(entry.getBoard().getId(),
+                        entry.getBoard().getBoardType(),
+                        entry.getBoard().getCategory().getCategory(),
+                        entry.getBoard().getTitle(),
+                        entry.getBoard().getContent(),
+                        entry.getBoard().getEndDateAt(),
+                        entry.getBoard().getLikeCount(),
+                        entry.getBoard().getViewCount(),
+                        entry.getBoard().getCommentCount(),
+                        entry.getBoard().getCity(),
+                        entry.getBoard().getGu(),
+                        entry.getBoard().getLat(),
+                        entry.getBoard().getLng(),
+                        entry.getBoard().getBoardimage(),
+                        entry.getBoard().getMaxEntry(),
+                        entry.getBoard().getCurrentEntry(),
+                        entry.getBoard().getCreatedAt(),
+                        myListMemberResponseDto);
+                boardInfo.add(responseDto);
+            }
+            Long totalCount = entryRepository.countByMember(member);
+            return new MypostResponseDto(totalCount, boardInfo);
         }
-        Long totalCount = entryRepository.countByMember(member);
-        return new MypostResponseDto(totalCount, boardInfo);
-    }
 
-    public MypostCommentResponseDto mycommentinformation(UserDetailsImpl userDetails, int page, int amount) {
-        // page 함수
-        Sort.Direction direction = Sort.Direction.DESC;
-        String sortby ="createdAt";
-        Sort sort = Sort.by(direction, sortby);
-        Pageable pageable = PageRequest.of(page, amount, sort);
+        public MypostCommentResponseDto mycommentinformation (UserDetailsImpl userDetails,int page, int amount){
+            // page 함수
+            Sort.Direction direction = Sort.Direction.DESC;
+            String sortby = "createdAt";
+            Sort sort = Sort.by(direction, sortby);
+            Pageable pageable = PageRequest.of(page, amount, sort);
 
-        Member member = memberRepository.findById(userDetails.getMember().getId()).orElseThrow(
-                () -> new RuntimeException("찾을 수 없는 사용자입니다.")
-        );
-        List<MyCommentResponseDto> commentList = new ArrayList<>();
+            Member member = memberRepository.findById(userDetails.getMember().getId()).orElseThrow(
+                    () -> new RuntimeException("찾을 수 없는 사용자입니다.")
+            );
+            List<MyCommentResponseDto> commentList = new ArrayList<>();
 //        List<Comment> comments = commentRepository.findAllByMember(member);
-        Page<Comment> comments = commentRepository.findAllByMemberAndBoardType(member, "information",pageable);
-        for (Comment comment : comments){
-            MyListMemberResponseDto myListMemberResponseDto = new MyListMemberResponseDto(comment.getMember().getUsername(),
-                    comment.getMember().getNickname(),
-                    comment.getMember().getProfile());
-            MyCommentResponseDto responseDto = new MyCommentResponseDto(
-                    comment.getId(),
-                    comment.getBoard().getTitle(),
-                    comment.getBoard().getId(),
-                    comment.getCreatedAt().format(DateTimeFormatter.ofPattern("yyyy/MM/dd HH:mm")),
-                    comment.getComment(),
-                    comment.getBoardType(),
-                    myListMemberResponseDto);
-            commentList.add(responseDto);
+            Page<Comment> comments = commentRepository.findAllByMemberAndBoardType(member, "information", pageable);
+            for (Comment comment : comments) {
+                MyListMemberResponseDto myListMemberResponseDto = new MyListMemberResponseDto(comment.getMember().getUsername(),
+                        comment.getMember().getNickname(),
+                        comment.getMember().getProfile());
+                MyCommentResponseDto responseDto = new MyCommentResponseDto(
+                        comment.getId(),
+                        comment.getBoard().getTitle(),
+                        comment.getBoard().getId(),
+                        comment.getCreatedAt().format(DateTimeFormatter.ofPattern("yyyy/MM/dd HH:mm")),
+                        comment.getComment(),
+                        comment.getBoardType(),
+                        myListMemberResponseDto);
+                commentList.add(responseDto);
+            }
+            Long informationCount = commentRepository.countByMemberAndBoardType(member, "information");
+            return new MypostCommentResponseDto(informationCount, commentList);
         }
-        Long informationCount = commentRepository.countByMemberAndBoardType(member, "information");
-        return new MypostCommentResponseDto(informationCount, commentList);
-    }
 
-    public MypostCommentResponseDto mycommentmatching(UserDetailsImpl userDetails, int page, int amount) {
-        // page 함수
-        Sort.Direction direction = Sort.Direction.DESC;
-        String sortby ="createdAt";
-        Sort sort = Sort.by(direction, sortby);
-        Pageable pageable = PageRequest.of(page, amount, sort);
+        public MypostCommentResponseDto mycommentmatching (UserDetailsImpl userDetails,int page, int amount){
+            // page 함수
+            Sort.Direction direction = Sort.Direction.DESC;
+            String sortby = "createdAt";
+            Sort sort = Sort.by(direction, sortby);
+            Pageable pageable = PageRequest.of(page, amount, sort);
 
-        Member member = memberRepository.findById(userDetails.getMember().getId()).orElseThrow(
-                () -> new RuntimeException("찾을 수 없는 사용자입니다.")
-        );
-        List<MyCommentResponseDto> commentList = new ArrayList<>();
+            Member member = memberRepository.findById(userDetails.getMember().getId()).orElseThrow(
+                    () -> new RuntimeException("찾을 수 없는 사용자입니다.")
+            );
+            List<MyCommentResponseDto> commentList = new ArrayList<>();
 //        List<Comment> comments = commentRepository.findAllByMember(member);
-        Page<Comment> comments = commentRepository.findAllByMemberAndBoardType(member, "matching",pageable);
-        for (Comment comment : comments){
-            MyListMemberResponseDto myListMemberResponseDto = new MyListMemberResponseDto(comment.getMember().getUsername(),
-                    comment.getMember().getNickname(),
-                    comment.getMember().getProfile());
-            MyCommentResponseDto responseDto = new MyCommentResponseDto(
-                    comment.getId(),
-                    comment.getBoard().getTitle(),
-                    comment.getBoard().getId(),
-                    comment.getCreatedAt().format(DateTimeFormatter.ofPattern("yyyy/MM/dd HH:mm")),
-                    comment.getComment(),
-                    comment.getBoardType(),
-                    myListMemberResponseDto);
-            commentList.add(responseDto);
+            Page<Comment> comments = commentRepository.findAllByMemberAndBoardType(member, "matching", pageable);
+            for (Comment comment : comments) {
+                MyListMemberResponseDto myListMemberResponseDto = new MyListMemberResponseDto(comment.getMember().getUsername(),
+                        comment.getMember().getNickname(),
+                        comment.getMember().getProfile());
+                MyCommentResponseDto responseDto = new MyCommentResponseDto(
+                        comment.getId(),
+                        comment.getBoard().getTitle(),
+                        comment.getBoard().getId(),
+                        comment.getCreatedAt().format(DateTimeFormatter.ofPattern("yyyy/MM/dd HH:mm")),
+                        comment.getComment(),
+                        comment.getBoardType(),
+                        myListMemberResponseDto);
+                commentList.add(responseDto);
+            }
+            Long matchingCount = commentRepository.countByMemberAndBoardType(member, "matching");
+            return new MypostCommentResponseDto(matchingCount, commentList);
         }
-        Long matchingCount = commentRepository.countByMemberAndBoardType(member, "matching");
-        return new MypostCommentResponseDto(matchingCount, commentList);
-    }
 
 
-    // 유저의 닉네임으로 유저 조회
-    public Member getMember(String nickname) {
-        return memberRepository.findByNickname(nickname).orElseThrow(() -> new IllegalArgumentException("회원이 아닙니다."));
-    }
+        // 유저의 닉네임으로 유저 조회
+        public Member getMember (String nickname){
+            return memberRepository.findByNickname(nickname).orElseThrow(() -> new IllegalArgumentException("회원이 아닙니다."));
+        }
 
-    public void logout(UserDetailsImpl userDetails) {
-        redisUtil.deleteData(userDetails.getUsername()+JwtProperties.HEADER_REFRESH);
+        public void logout (UserDetailsImpl userDetails){
+            redisUtil.deleteData(userDetails.getUsername() + JwtProperties.HEADER_REFRESH);
+        }
     }
-}

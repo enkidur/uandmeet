@@ -41,7 +41,7 @@ public class Member {
     private String profile; // 이미지
 
     //    @OneToMany(mappedBy = "member", fetch = FetchType.LAZY)
-    @Column
+    @Column(name = "concern_key")
     @ElementCollection(fetch = FetchType.LAZY)
     private List<String> concern;
 
