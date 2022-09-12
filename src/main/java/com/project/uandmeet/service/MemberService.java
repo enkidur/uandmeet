@@ -563,7 +563,7 @@ public class MemberService {
                         board.getViewCount(),
                         board.getCommentCount(),
                         board.getBoardimage(),
-                        board.getCreatedAt(),
+                        board.getCreatedAt().format(DateTimeFormatter.ofPattern("yyyy/MM/dd HH:mm")),
                         myListMemberResponseDto);
                 boardInfo.add(responseDto);
             }
@@ -598,8 +598,8 @@ public class MemberService {
                         board.getLikeCount(),
                         board.getViewCount(),
                         board.getCommentCount(),
-                        board.getCity(),
-                        board.getGu(),
+                        board.getCity().getCtpKorNmAbbreviation(),
+                        board.getGu().getSigKorNm(),
                         board.getLat(),
                         board.getLng(),
                         board.getBoardimage(),
@@ -630,7 +630,8 @@ public class MemberService {
                 MyListMemberResponseDto myListMemberResponseDto = new MyListMemberResponseDto(entry.getBoard().getMember().getUsername(),
                         entry.getBoard().getMember().getNickname(),
                         entry.getBoard().getMember().getProfile());
-                MyListResponseDto responseDto = new MyListResponseDto(entry.getBoard().getId(),
+                MyListResponseDto responseDto = new MyListResponseDto(
+                        entry.getBoard().getId(),
                         entry.getBoard().getBoardType(),
                         entry.getBoard().getCategory().getCategory(),
                         entry.getBoard().getTitle(),
@@ -639,8 +640,8 @@ public class MemberService {
                         entry.getBoard().getLikeCount(),
                         entry.getBoard().getViewCount(),
                         entry.getBoard().getCommentCount(),
-                        entry.getBoard().getCity(),
-                        entry.getBoard().getGu(),
+                        entry.getBoard().getCity().getCtpKorNmAbbreviation(),
+                        entry.getBoard().getGu().getSigKorNm(),
                         entry.getBoard().getLat(),
                         entry.getBoard().getLng(),
                         entry.getBoard().getBoardimage(),
@@ -687,7 +688,7 @@ public class MemberService {
 
         public MypostCommentResponseDto mycommentmatching (UserDetailsImpl userDetails,int page, int amount){
             // page 함수
-            Sort.Direction direction = Sort.Direction.DESC;
+            Sort.Direction direction = Sort.Direction.ASC;
             String sortby = "createdAt";
             Sort sort = Sort.by(direction, sortby);
             Pageable pageable = PageRequest.of(page, amount, sort);

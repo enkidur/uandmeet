@@ -22,8 +22,8 @@ public class MyListResponseDto {
     private Long viewCount;
     //댓글 수
     private Long commentCount;
-    private Siarea city;
-    private Guarea gu;
+    private String city;
+    private String gu;
     //경도
     private String lat;
     //위도
@@ -36,7 +36,7 @@ public class MyListResponseDto {
     private String createdAt;
     private MyListMemberResponseDto writer;
 
-    public MyListResponseDto(Long boardId, String boardType, String category, String title, String content, String endDateAt, Long likeCount, Long viewCount, Long commentCount, Siarea city, Guarea gu,String lat, String lng, String boardimage, Long maxEntry, Long currentEntry, String createdAt,MyListMemberResponseDto writer) {
+    public MyListResponseDto(Long boardId, String boardType, String category, String title, String content, String endDateAt, Long likeCount, Long viewCount, Long commentCount, String city, String gu,String lat, String lng, String boardimage, Long maxEntry, Long currentEntry, String createdAt,MyListMemberResponseDto writer) {
         this.boardId = boardId;
         this.boardType = boardType;
         this.category = category;

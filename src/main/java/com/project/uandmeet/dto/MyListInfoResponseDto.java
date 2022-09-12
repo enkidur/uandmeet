@@ -20,11 +20,11 @@ public class MyListInfoResponseDto {
     private Long commentCount;
 
     private String boardimage;
-    private LocalDateTime endDateAt;
+    private String createdAt;
 
     private MyListMemberResponseDto writer;
 
-    public MyListInfoResponseDto(Long boardId, String boardType, String category, String title, String content, Long likeCount, Long viewCount, Long commentCount, String boardimage, LocalDateTime createdAt,MyListMemberResponseDto writer) {
+    public MyListInfoResponseDto(Long boardId, String boardType, String category, String title, String content, Long likeCount, Long viewCount, Long commentCount, String boardimage, String createdAt, MyListMemberResponseDto writer) {
         this.boardId = boardId;
         this.boardType = boardType;
         this.category = category;
@@ -34,7 +34,7 @@ public class MyListInfoResponseDto {
         this.viewCount = viewCount;
         this.commentCount = commentCount;
         this.boardimage = boardimage;
-        this.endDateAt = createdAt;
+        this.createdAt = createdAt;
         this.writer = writer;
     }
 }

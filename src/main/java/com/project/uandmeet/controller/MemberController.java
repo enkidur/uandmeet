@@ -281,7 +281,7 @@ public class MemberController {
         return ResponseEntity.ok(memberService.mypostmatching(userDetails, page, amount));
     }
 
-    // 나의 게시글(신청글)
+    // 나의 게시글(내가 신청한 글)
     @GetMapping("/api/myentry")
     public ResponseEntity<MypostResponseDto> myentry(@AuthenticationPrincipal UserDetailsImpl userDetails,
                                                      @RequestParam int page,
