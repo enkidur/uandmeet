@@ -21,6 +21,10 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestTemplate;
+
+import javax.servlet.http.HttpServletResponse;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.UUID;
 
 @Transactional
@@ -34,7 +38,7 @@ public class KakaoService {
     private final RedisUtil redisUtil;
 
 
-    public void kakaoLogin(String code) throws JsonProcessingException {
+    public Map<String, String> kakaoLogin(String code) throws JsonProcessingException {
         // 1. "인가 코드"로 "액세스 토큰" 요청
         String kakaoToken = getKakoToken(code);
 
@@ -42,7 +46,7 @@ public class KakaoService {
         KakaoUserInfoDto kakaoUserInfo = getKaKaoUserInfo(kakaoToken);
 
         // 필요 시 회원가입
-        registerKakaoIfNeeded(kakaoUserInfo);
+        return registerKakaoIfNeeded(kakaoUserInfo);
 
         // 4. 강제 로그인 처리
 //        froceLogin(member);
@@ -118,7 +122,7 @@ public class KakaoService {
     }
 
 
-    private Member registerKakaoIfNeeded(KakaoUserInfoDto kakaoUserInfo) {
+    private Map<String, String> registerKakaoIfNeeded(KakaoUserInfoDto kakaoUserInfo) {
         // DB 에 중복된 Kakao Id 가 있는지 확인
 //        String id = kakaoUserInfo.getId();
 //        System.out.println(id);
@@ -142,14 +146,13 @@ public class KakaoService {
             member = new Member(nickname, encodedPassword, username, gender);
             member.setLoginto("kakao");
             memberRepository.save(member);
-            createToken(member);
+            return createToken(member);
         } else {
-            createToken(member);
+            return createToken(member);
         }
-        return member;
     }
 
-    private void createToken(Member member) {
+    private Map<String, String> createToken(Member member) {
 
         String accessToken = jwtTokenProvider.createToken(member.getUsername(), member.getId());
         String refreshToken = jwtTokenProvider.createRefreshToken(member.getUsername());
@@ -178,11 +181,19 @@ public class KakaoService {
         // token 을 Header 에 발급
         // 재발급떼문에 set 사용
         HttpHeaders headers = new HttpHeaders();
+        Map<String, String> userInfo = new HashMap<>();
         headers.set(JwtProperties.HEADER_ACCESS, JwtProperties.TOKEN_PREFIX + accessToken);
+        userInfo.put("username", member.getUsername());
+        userInfo.put("nickname", member.getNickname());
+        userInfo.put("profile", member.getProfile());
+        userInfo.put("loginto", member.getLoginto());
+        // 헤더에 보이지 않음
         headers.set("username", member.getUsername());
         headers.set("nickname", member.getNickname());
         headers.set("profile", member.getProfile());
         headers.set("loginto", member.getLoginto());
+
+        return userInfo;
 //        headers.set(JwtProperties.HEADER_REFRESH, JwtProperties.TOKEN_PREFIX + refreshToken);
     }
 

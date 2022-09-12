@@ -242,10 +242,9 @@ public class MemberController {
 
     // kakao login
     @GetMapping("/user/kakao/callback")
-    public ResponseEntity<String> kakaoLogin(@RequestParam String code) throws JsonProcessingException {
+    public ResponseEntity<Map<String, String>> kakaoLogin(@RequestParam String code) throws JsonProcessingException {
         // authorizedCode: 카카오 서버로부터 받은 인가 코드
-        kakaoService.kakaoLogin(code);
-        return ResponseEntity.ok("완료");
+        return ResponseEntity.ok(kakaoService.kakaoLogin(code));
     }
 
     // OAuth 로그인을 해도 UserDetailsImpl

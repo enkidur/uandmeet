@@ -61,5 +61,6 @@ public class OAuth2SuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
                 .queryParam("nickname", nickname)
                 .queryParam("profile", profile)
                 .build().toUriString();
+
     }
 }

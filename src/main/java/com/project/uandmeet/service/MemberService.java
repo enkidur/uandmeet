@@ -149,7 +149,7 @@ public class MemberService {
     // 회원 탈퇴
     @Transactional
     public String withdraw(UserDetailsImpl userDetails, String password) {
-        if (userDetails.getPassword().equals(passwordEncoder.encode(password))) {
+        if (userDetails.getPassword().matches(passwordEncoder.encode(password))) {
             String username = userDetails.getUsername();
 
             List<Entry> entries = entryRepository.findByMember(userDetails.getMember());
@@ -441,11 +441,15 @@ public class MemberService {
 
             String nickname = member.getNickname();
             Double sum = 0D;
-            Double star = 0D;
-            for (int i = 0; i < review.size(); i++) {
-                sum += review.get(i).getEvaluation_items();
+            Double star;
+            for (Review value : review) {
+                sum += value.getEvaluation_items();
             }
-            star = sum / review.size(); // 평균 별점
+            if (sum == 0) {
+                star = 0D;
+            } else {
+                star = sum / review.size(); // 평균 별점
+            }
             String profile = member.getProfile();
             ProfileDto profileDto = new ProfileDto(nickname, star, profile);
             return profileDto;
@@ -456,16 +460,20 @@ public class MemberService {
         {
             Long userId = userDetails.getMember().getId();
             Member member = memberRepository.findById(userId).orElseThrow(
-                    () -> new RuntimeException("볼수 없는 정보입니다")
+                    () -> new CustomException(ErrorCode.MEMBER_NOT_FOUND)
             );
             List<Review> review = reviewRepository.findByTo(member);
             String nickname = member.getNickname();
             Double sum = 0D;
-            Double star = 0D;
-            for (int i = 0; i < review.size(); i++) {
-                sum += review.get(i).getEvaluation_items();
+            Double star;
+            for (Review value : review) {
+                sum += value.getEvaluation_items();
             }
-            star = sum / review.size();
+            if (sum == 0) {
+                star = 0D;
+            } else {
+                star = sum / review.size(); // 평균 별점
+            }
             if (requestDto.getData() != null) {
                 ImageDto uploadImage = s3Uploader.upload(requestDto.getData(), POST_IMAGE_DIR);
                 member.setProfile(uploadImage.getImageUrl());
@@ -498,10 +506,10 @@ public class MemberService {
 
         public SimpleReviewResponseDto simpleReview (Long memberId){
             Member member = memberRepository.findById(memberId).orElseThrow(
-                    () -> new RuntimeException("찾을 수 없는 사용자입니다.")
+                    () -> new CustomException(ErrorCode.MEMBER_NOT_FOUND)
             );
-            Map<Integer, Long> reviews = new HashMap<>();
-            Map<Integer, Long> sortedReview = new HashMap<>();
+            Map<Integer, Long> reviews = new LinkedHashMap<>();
+            Map<Integer, Long> sortedReview = new LinkedHashMap<>();
             Long reviewCnt = reviewRepository.countByTo(member);
             System.out.println(reviewCnt);
             for (int i = 0; i < reviewCnt; i++) {
@@ -510,19 +518,18 @@ public class MemberService {
             }
             List<Map.Entry<Integer, Long>> highs =
                     reviews.entrySet().stream().sorted(Map.Entry.comparingByValue()).collect(Collectors.toList());
-            for (int j = Math.toIntExact(reviewCnt) - 1; j > reviewCnt - 6; j--) {
-                Map.Entry<Integer, Long> high = highs.get(j);
-                System.out.println("key" + high.getKey() + "value" + high.getValue());
-                sortedReview.put(high.getKey(), high.getValue());
+            if (reviewCnt < 6) {
+                for (int i = Math.toIntExact(reviewCnt)-1 ; i >= 0; i--) {
+                    Map.Entry<Integer, Long> high = highs.get(i);
+                    sortedReview.put(high.getKey(), high.getValue());
+                }
+            } else {
+                for (int i = Math.toIntExact(reviewCnt) - 1; i > reviewCnt - 6; i--) {
+                    Map.Entry<Integer, Long> high = highs.get(i);
+                    System.out.println("key" + high.getKey() + "value" + high.getValue());
+                    sortedReview.put(high.getKey(), high.getValue());
+                }
             }
-//        for (int i = 1; i <=5; i++) {
-//            Long numCnt = reviewRepository.countByToAndNum(member, i);
-//            plusReview.put(i, numCnt);
-//        }
-//        for (int i = 1; i <=5; i++) {
-//            Long numCnt = reviewRepository.countByToAndNum(member, i+10);
-//            minusReview.put(i, numCnt);
-//        }
             return new SimpleReviewResponseDto(sortedReview);
         }
 

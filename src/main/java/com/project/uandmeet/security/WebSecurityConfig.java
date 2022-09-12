@@ -9,6 +9,7 @@ import com.project.uandmeet.redis.RedisUtil;
 import com.project.uandmeet.security.jwt.JwtAuthenticationFilter;
 import com.project.uandmeet.security.jwt.JwtAuthorizationFilter;
 import com.project.uandmeet.exception.JwtTokenExceptionFilter;
+import com.project.uandmeet.security.jwt.JwtProperties;
 import com.project.uandmeet.security.jwt.JwtTokenProvider;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -111,12 +112,16 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
 //        configuration.addAllowedOriginPattern("http://localhost:3000");
-        configuration.addAllowedOriginPattern("http://13.209.65.84:8080");
+        configuration.addAllowedOriginPattern("http://3.35.9.167:8080");
         //이곳에 관련 url 추가 해야합니다 도메인,리액트(?) 등
         configuration.addAllowedMethod("*");
         configuration.addAllowedHeader("*");
-        configuration.addExposedHeader("Authorization");
-        configuration.addExposedHeader("RefreshToken");
+        configuration.addExposedHeader("Authorization"); // 없으면 프론트측 Header에 나타나지않고 network에만 나타나게됨
+        configuration.addExposedHeader(JwtProperties.HEADER_ACCESS); // 없으면 프론트측 Header에 나타나지않고 network에만 나타나게됨
+        configuration.addExposedHeader("username");
+        configuration.addExposedHeader("nickname");
+        configuration.addExposedHeader("profile");
+        configuration.addExposedHeader("loginto");
         configuration.setAllowCredentials(true);
 //        configuration.validateAllowCredentials();
         configuration.setMaxAge(3600L);
