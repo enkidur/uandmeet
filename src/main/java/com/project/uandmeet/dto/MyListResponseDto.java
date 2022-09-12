@@ -33,10 +33,10 @@ public class MyListResponseDto {
     private Long maxEntry;
     //매칭참여 수
     private Long currentEntry;
-    private LocalDateTime createdAt;
+    private String createdAt;
     private MyListMemberResponseDto writer;
 
-    public MyListResponseDto(Long boardId, String boardType, String category, String title, String content, String endDateAt, Long likeCount, Long viewCount, Long commentCount, Siarea city, Guarea gu,String lat, String lng, String boardimage, Long maxEntry, Long currentEntry, LocalDateTime createdAt,MyListMemberResponseDto writer) {
+    public MyListResponseDto(Long boardId, String boardType, String category, String title, String content, String endDateAt, Long likeCount, Long viewCount, Long commentCount, Siarea city, Guarea gu,String lat, String lng, String boardimage, Long maxEntry, Long currentEntry, String createdAt,MyListMemberResponseDto writer) {
         this.boardId = boardId;
         this.boardType = boardType;
         this.category = category;

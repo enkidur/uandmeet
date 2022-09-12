@@ -33,6 +33,9 @@ public enum ErrorCode {
     DUPLICATE_NICKNAME(HttpStatus.CONFLICT, "중복된 닉네임이 존재합니다"),
     DUPLICATE_APPLY(HttpStatus.CONFLICT, "이미 참여한 매칭입니다."),
 
+    DUPLICATE_REVIEW(HttpStatus.CONFLICT, "이미 참여한 리뷰입니다."),
+
+
     /*FRIEND 관련 에러코드*/
     /*유저 이름이 같을 때 보내는 코드*/
     FRIENDNAME_OVERLAP(HttpStatus.NON_AUTHORITATIVE_INFORMATION, "이미 친구로 등록 하였습니다."),

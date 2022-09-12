@@ -180,6 +180,10 @@ public class KakaoService {
         // 재발급떼문에 set 사용
         HttpHeaders headers = new HttpHeaders();
         headers.set(JwtProperties.HEADER_ACCESS, JwtProperties.TOKEN_PREFIX + accessToken);
+        headers.set("username", member.getUsername());
+        headers.set("nickname", member.getNickname());
+        headers.set("profile", member.getProfile());
+        headers.set("loginto", member.getLoginto());
 //        headers.set(JwtProperties.HEADER_REFRESH, JwtProperties.TOKEN_PREFIX + refreshToken);
     }
 

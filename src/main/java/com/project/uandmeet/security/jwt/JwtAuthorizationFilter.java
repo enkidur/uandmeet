@@ -36,7 +36,7 @@ public class JwtAuthorizationFilter extends BasicAuthenticationFilter {
         String header = request.getHeader(JwtProperties.HEADER_ACCESS);
         // 로그인, 리프레시 요청이라면 토큰 검사하지 않음
         // 리프레시 요청은 만료된 토큰을 파싱하기 위해 검사하지 않음
-        if (request.getServletPath().equals("/login") || request.getServletPath().equals("/api/refresh")) {
+        if (request.getServletPath().equals("/login") || request.getServletPath().equals("/api/refresh") ||request.getServletPath().equals("/user/kakao/callback")) {
             chain.doFilter(request, response);
         } else if (header == null || !header.startsWith(JwtProperties.TOKEN_PREFIX)) {
             chain.doFilter(request, response);

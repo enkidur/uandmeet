@@ -605,7 +605,7 @@ public class MemberService {
                         board.getBoardimage(),
                         board.getMaxEntry(),
                         board.getCurrentEntry(),
-                        board.getCreatedAt(),
+                        board.getCreatedAt().format(DateTimeFormatter.ofPattern("yyyy/MM/dd HH:mm")),
                         myListMemberResponseDto);
                 boardInfo.add(responseDto);
             }
@@ -646,7 +646,7 @@ public class MemberService {
                         entry.getBoard().getBoardimage(),
                         entry.getBoard().getMaxEntry(),
                         entry.getBoard().getCurrentEntry(),
-                        entry.getBoard().getCreatedAt(),
+                        entry.getBoard().getCreatedAt().format(DateTimeFormatter.ofPattern("yyyy/MM/dd HH:mm")),
                         myListMemberResponseDto);
                 boardInfo.add(responseDto);
             }
