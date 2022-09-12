@@ -410,7 +410,7 @@ public class MemberService {
         }
 
         // info -> gender 수정
-        public MyPageInfoDto genderedit (UserDetailsImpl userDetails, InfoeditRequestDto requestDto){
+        public MyPageInfoDto genderedit (UserDetailsImpl userDetails, InfogenderDto requestDto){
             String username = userDetails.getUsername();
             Long userId = userDetails.getMember().getId();
             Member member = memberRepository.findById(userId).orElseThrow(
@@ -450,10 +450,11 @@ public class MemberService {
 
             String nickname = member.getNickname();
             Double sum = 0D;
+            Double star = 0D;
             for (int i = 0; i < review.size(); i++) {
                 sum += review.get(i).getEvaluation_items();
             }
-            Double star = sum / review.size(); // 평균 별점
+            star = sum / review.size(); // 평균 별점
             String profile = member.getProfile();
             ProfileDto profileDto = new ProfileDto(nickname, star, profile);
             return profileDto;
@@ -469,10 +470,11 @@ public class MemberService {
             List<Review> review = reviewRepository.findByTo(member);
             String nickname = member.getNickname();
             Double sum = 0D;
+            Double star = 0D;
             for (int i = 0; i < review.size(); i++) {
                 sum += review.get(i).getEvaluation_items();
             }
-            Double star = sum / review.size();
+            star = sum / review.size();
             if (requestDto.getData() != null) {
                 ImageDto uploadImage = s3Uploader.upload(requestDto.getData(), POST_IMAGE_DIR);
                 member.setProfile(uploadImage.getImageUrl());

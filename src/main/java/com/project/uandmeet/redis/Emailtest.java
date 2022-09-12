@@ -16,14 +16,14 @@ import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
-public class EmailService {
+public class Emailtest {
     @Autowired
     private JavaMailSenderImpl mailSender; //Application 에서 빈 등록했기 때문에 주입받을 수 있다.
 
     private final MemberRepository memberRepository;
     @Autowired
     private RedisUtil redisUtil;
-    //    private String authNumber; // 난수 번호
+//    private String authNumber; // 난수 번호
     private int emailCnt = 0; // email 인증 횟수
     //
     public String makeRandomNumber() {
@@ -44,6 +44,7 @@ public class EmailService {
         if (Integer.parseInt(redisUtil.getData("Cnt" + email)) < 4) {
             redisUtil.setDataExpire("Cnt" + email, String.valueOf(emailCnt + 1),60 * 60L);
             int restCnt = 3 - Integer.parseInt(redisUtil.getData("Cnt" + email));
+            makeRandomNumber();
             //인증메일 보내기
             String setFrom = "wkraudcka@naver.com"; // email-config에 설정한 자신의 이메일 주소를 입력
             String toMail = email;
@@ -62,14 +63,14 @@ public class EmailService {
                             "		아래 <b style=\"color: #00CFFF\">'인증 번호'</b> 를 입력하여 회원가입을 완료해 주세요.<br />"																													+
                             "		감사합니다."																																															+
                             "	</p>"																																																	+
-                            "          <div style=\"text-align: center;\"><h1><b style=\"color: #00CFFF\" >" + redisUtil.getData("Auth" + email) + "<br /><h1></div>"																																										+
+                            "          <div style=\"text-align: center;\"><h1><b style=\"color: #00CFFF\" >" + redisUtil.getData("Cnt" + email) + "<br /><h1></div>"																																										+
                             "	<div style=\"border-top: 1px solid #DDD; padding: 5px;\"></div>"																																		+
                             "<br>" +
                             "남은 인증 횟수 : " + restCnt +
                             " </div>";
 
             mailSend(setFrom, toMail, title, content);
-            return "인증 번호 :" + redisUtil.getData("Auth" + email) + "남은 횟수 :"+ restCnt;
+            return "인증 번호 :" + redisUtil.getData("Cnt" + email) + "남은 횟수 :"+ restCnt;
         }
         return "인증 횟수를 초과하였습니다. 1시간 뒤에 다시 시도해 주세요.";
     }
@@ -101,7 +102,7 @@ public class EmailService {
     }
 
     public String checkAuthNum(String authNum, String email) {
-        return String.valueOf(authNum.equals(redisUtil.getData("Auth" + email)));
+        return String.valueOf(authNum.equals(redisUtil.getData("Cnt" + email)));
     }
 
 }

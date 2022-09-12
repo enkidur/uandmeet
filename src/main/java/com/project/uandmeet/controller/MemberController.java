@@ -31,7 +31,7 @@ public class MemberController {
 
     // 회원가입 1. emali check
     @PostMapping("/api/checkemail")
-    public ResponseEntity<String> checkemail(@RequestBody EmailDto requestDto) throws IOException {
+    public ResponseEntity<String> checkemail(@RequestBody EmailDto requestDto) {
 //        // 헤더에 전달
 //        HttpHeaders headers = new HttpHeaders();
 //        headers.set("level","1");
@@ -72,7 +72,7 @@ public class MemberController {
     @PostMapping("/api/checkAuthNum")
     public @ResponseBody ResponseEntity<String> checkAuthNum(@RequestBody AuthNumDto requestDto) {
 //        String level = redisUtil.getData(username + "level");
-        ResponseEntity<String> res = ResponseEntity.ok(emailService.checkAuthNum(requestDto.getAuthNum()));
+        ResponseEntity<String> res = ResponseEntity.ok(emailService.checkAuthNum(requestDto.getAuthNum(), requestDto.getUsername()));
 //        int val = Integer.parseInt(level);
 //        if (val < 2) {
 //            return ResponseEntity.ok("잘못된 접근입니다.");
@@ -83,7 +83,7 @@ public class MemberController {
 
     // 회원가입 4. password check
     @PostMapping("/api/checkpassword")
-    public ResponseEntity<String> checkPassword(@RequestBody MemberRequestDto requestDto) throws IOException {
+    public ResponseEntity<String> checkPassword(@RequestBody MemberRequestDto requestDto) {
 //        String level = redisUtil.getData(username + "level");
         memberService.checkPassword(requestDto.getPassword(), requestDto.getPasswordCheck());
         ResponseEntity<String> res = ResponseEntity.ok(memberService.signup(requestDto));
@@ -197,7 +197,7 @@ public class MemberController {
     // myinfo -> gender 수정
     @PutMapping("/api/mypage/infoedit/gender")
     public ResponseEntity<MyPageInfoDto> genderedit(@AuthenticationPrincipal UserDetailsImpl userDetails,
-                                                    @RequestBody InfoeditRequestDto requestDto) {
+                                                    @RequestBody InfogenderDto requestDto) {
         return ResponseEntity.ok(memberService.genderedit(userDetails, requestDto));
     }
 

@@ -5,4 +5,5 @@ import lombok.Getter;
 @Getter
 public class AuthNumDto {
     private String authNum;
+    private String username;
 }

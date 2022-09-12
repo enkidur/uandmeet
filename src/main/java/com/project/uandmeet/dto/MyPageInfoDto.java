@@ -10,7 +10,7 @@ public class MyPageInfoDto {
     private String username;
     private String gender;
     private Map<String, Long> birth;
-    private String password;
+
 
     public MyPageInfoDto(String username, String gender, Map<String, Long> birth) {
         this.username = username;

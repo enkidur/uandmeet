@@ -114,8 +114,7 @@ public class KakaoService {
                         .get("gender").asText();
         System.out.println("jsonNode :"+jsonNode);
         System.out.println("카카오 사용자 정보: " + nickname + ", " + email + ", " + gender);
-        KakaoUserInfoDto kakaoUserInfoDto = new KakaoUserInfoDto(nickname, email, gender);
-        return kakaoUserInfoDto;
+        return new KakaoUserInfoDto(nickname, email, gender);
     }
 
 
