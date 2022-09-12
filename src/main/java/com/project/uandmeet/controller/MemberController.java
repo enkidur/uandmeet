@@ -138,7 +138,7 @@ public class MemberController {
     // 8. 클라이언트는 새롭게 받은 Access Token 을 기존의 Access Token 에 덮어쓰게 된다.
     @GetMapping("/api/refresh")
     public ResponseEntity<Map<String, String>> refresh(HttpServletRequest request,
-                                                       HttpServletResponse response) {
+                                                       HttpServletResponse response) throws JsonProcessingException {
         Map<String, String> tokens = memberService.refresh(request, response);
         return ResponseEntity.ok(tokens);
     }
@@ -185,9 +185,7 @@ public class MemberController {
     public ResponseEntity<MypageDto> concernedit(@AuthenticationPrincipal UserDetailsImpl userDetails,
                                                  @RequestBody ConcernDto requestDto) {
         return ResponseEntity.ok(memberService.concernedit(userDetails,
-                requestDto.getConcern1(),
-                requestDto.getConcern2(),
-                requestDto.getConcern3()));
+                requestDto.getConcerns()));
     }
 
     //myInfo 페이지
