@@ -539,7 +539,7 @@ public class MemberService {
 
         public MyPostInfoResponseDto mypostinformation (UserDetailsImpl userDetails,int page, int amount){
             // page 함수
-            Sort.Direction direction = Sort.Direction.DESC;
+            Sort.Direction direction = Sort.Direction.ASC;
             String sortby = "createdAt";
             Sort sort = Sort.by(direction, sortby);
             Pageable pageable = PageRequest.of(page, amount, sort);
@@ -574,7 +574,7 @@ public class MemberService {
 
         public MypostResponseDto mypostmatching (UserDetailsImpl userDetails,int page, int amount){
             // page 함수
-            Sort.Direction direction = Sort.Direction.DESC;
+            Sort.Direction direction = Sort.Direction.ASC;
             String sortby = "createdAt";
             Sort sort = Sort.by(direction, sortby);
             Pageable pageable = PageRequest.of(page, amount, sort);
@@ -615,7 +615,7 @@ public class MemberService {
 
         public MypostResponseDto myentry (UserDetailsImpl userDetails,int page, int amount){
             // page 함수
-            Sort.Direction direction = Sort.Direction.DESC;
+            Sort.Direction direction = Sort.Direction.ASC;
             String sortby = "createdAt";
             Sort sort = Sort.by(direction, sortby);
             Pageable pageable = PageRequest.of(page, amount, sort);
@@ -656,7 +656,7 @@ public class MemberService {
 
         public MypostCommentResponseDto mycommentinformation (UserDetailsImpl userDetails,int page, int amount){
             // page 함수
-            Sort.Direction direction = Sort.Direction.DESC;
+            Sort.Direction direction = Sort.Direction.ASC;
             String sortby = "createdAt";
             Sort sort = Sort.by(direction, sortby);
             Pageable pageable = PageRequest.of(page, amount, sort);
@@ -687,7 +687,7 @@ public class MemberService {
 
         public MypostCommentResponseDto mycommentmatching (UserDetailsImpl userDetails,int page, int amount){
             // page 함수
-            Sort.Direction direction = Sort.Direction.DESC;
+            Sort.Direction direction = Sort.Direction.ASC;
             String sortby = "createdAt";
             Sort sort = Sort.by(direction, sortby);
             Pageable pageable = PageRequest.of(page, amount, sort);
