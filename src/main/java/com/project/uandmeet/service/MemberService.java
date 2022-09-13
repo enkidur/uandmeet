@@ -455,7 +455,7 @@ public class MemberService {
             Member member = memberRepository.findById(userId).orElseThrow(
                     () -> new RuntimeException("볼수 없는 정보입니다")
             );
-            List<Review> review = reviewRepository.findByTo(member);
+            List<Review> review = reviewRepository.findByTo(userId);
 
             String nickname = member.getNickname();
             Double sum = 0D;
@@ -480,7 +480,7 @@ public class MemberService {
             Member member = memberRepository.findById(userId).orElseThrow(
                     () -> new CustomException(ErrorCode.MEMBER_NOT_FOUND)
             );
-            List<Review> review = reviewRepository.findByTo(member);
+            List<Review> review = reviewRepository.findByTo(userId);
             String nickname = member.getNickname();
             Double sum = 0D;
             Double star;
@@ -528,10 +528,10 @@ public class MemberService {
             );
             Map<Integer, Long> reviews = new LinkedHashMap<>();
             Map<Integer, Long> sortedReview = new LinkedHashMap<>();
-            Long reviewCnt = reviewRepository.countByTo(member);
+            Long reviewCnt = reviewRepository.countByTo(member.getId());
             System.out.println(reviewCnt);
             for (int i = 0; i < reviewCnt; i++) {
-                Long numCnt = reviewRepository.countByToAndNum(member, i);
+                Long numCnt = reviewRepository.countByToAndNum(member.getId(), i);
                 reviews.put(i, numCnt);
             }
             List<Map.Entry<Integer, Long>> highs =

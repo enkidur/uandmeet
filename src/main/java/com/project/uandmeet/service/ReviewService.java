@@ -54,7 +54,7 @@ public class ReviewService {
             throw new CustomException(ErrorCode.INVALID_AUTHORITY);
         }
         // 이미 참여한 리뷰일 경우
-        if (reviewRepository.existsByToAndBoard(board.getMember(), board)) {
+        if (reviewRepository.existsByToAndAndBoardId(board.getMember().getId(), board.getId())) {
             throw new CustomException(ErrorCode.DUPLICATE_REVIEW);
         }
 

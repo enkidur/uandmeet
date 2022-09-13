@@ -10,8 +10,8 @@ import java.util.List;
 public interface ReviewRepository extends JpaRepository<Review, Long> {
 
     List<Review> findAllById(Long memberId);
-    Long countByTo(Member to);
-    Long countByToAndNum(Member to, int i);
-    List<Review> findByTo(Member to);
-    boolean existsByToAndBoard(Member to, Board board);
+    Long countByTo(Long to);
+    Long countByToAndNum(Long to, int i);
+    List<Review> findByTo(Long to);
+    boolean existsByToAndAndBoardId(Long to, Long boardId);
 }
