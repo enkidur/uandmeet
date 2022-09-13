@@ -43,15 +43,14 @@
 - [Team notion](https://invincible-flag-377.notion.site/SA-3-395d4213d8b340c0a095245fdcd6aa8d)
 - [Github Back-End repo](https://github.com/enkidur/uandmeet)
 - [Github Front-End repo](https://github.com/whtnqls124578/CloneCodding)
-
 <br>
 
-## 주요 작업 및 기능
+## 🚀 주요 작업 및 기능
 #### 백엔드
-- 제공페이지 : 로그인, 회원가입, 메인페이지, 장바구니
-- JWT를 활용한 회원가입 & 로그인
-- 장바구니 기능
-- POST CRUD
+- 😃 제공페이지 : 로그인, 회원가입, 메인페이지, 장바구니
+- 😃 JWT를 활용한 회원가입 & 로그인
+- 😃 장바구니 기능
+- 😃 POST CRUD
 #### 프론트엔드
 - 전체 css
 - 로그인, 회원가입(세션스토리지)
