@@ -23,7 +23,6 @@ public class SearchService {
 
     private final BoardRepository boardRepository;
 
-
     public List<SearchResponseDto> queryDslSearch(String boardType,int page, int size, String sort, String keyword, String city, String gu) {
 
         if (page > 0)
@@ -53,16 +52,34 @@ public class SearchService {
             List<SearchResponseDto> boardList = new ArrayList<>();
 
             result.stream().forEach(board -> {
-                if(board.getCity().getCtpKorNmAbbreviation().equals(city) && board.getGu().getSigKorNm().equals(gu)){
+
+                // 정보 공유일때
+                if(board.getBoardType().equals("information")){
 
                     Long id = board.getId();
+                    String bt = "information";
                     Board board1 = boardRepository.findById(id).orElseThrow(() -> new NullPointerException("보드가 없습니다"));
 
-                    SearchResponseDto responseDto = new SearchResponseDto(board1);
+                    SearchResponseDto responseDto = new SearchResponseDto(board1,bt);
 
                     boardList.add(responseDto);
 
                 }
+
+                // 매칭 게시판일때
+                else{
+
+                    if(board.getCity().getCtpKorNmAbbreviation().equals(city) && board.getGu().getSigKorNm().equals(gu)){
+
+                        Long id = board.getId();
+                        Board board1 = boardRepository.findById(id).orElseThrow(() -> new NullPointerException("보드가 없습니다"));
+
+                        SearchResponseDto responseDto = new SearchResponseDto(board1);
+                        boardList.add(responseDto);
+                    }
+
+                }
+
             });
             return boardList;
         }
@@ -89,16 +106,34 @@ public class SearchService {
             List<SearchResponseDto> boardList = new ArrayList<>();
 
             result.stream().forEach(board -> {
-                if(board.getCity().getCtpKorNmAbbreviation().equals(city) && board.getGu().getSigKorNm().equals(gu)){
 
+                // 정보 공유일때
+                if(board.getBoardType().equals("information")){
                     Long id = board.getId();
+                    String bt = "information";
                     Board board1 = boardRepository.findById(id).orElseThrow(() -> new NullPointerException("보드가 없습니다"));
 
-                    SearchResponseDto responseDto = new SearchResponseDto(board1);
+                    SearchResponseDto responseDto = new SearchResponseDto(board1,bt);
 
                     boardList.add(responseDto);
+                }
+
+                // 매칭 게시판일때
+                else{
+
+                    if(board.getCity().getCtpKorNmAbbreviation().equals(city) && board.getGu().getSigKorNm().equals(gu)){
+
+                        Long id = board.getId();
+                        Board board1 = boardRepository.findById(id).orElseThrow(() -> new NullPointerException("보드가 없습니다"));
+
+                        SearchResponseDto responseDto = new SearchResponseDto(board1);
+
+                        boardList.add(responseDto);
+
+                    }
 
                 }
+
             });
             return boardList;
         }
@@ -129,14 +164,30 @@ public class SearchService {
             List<SearchResponseDto> boardList = new ArrayList<>();
 
             result.stream().forEach(board -> {
-                if(board.getCity().getCtpKorNmAbbreviation().equals(city) && board.getGu().getSigKorNm().equals(gu)) {
+
+                // 정보 공유일때
+                if(board.getBoardType().equals("information")){
 
                     Long id = board.getId();
+                    String bt = "information";
                     Board board1 = boardRepository.findById(id).orElseThrow(() -> new NullPointerException("보드가 없습니다"));
 
-                    SearchResponseDto responseDto = new SearchResponseDto(board1);
+                    SearchResponseDto responseDto = new SearchResponseDto(board1,bt);
 
                     boardList.add(responseDto);
+                }
+
+                // 매칭 게시판일때
+                else{
+                    if(board.getCity().getCtpKorNmAbbreviation().equals(city) && board.getGu().getSigKorNm().equals(gu)){
+
+                        Long id = board.getId();
+                        Board board1 = boardRepository.findById(id).orElseThrow(() -> new NullPointerException("보드가 없습니다"));
+
+                        SearchResponseDto responseDto = new SearchResponseDto(board1);
+
+                        boardList.add(responseDto);
+                    }
                 }
             });
 

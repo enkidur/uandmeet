@@ -35,7 +35,7 @@ public class BoardResponseDto {
         this.city = board.getCity().getCtpKorNmAbbreviation();
         this.gu = board.getGu().getSigKorNm();
         this.id = board.getId();
-        this.createdAt = board.getCreatedAt().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:SS:ss.SSS"));
+        this.createdAt = board.getCreatedAt().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.SSS"));
         this.category = board.getCategory().getCategory();
         this.endDateAt = board.getEndDateAt();
         this.content = board.getContent();
@@ -50,7 +50,7 @@ public class BoardResponseDto {
     {
         this.memberSimpleDto = memberSimpleDto;
         this.id = board.getId();
-        this.createdAt = board.getCreatedAt().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:SS:ss.SSS"));
+        this.createdAt = board.getCreatedAt().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.SSS"));
         this.category = board.getCategory().getCategory();
         this.endDateAt = board.getEndDateAt();
         this.content = board.getContent();
@@ -66,7 +66,7 @@ public class BoardResponseDto {
         this.city = board.getCity().getCtpKorNmAbbreviation();
         this.gu = board.getGu().getSigKorNm();
         this.id = board.getId();
-        this.createdAt = board.getCreatedAt().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:SS:ss.SSS"));
+        this.createdAt = board.getCreatedAt().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.SSS"));
         this.category = board.getCategory().getCategory();
         this.endDateAt = board.getEndDateAt();
         this.content = board.getContent();

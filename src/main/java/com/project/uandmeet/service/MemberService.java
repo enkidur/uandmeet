@@ -3,6 +3,7 @@ package com.project.uandmeet.service;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.project.uandmeet.dto.*;
+import com.project.uandmeet.dto.boardDtoGroup.LikeDto;
 import com.project.uandmeet.exception.CustomException;
 import com.project.uandmeet.exception.ErrorCode;
 import com.project.uandmeet.model.*;
@@ -19,6 +20,8 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -148,8 +151,10 @@ public class MemberService {
 
     // 회원 탈퇴
     @Transactional
-    public String withdraw(UserDetailsImpl userDetails, String password) {
-        if (userDetails.getPassword().matches(passwordEncoder.encode(password))) {
+    public ResponseEntity<String> withdraw(UserDetailsImpl userDetails, String password) {
+        ResponseEntity<String> responseEntity = null;
+
+        if (passwordEncoder.matches(password,userDetails.getPassword())) {
             String username = userDetails.getUsername();
 
             List<Entry> entries = entryRepository.findByMember(userDetails.getMember());
@@ -161,25 +166,38 @@ public class MemberService {
                         .orElseGet(() -> null);
 
                 if (board != null) {
+                    entryRepository.delete(entry);
                     board.setCurrentEntry(board.getCurrentEntry() - 1);
                     boardRepository.save(board);
                 }
+
             }
 
             //좋아요 참여 했던 것들 지우기.
-            for (Entry entry : entries) {
-                Board board = boardRepository.findById(entry.getBoard().getId())
+            for (Liked liked : likeds) {
+                Board board = boardRepository.findById(liked.getBoard().getId())
                         .orElseGet(() -> null);
 
                 if (board != null) {
-                    board.setCurrentEntry(board.getCurrentEntry() - 1);
+                    likedRepository.delete(liked);
+                    board.setLikeCount(board.getLikeCount() - 1);
                     boardRepository.save(board);
                 }
             }
 
-            memberRepository.deleteByUsername(username);
+            try {
+                memberRepository.deleteByUsername(username);
+                responseEntity = ResponseEntity.ok("회원 탈퇴 완료.");
+            }catch (Exception e)
+            {
+                System.out.println(e);
+                responseEntity = ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(String.valueOf(e));
+            }
         }
-        return "회원탈퇴 완료";
+        else
+            responseEntity = ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("잘못된 비밀번호입니다.");
+
+        return responseEntity;
     }
 
 //    public void accessAndRefreshTokenProcess(String username) {

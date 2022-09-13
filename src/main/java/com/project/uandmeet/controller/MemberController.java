@@ -2,6 +2,7 @@ package com.project.uandmeet.controller;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.project.uandmeet.dto.*;
+import com.project.uandmeet.exception.CustomException;
 import com.project.uandmeet.model.Review;
 import com.project.uandmeet.security.UserDetailsImpl;
 import com.project.uandmeet.service.EmailService;
@@ -122,10 +123,10 @@ public class MemberController {
     }
 
     // 회원 탈퇴
-    @PostMapping("/api/withdraw")
+    @DeleteMapping("/api/withdraw")
     public ResponseEntity<String> withdraw(@AuthenticationPrincipal UserDetailsImpl userDetails,
                                            @RequestBody PasswordDto requestDto) {
-        return ResponseEntity.ok(memberService.withdraw(userDetails, requestDto.getPassword()));
+        return memberService.withdraw(userDetails, requestDto.getPassword());
     }
 
     // 1. 클라이언트에서 로그인한다.
