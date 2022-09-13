@@ -30,10 +30,13 @@ public class ReviewService {
 
     public ReviewResponseDto review(UserDetailsImpl userDetails, Long boardId) {
         String nickname = userDetails.getMember().getNickname();
-        Board board = boardRepository.findByBoardTypeAndId("matching", boardId).orElseThrow(
+
+        Board board = boardRepository.findById(boardId).orElseThrow(
                 () -> new RuntimeException("찾을 수 없는 게시글입니다.")
         );
-        Member otherMember = board.getMember();
+
+        String otherMember = board.getMember().getNickname();
+
         ReviewResponseDto reviewResponseDto = new ReviewResponseDto(nickname, otherMember);
         return reviewResponseDto;
     }
