@@ -2,13 +2,13 @@
 <img src="src/main/resources/image/kurly.PNG" width="700" height="400" />
 </div>
 
-## 마켓 컬리(클론 코딩) 소개
-마켓 컬리를 클론 코딩 해보았습니다.
+## UandMeet 소개
+맟춤 운동 매칭 , 정보 공유 사이트 입니다.
 ## 프로젝트 개요
 <br>
-마켓 컬리의 기능을 몇가지를 선택해 디자인 및 기능을 따라 구현하는 
+지역별로 같이 운동할 사람을 매칭하고, 정보까지 공유할 수 있는
 <br>
-클론코딩 프로젝트입니다. 
+게시판 위주의 사이트입니다.
 
 #### 🗓 2022.07.29 - 2022.08.04 (1주)
 #### 🙋‍♂️ 팀원
@@ -19,12 +19,12 @@
     <td colspan="4">Back-End</td>
   </tr>
   <tr>
+    <td>조현오</td>
     <td>박정원</td>
-    <td>조수빈</td>
-    <td>송주영</td>
-    <td>안상록</td>
-    <td>안홍주</td>
+    <td>이민호</td>
     <td>이성훈</td>
+    <td>장정훈</td>
+    <td>홍산의</td>
   </tr>
   <tr>
     <td><img src="https://img.shields.io/badge/React-61DAFB?style=flat-square&logo=React&logoColor=white"/></td>
