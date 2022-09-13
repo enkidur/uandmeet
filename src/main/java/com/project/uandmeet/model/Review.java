@@ -6,6 +6,7 @@ import lombok.RequiredArgsConstructor;
 
 import javax.persistence.*;
 import java.sql.Timestamp;
+import java.util.List;
 
 @Getter
 @Entity
@@ -45,10 +46,11 @@ public class Review extends BaseTime{
 
     // 별점
     @Column
-    private int num;
+    @ElementCollection(fetch = FetchType.LAZY)
+    private List<Integer> num;
 
 
-    public Review(Long boardId , Long from, Long to, int num, Long score, String review) {
+    public Review(Long boardId , Long from, Long to, List<Integer> num, Long score, String review) {
         this.boardId = boardId;
         this.from = from;
         this.to = to;

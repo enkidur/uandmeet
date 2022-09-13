@@ -18,7 +18,9 @@ import java.sql.Timestamp;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 
 @Service
 @Slf4j
@@ -58,13 +60,18 @@ public class ReviewService {
             throw new CustomException(ErrorCode.DUPLICATE_REVIEW);
         }
 
-        Review review = new Review(board.getId(), from.getId(), board.getMember().getId(), requestDto.getNum(), requestDto.getScore(), requestDto.getReview());
+        List<Integer> nums = new ArrayList<>(); // 초기화
+        for (int num : requestDto.getNum()) {
+            nums.add(num);
+        }
+
+        Review review = new Review(board.getId(), from.getId(), board.getMember().getId(), nums, requestDto.getScore(), requestDto.getReview());
         reviewRepository.save(review);
         return new ReviewDto(board.getId(),
                 from.getId(),
                 board.getMember().getId(),
                 board.getMember().getNickname(),
-                requestDto.getNum(),
+                nums,
                 requestDto.getScore(),
                 requestDto.getReview());
     }

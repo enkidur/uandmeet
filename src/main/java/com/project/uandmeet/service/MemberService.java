@@ -362,8 +362,6 @@ public class MemberService {
             member.setConcern(concern);
             Map<String, Long> joinCnt = new HashMap<>();
             if (cnt == 0) {
-                System.out.println(concern);
-                log.info(String.valueOf(concern));
                 return new MypageDto(nickname, concern);
             }
             for (int i = 0; i < cnt; i++) {
@@ -529,7 +527,6 @@ public class MemberService {
             Map<Integer, Long> reviews = new LinkedHashMap<>();
             Map<Integer, Long> sortedReview = new LinkedHashMap<>();
             Long reviewCnt = reviewRepository.countByTo(member.getId());
-            System.out.println(reviewCnt);
             for (int i = 0; i < reviewCnt; i++) {
                 Long numCnt = reviewRepository.countByToAndNum(member.getId(), i);
                 reviews.put(i, numCnt);

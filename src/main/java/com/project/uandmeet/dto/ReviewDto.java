@@ -4,6 +4,8 @@ import com.project.uandmeet.model.Board;
 import com.project.uandmeet.model.Member;
 import lombok.Getter;
 
+import java.util.List;
+
 
 @Getter
 public class ReviewDto {
@@ -24,9 +26,9 @@ public class ReviewDto {
     //단일 평가점수
     private Long evaluation_items;
 
-    private int num;
+    private List<Integer> num;
 
-    public ReviewDto(Long board, Long from, Long boardUserId, String toNickname, int num, Long score, String review) {
+    public ReviewDto(Long board, Long from, Long boardUserId, String toNickname, List<Integer> num, Long score, String review) {
         this.board = board;
         this.from = from;
         this.toId = boardUserId;
