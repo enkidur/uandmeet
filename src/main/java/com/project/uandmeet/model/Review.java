@@ -19,16 +19,21 @@ public class Review extends BaseTime{
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "board")
-    private Board board;
+//    @ManyToOne(fetch = FetchType.LAZY)
+//    @JoinColumn(name = "board")
+//    private Board board;
+    @Column(name = "board")
+    private Long boardId;
 
     @Column(name = "form_member")
     private Long from;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "to_member")
-    private Member to;
+//    @ManyToOne(fetch = FetchType.LAZY)
+//    @JoinColumn(name = "to_member")
+//    private Member to;
+
+    @Column(name = "to_member")
+    private Long to;
 
     //리뷰 메시지
     @Column(nullable = false)
@@ -43,8 +48,8 @@ public class Review extends BaseTime{
     private int num;
 
 
-    public Review(Board board, Long from, Member to, int num, Long score, String review) {
-        this.board = board;
+    public Review(Long boardId , Long from, Long to, int num, Long score, String review) {
+        this.boardId = boardId;
         this.from = from;
         this.to = to;
         this.num = num;

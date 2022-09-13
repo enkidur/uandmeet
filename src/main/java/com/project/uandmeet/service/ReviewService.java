@@ -58,7 +58,7 @@ public class ReviewService {
             throw new CustomException(ErrorCode.DUPLICATE_REVIEW);
         }
 
-        Review review = new Review(board, from.getId(), board.getMember(), requestDto.getNum(), requestDto.getScore(), requestDto.getReview());
+        Review review = new Review(board.getId(), from.getId(), board.getMember().getId(), requestDto.getNum(), requestDto.getScore(), requestDto.getReview());
         reviewRepository.save(review);
         return new ReviewDto(board.getId(),
                 from.getId(),
