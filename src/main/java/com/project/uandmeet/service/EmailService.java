@@ -69,7 +69,7 @@ public class EmailService {
                             " </div>";
 
             mailSend(setFrom, toMail, title, content);
-            return "인증 번호 :" + redisUtil.getData("Auth" + email) + "남은 횟수 :"+ restCnt;
+            return "남은 횟수 :"+ restCnt;
         }
         return "인증 횟수를 초과하였습니다. 1시간 뒤에 다시 시도해 주세요.";
     }

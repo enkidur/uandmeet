@@ -228,7 +228,7 @@ public class MemberService {
         jwtTokenProvider.validateToken(authorizationHeader);
         String username = jwtTokenProvider.getUserPk(authorizationHeader);
         Member member = memberRepository.findByUsername(username).orElseThrow(
-                () -> new RuntimeException("사용자를 찾을 수 없습니다.")
+                () -> new CustomException(ErrorCode.MEMBER_NOT_FOUND)
         );
         Long userId = member.getId();
         // Access Token 재발급
@@ -264,7 +264,7 @@ public class MemberService {
             int restCnt = 3 - Integer.parseInt(redisUtil.getData("Cnt" + username));
 
             Member member = memberRepository.findByUsername(username).orElseThrow(
-                    () -> new IllegalArgumentException("해당 아이디가 없습니다.")
+                    () -> new CustomException(ErrorCode.MEMBER_NOT_FOUND)
             );
 
             //인증메일 보내기
@@ -307,10 +307,10 @@ public class MemberService {
     public String passChange(UserDetailsImpl userDetails, PasswordChangeDto passwordChangeDto) {
         Long userId = userDetails.getMember().getId();
         Member member = memberRepository.findById(userId).orElseThrow(
-                () -> new RuntimeException("해당 권한이 없습니다.")
+                () -> new CustomException(ErrorCode.MEMBER_NOT_FOUND)
         );
         if (!passwordChangeDto.getNewPassword().equals(passwordChangeDto.getNewPasswordCheck())) {
-            throw new RuntimeException("비밀번호가 일치하지 않습니다.");
+            throw new CustomException(ErrorCode.PASSWORD_PASSWORDCHECK);
         } else {
             member.setPassword(passwordEncoder.encode(passwordChangeDto.getNewPassword()));
         }
@@ -321,7 +321,7 @@ public class MemberService {
     public MypageDto action(UserDetailsImpl userDetails) {
         Long userId = userDetails.getMember().getId();
         Member member = memberRepository.findById(userId).orElseThrow(
-                () -> new RuntimeException("볼수 없는 정보입니다")
+                () -> new CustomException(ErrorCode.MEMBER_NOT_FOUND)
         );
         List<Entry> entry = entryRepository.findByMember(member); // 참여한 매칭 리스트
         String nickname = member.getNickname();
@@ -345,7 +345,7 @@ public class MemberService {
         public MypageDto concernedit (UserDetailsImpl userDetails, String[]concerns){
             Long userId = userDetails.getMember().getId();
             Member member = memberRepository.findById(userId).orElseThrow(
-                    () -> new RuntimeException("수정 권한이 없습니다.")
+                    () -> new CustomException(ErrorCode.MEMBER_NOT_FOUND)
             );
             List<Entry> entry = entryRepository.findByMember(member); // 참여한 매칭 리스트
             Long cnt = entryRepository.countByMember(member); // 참여한 매칭 수
@@ -377,7 +377,7 @@ public class MemberService {
         public MypageDto nicknameedit (UserDetailsImpl userDetails, String nickname){
             Long userId = userDetails.getMember().getId();
             Member member = memberRepository.findById(userId).orElseThrow(
-                    () -> new RuntimeException("수정 권한이 없습니다.")
+                    () -> new CustomException(ErrorCode.MEMBER_NOT_FOUND)
             );
             List<Entry> entry = entryRepository.findByMember(member); // 참여한 매칭 리스트
             Long cnt = entryRepository.countByMember(member); // 참여한 매칭
@@ -397,7 +397,7 @@ public class MemberService {
             if (usingnickname == null) {
                 member.setNickname(nickname);
             } else {
-                throw new RuntimeException("이미 존재하는 닉네임입니다.");
+                throw new CustomException(ErrorCode.DUPLICATE_NICKNAME);
             }
             MypageDto mypageDto = new MypageDto(nickname, concern, joinCnt);
             return mypageDto;
@@ -408,7 +408,7 @@ public class MemberService {
             String username = userDetails.getUsername();
             Long userId = userDetails.getMember().getId();
             Member member = memberRepository.findById(userId).orElseThrow(
-                    () -> new RuntimeException("볼 수 없는 정보입니다")
+                    () -> new CustomException(ErrorCode.MEMBER_NOT_FOUND)
             );
             String gender = member.getGender();
             Map<String, Long> birth = member.getBirth(); // year, month, day
@@ -421,7 +421,7 @@ public class MemberService {
             String username = userDetails.getUsername();
             Long userId = userDetails.getMember().getId();
             Member member = memberRepository.findById(userId).orElseThrow(
-                    () -> new RuntimeException("볼 수 없는 정보입니다")
+                    () -> new CustomException(ErrorCode.MEMBER_NOT_FOUND)
             );
             String gender = requestDto.getGender();
             member.setGender(gender);
@@ -435,7 +435,7 @@ public class MemberService {
             String username = userDetails.getUsername();
             Long userId = userDetails.getMember().getId();
             Member member = memberRepository.findById(userId).orElseThrow(
-                    () -> new RuntimeException("볼 수 없는 정보입니다")
+                    () -> new CustomException(ErrorCode.MEMBER_NOT_FOUND)
             );
             String gender = member.getGender();
             Map<String, Long> birth = new HashMap<>();
@@ -451,7 +451,7 @@ public class MemberService {
         public ProfileDto profile (UserDetailsImpl userDetails){
             Long userId = userDetails.getMember().getId();
             Member member = memberRepository.findById(userId).orElseThrow(
-                    () -> new RuntimeException("볼수 없는 정보입니다")
+                    () -> new CustomException(ErrorCode.MEMBER_NOT_FOUND)
             );
             List<Review> review = reviewRepository.findByTo(userId);
 
@@ -507,8 +507,8 @@ public class MemberService {
             Member member = memberRepository.findById(userId).orElseThrow(
                     () -> new CustomException(ErrorCode.MEMBER_NOT_FOUND)
             );
-            if (!passwordEncoder.encode(passwordChangeDto.getPasswordCheck()).equals(member.getPassword()) && !passwordChangeDto.getNewPassword().equals(passwordChangeDto.getNewPasswordCheck())) {
-                throw new RuntimeException("비밀번호가 일치하지 않습니다.");
+            if (!passwordEncoder.matches(passwordChangeDto.getPasswordCheck(),userDetails.getPassword()) && !passwordChangeDto.getNewPassword().equals(passwordChangeDto.getNewPasswordCheck())) {
+                throw new CustomException(ErrorCode.PASSWORD_PASSWORDCHECK);
             } else {
                 member.setPassword(passwordEncoder.encode(passwordChangeDto.getNewPassword()));
             }
@@ -560,7 +560,7 @@ public class MemberService {
             Pageable pageable = PageRequest.of(page, amount, sort);
 
             Member member = memberRepository.findById(userDetails.getMember().getId()).orElseThrow(
-                    () -> new RuntimeException("찾을 수 없는 사용자입니다.")
+                    () -> new CustomException(ErrorCode.MEMBER_NOT_FOUND)
             );
 //        List<Board> boards = boardRepository.findByMemberAndBoardType(member, "information");
             Page<Board> boards = boardRepository.findByMemberAndBoardType(member, "information", pageable);
@@ -595,7 +595,7 @@ public class MemberService {
             Pageable pageable = PageRequest.of(page, amount, sort);
 
             Member member = memberRepository.findById(userDetails.getMember().getId()).orElseThrow(
-                    () -> new RuntimeException("찾을 수 없는 사용자입니다.")
+                    () -> new CustomException(ErrorCode.MEMBER_NOT_FOUND)
             );
 //        List<Board> boards = boardRepository.findByMemberAndBoardType(member, "matching");
             Page<Board> boards = boardRepository.findByMemberAndBoardType(member, "matching", pageable);
@@ -636,7 +636,7 @@ public class MemberService {
             Pageable pageable = PageRequest.of(page, amount, sort);
 
             Member member = memberRepository.findById(userDetails.getMember().getId()).orElseThrow(
-                    () -> new RuntimeException("찾을 수 없는 사용자입니다.")
+                    () -> new CustomException(ErrorCode.MEMBER_NOT_FOUND)
             );
 //        List<Entry> entries = entryRepository.findByMember(member);
             Page<Entry> entries = entryRepository.findByMember(member, pageable);
@@ -678,7 +678,7 @@ public class MemberService {
             Pageable pageable = PageRequest.of(page, amount, sort);
 
             Member member = memberRepository.findById(userDetails.getMember().getId()).orElseThrow(
-                    () -> new RuntimeException("찾을 수 없는 사용자입니다.")
+                    () -> new CustomException(ErrorCode.MEMBER_NOT_FOUND)
             );
             List<MyCommentResponseDto> commentList = new ArrayList<>();
 //        List<Comment> comments = commentRepository.findAllByMember(member);
@@ -709,7 +709,7 @@ public class MemberService {
             Pageable pageable = PageRequest.of(page, amount, sort);
 
             Member member = memberRepository.findById(userDetails.getMember().getId()).orElseThrow(
-                    () -> new RuntimeException("찾을 수 없는 사용자입니다.")
+                    () -> new CustomException(ErrorCode.MEMBER_NOT_FOUND)
             );
             List<MyCommentResponseDto> commentList = new ArrayList<>();
 //        List<Comment> comments = commentRepository.findAllByMember(member);
@@ -735,7 +735,9 @@ public class MemberService {
 
         // 유저의 닉네임으로 유저 조회
         public Member getMember (String nickname){
-            return memberRepository.findByNickname(nickname).orElseThrow(() -> new IllegalArgumentException("회원이 아닙니다."));
+            return memberRepository.findByNickname(nickname).orElseThrow(
+                    () -> new CustomException(ErrorCode.MEMBER_NOT_FOUND)
+            );
         }
 
         public void logout (UserDetailsImpl userDetails){

@@ -30,12 +30,15 @@ public class ReviewService {
     private final BoardRepository boardRepository;
     private final EntryRepository entryRepository;
 
-    public ReviewResponseDto review(UserDetailsImpl userDetails, BoardIdRequestDto requestDto) {
+    public ReviewResponseDto review(UserDetailsImpl userDetails, Long boardId) {
         String nickname = userDetails.getMember().getNickname();
-        Board board = boardRepository.findByBoardTypeAndId("matching", requestDto.getBoardId()).orElseThrow(
-                () -> new RuntimeException("찾을 수 없는 게시글입니다.")
+
+        Board board = boardRepository.findById(boardId).orElseThrow(
+                () -> new CustomException(ErrorCode.BOARD_NOT_FOUND)
         );
-        Member otherMember = board.getMember();
+
+        String otherMember = board.getMember().getNickname();
+
         ReviewResponseDto reviewResponseDto = new ReviewResponseDto(nickname, otherMember);
         return reviewResponseDto;
     }
@@ -44,7 +47,7 @@ public class ReviewService {
     public ReviewDto createReview(UserDetailsImpl userDetails, ReviewRequestDto requestDto) throws ParseException {
         Member from = userDetails.getMember();
         Board board = boardRepository.findByBoardTypeAndId("matching", requestDto.getBoardId()).orElseThrow(
-                () -> new RuntimeException("찾을 수 없는 게시글입니다.")
+                () -> new CustomException(ErrorCode.BOARD_NOT_FOUND)
         );
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd"); // 형식 통일
         Date date = sdf.parse(board.getEndDateAt());//String-->Date

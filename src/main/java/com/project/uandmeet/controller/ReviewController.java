@@ -11,10 +11,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.text.ParseException;
 
@@ -26,9 +23,9 @@ public class ReviewController {
     // review 작성 페이지
     @GetMapping("/api/review")
     public ResponseEntity<ReviewResponseDto> Review(@AuthenticationPrincipal UserDetailsImpl userDetails,
-                                                    @RequestBody BoardIdRequestDto requestDto) {
+                                                    @RequestParam(value = "boardId") Long boardId) {
 
-        return ResponseEntity.ok(reviewService.review(userDetails, requestDto));
+        return ResponseEntity.ok(reviewService.review(userDetails, boardId));
     }
 
     //review 작성

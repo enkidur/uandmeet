@@ -662,7 +662,7 @@ public class BoardService {
             }
         } else {
             Category mainCategory = categoryRepository.findAllByCategory(category).orElseThrow(
-                    () -> new RuntimeException("찾을 수 없는 카테고리입니다.")
+                    () -> new CustomException(ErrorCode.BOARD_NOT_FOUND)
             );
             List<Board> mains = boardRepository.findByBoardTypeAndCategoryOrderByLikeCount("information", mainCategory);
             for (Board main : mains) {
@@ -701,7 +701,7 @@ public class BoardService {
             }
         } else {
             Category mainCategory = categoryRepository.findAllByCategory(category).orElseThrow(
-                    () -> new RuntimeException("찾을 수 없는 카테고리입니다.")
+                    () -> new CustomException(ErrorCode.CATEGORY_NOT_FOUND)
             );
             List<Board> mains = boardRepository.findByBoardTypeAndCategoryOrderByLikeCount("matching", mainCategory);
             for (Board main : mains) {
@@ -729,7 +729,7 @@ public class BoardService {
 
     public List<MainPageEntryDto> mainmyentry(UserDetailsImpl userDetails) {
         Member member = memberRepostiory.findById(userDetails.getMember().getId()).orElseThrow(
-                () -> new RuntimeException("찾을 수 없는 사용자입니다.")
+                () -> new CustomException(ErrorCode.MEMBER_NOT_FOUND)
         );
         List<Entry> entries = entryRepository.findByMember(member);
         List<Board> boards = boardRepository.findByMemberAndBoardType(member, "matching");
