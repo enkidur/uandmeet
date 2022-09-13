@@ -772,6 +772,7 @@ public class BoardService {
         }
         return boardInfo;
     }
+
     /*
     @Transactional
     public BoardResponseFinalDto boardMatchingmypageAllInquiry(String type,

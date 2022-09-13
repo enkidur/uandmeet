@@ -46,17 +46,17 @@ public class OAuth2SuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
         redisUtil.setDataExpire(userDetails.getUsername()+JwtProperties.HEADER_REFRESH, JwtProperties.TOKEN_PREFIX + refreshToken, JwtProperties.REFRESH_EXPIRATION_TIME);
 
 
-        String url = makeRedirectUrl(accessToken, refreshToken,username , nickname, profile);
+        String url = makeRedirectUrl(accessToken, username , nickname, profile);
 
         System.out.println("조합된 URL: "+url);
 
         getRedirectStrategy().sendRedirect(request, response, url);
     }
 
-    private String makeRedirectUrl(String access_Token, String refresh_Token,String username,String nickname, String profile) {
+    private String makeRedirectUrl(String access_Token,String username,String nickname, String profile) {
         return UriComponentsBuilder.fromUriString("http://localhost:3000/oauth2/redirect")
                 .queryParam("access_Token", access_Token)
-                .queryParam("refresh_Token", refresh_Token)
+//                .queryParam("refresh_Token", refresh_Token)
                 .queryParam("username", username)
                 .queryParam("nickname", nickname)
                 .queryParam("profile", profile)
