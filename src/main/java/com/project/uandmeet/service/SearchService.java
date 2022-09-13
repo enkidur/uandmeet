@@ -64,21 +64,8 @@ public class SearchService {
                 }
                 // 매칭 게시판일때
                 else{
-                    // city 전체 조회일때 city이름 가져와서 responseDto에 추가
-                    if(gu.equals("all") && board.getCity().getCtpKorNmAbbreviation().equals(city)){
-                        Long id = board.getId();
-                        Board board1 = boardRepository.findById(id).orElseThrow(() -> new NullPointerException("보드가 없습니다"));
 
-                        SearchResponseDto responseDto = new SearchResponseDto(board1);
-                        boardList.add(responseDto);
-                    }
-                    if(board.getCity().getCtpKorNmAbbreviation().equals(city) && board.getGu().getSigKorNm().equals(gu)){
-                        Long id = board.getId();
-                        Board board1 = boardRepository.findById(id).orElseThrow(() -> new NullPointerException("보드가 없습니다"));
-
-                        SearchResponseDto responseDto = new SearchResponseDto(board1);
-                        boardList.add(responseDto);
-                    }
+                    matching_Service(city,gu,boardList,board);
 
                 }
 
@@ -122,21 +109,8 @@ public class SearchService {
 
                 // 매칭 게시판일때
                 else{
-                    // city 전체 조회일때 city이름 가져와서 responseDto에 추가
-                    if(gu.equals("all") && board.getCity().getCtpKorNmAbbreviation().equals(city)){
-                        Long id = board.getId();
-                        Board board1 = boardRepository.findById(id).orElseThrow(() -> new NullPointerException("보드가 없습니다"));
 
-                        SearchResponseDto responseDto = new SearchResponseDto(board1);
-                        boardList.add(responseDto);
-                    }
-                    if(board.getCity().getCtpKorNmAbbreviation().equals(city) && board.getGu().getSigKorNm().equals(gu)){
-                        Long id = board.getId();
-                        Board board1 = boardRepository.findById(id).orElseThrow(() -> new NullPointerException("보드가 없습니다"));
-
-                        SearchResponseDto responseDto = new SearchResponseDto(board1);
-                        boardList.add(responseDto);
-                    }
+                    matching_Service(city,gu,boardList,board);
 
                 }
 
@@ -185,30 +159,45 @@ public class SearchService {
 
                 // 매칭 게시판일때
                 else{
-                    // city 전체 조회일때 city이름 가져와서 responseDto에 추가
-                    if(gu.equals("all") && board.getCity().getCtpKorNmAbbreviation().equals(city)){
-                        Long id = board.getId();
-                        Board board1 = boardRepository.findById(id).orElseThrow(() -> new NullPointerException("보드가 없습니다"));
 
-                        SearchResponseDto responseDto = new SearchResponseDto(board1);
-                        boardList.add(responseDto);
-                    }
-                    if(board.getCity().getCtpKorNmAbbreviation().equals(city) && board.getGu().getSigKorNm().equals(gu)){
-                        Long id = board.getId();
-                        Board board1 = boardRepository.findById(id).orElseThrow(() -> new NullPointerException("보드가 없습니다"));
-
-                        SearchResponseDto responseDto = new SearchResponseDto(board1);
-                        boardList.add(responseDto);
-                    }
+                    matching_Service(city,gu,boardList,board);
 
                 }
             });
-
 
             return boardList;
         }
 
         return null;
+    }
+
+    private void matching_Service(String city, String gu, List<SearchResponseDto> boardList, Board board) {
+
+        // 전국일때
+        if(gu.equals("all") && city.equals("all")){
+
+            Long id = board.getId();
+            Board board1 = boardRepository.findById(id).orElseThrow(() -> new NullPointerException("보드가 없습니다"));
+
+            SearchResponseDto responseDto = new SearchResponseDto(board1);
+            boardList.add(responseDto);
+        }
+        // city 전체 조회일때 city이름 가져와서 responseDto에 추가
+        if(gu.equals("all") && board.getCity().getCtpKorNmAbbreviation().equals(city)){
+            Long id = board.getId();
+            Board board1 = boardRepository.findById(id).orElseThrow(() -> new NullPointerException("보드가 없습니다"));
+
+            SearchResponseDto responseDto = new SearchResponseDto(board1);
+            boardList.add(responseDto);
+        }
+        // 특정 city,gu 조회
+        if(board.getCity().getCtpKorNmAbbreviation().equals(city) && board.getGu().getSigKorNm().equals(gu)){
+            Long id = board.getId();
+            Board board1 = boardRepository.findById(id).orElseThrow(() -> new NullPointerException("보드가 없습니다"));
+
+            SearchResponseDto responseDto = new SearchResponseDto(board1);
+            boardList.add(responseDto);
+        }
     }
 
 }
