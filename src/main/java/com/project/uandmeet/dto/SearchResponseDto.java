@@ -16,6 +16,7 @@ public class SearchResponseDto {
     private String title;
     private String content;
     private String boardimage;
+
     private LocalDateTime endDateAt;
     private String city;
     private String gu;
@@ -37,6 +38,7 @@ public class SearchResponseDto {
     //위도
     private double lng;
 
+    // 매칭
     public SearchResponseDto(Board board){
         this.city = board.getCity().getCtpKorNmAbbreviation();
         this.gu = board.getGu().getSigKorNm();
@@ -54,7 +56,24 @@ public class SearchResponseDto {
         this.profile=board.getMember().getProfile();
         this.username=board.getMember().getUsername();
         this.boardType=board.getBoardType();
+    }
 
+    //정보공유
+    public SearchResponseDto(Board board,String bt){
+        this.id = board.getId();
+        this.createdAt = board.getCreatedAt();
+        this.category = board.getCategory().getCategory();
+        this.title = board.getTitle();
+        this.boardimage = board.getBoardimage();
+        this.likeCount = board.getLikeCount();
+        this.commentCount = board.getCommentCount();
+        this.maxEntry = board.getMaxEntry();
+        this.currentEntry = board.getCurrentEntry();
+        this.content=board.getContent();
+        this.nickname=board.getMember().getNickname();
+        this.profile=board.getMember().getProfile();
+        this.username=board.getMember().getUsername();
+        this.boardType=bt;
     }
 
 }
