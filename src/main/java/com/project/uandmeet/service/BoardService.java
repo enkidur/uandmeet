@@ -673,10 +673,10 @@ public class BoardService {
                 temp.add(mainPageDto);
             }
         }
-        if (temp.size() < 5) {
+        if (temp.size() < 6) {
             mainPage.addAll(temp);
         } else {
-            for (int i = 0; i < 4; i++) {
+            for (int i = 0; i < 5; i++) {
                 mainPage.add(temp.get(i));
             }
         }
