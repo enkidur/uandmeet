@@ -1,3 +1,5 @@
+![image](https://user-images.githubusercontent.com/56526225/190001982-759cc76a-7d85-4e36-a5ec-b804401eeb9d.png)
+
 
 ## UandMeet 소개
 맟춤 운동 매칭 , 정보 공유 사이트 입니다.
