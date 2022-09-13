@@ -41,7 +41,7 @@
 
 - [시연영상]()
 - [Team notion](https://invincible-flag-377.notion.site/SA-3-395d4213d8b340c0a095245fdcd6aa8d)
-- [Github Back-End repo](https://github.com/AhnSangRok/Kurly_clone)
+- [Github Back-End repo](https://github.com/enkidur/uandmeet)
 - [Github Front-End repo](https://github.com/whtnqls124578/CloneCodding)
 
 <br>
