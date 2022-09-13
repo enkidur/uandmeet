@@ -5,7 +5,7 @@
 <br>
 게시판 위주의 사이트입니다.
 
-##🛠 Architecture
+## Architecture
 ![image](https://user-images.githubusercontent.com/56526225/190002286-d5fa17f1-a672-462f-b5da-fd9303cddee4.png)
 
 
