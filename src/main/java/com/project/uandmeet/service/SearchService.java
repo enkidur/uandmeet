@@ -59,13 +59,9 @@ public class SearchService {
                     Long id = board.getId();
                     String bt = "information";
                     Board board1 = boardRepository.findById(id).orElseThrow(() -> new NullPointerException("보드가 없습니다"));
-
                     SearchResponseDto responseDto = new SearchResponseDto(board1,bt);
-
                     boardList.add(responseDto);
-
                 }
-
                 // 매칭 게시판일때
                 else{
 

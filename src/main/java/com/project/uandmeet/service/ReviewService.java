@@ -28,9 +28,9 @@ public class ReviewService {
     private final BoardRepository boardRepository;
     private final EntryRepository entryRepository;
 
-    public ReviewResponseDto review(UserDetailsImpl userDetails, BoardIdRequestDto requestDto) {
+    public ReviewResponseDto review(UserDetailsImpl userDetails, Long boardId) {
         String nickname = userDetails.getMember().getNickname();
-        Board board = boardRepository.findByBoardTypeAndId("matching", requestDto.getBoardId()).orElseThrow(
+        Board board = boardRepository.findByBoardTypeAndId("matching", boardId).orElseThrow(
                 () -> new RuntimeException("찾을 수 없는 게시글입니다.")
         );
         Member otherMember = board.getMember();
