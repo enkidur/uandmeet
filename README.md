@@ -1,11 +1,7 @@
-<div align = center>
-<img src="src/main/resources/image/kurly.PNG" width="700" height="400" />
-</div>
 
 ## UandMeet 소개
 맟춤 운동 매칭 , 정보 공유 사이트 입니다.
 ## 프로젝트 개요
-<br>
 지역별로 같이 운동할 사람을 매칭하고, 정보까지 공유할 수 있는
 <br>
 게시판 위주의 사이트입니다.
