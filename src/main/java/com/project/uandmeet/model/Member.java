@@ -61,8 +61,8 @@ public class Member {
     @Enumerated(value = EnumType.STRING) // Enum type을 STring 으로 변화하여 저장
     private MemberRoleEnum role;
 
-    @OneToMany(fetch = FetchType.LAZY)
-    private List<Review> review;
+//    @OneToMany(fetch = FetchType.LAZY)
+//    private List<Review> review;
 
     @Column
     private String loginto;
