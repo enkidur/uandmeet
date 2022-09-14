@@ -7,10 +7,10 @@ import java.util.Map;
 
 @Getter
 public class SimpleReviewResponseDto {
-    Map<Integer, Long> review;
+    Map<Integer, Integer> review;
 //    Map<Integer, Long> plusReview;
 //    Map<Integer, Long> minusReview;
-    public SimpleReviewResponseDto(Map<Integer, Long> review) {
+    public SimpleReviewResponseDto(Map<Integer, Integer> review) {
         this.review = review;
     }
 
