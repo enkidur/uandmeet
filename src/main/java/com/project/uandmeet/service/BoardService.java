@@ -653,7 +653,7 @@ public class BoardService {
         List<MainPageDto> temp = new ArrayList<>();
         List<MainPageDto> mainPage = new ArrayList<>();
         if (category.equals("all")) {
-            List<Board> mains = boardRepository.findByBoardTypeOrderByLikeCount("information");
+            List<Board> mains = boardRepository.findByBoardTypeOrderByLikeCountDesc("information");
             for (Board main : mains) {
                 MainPageDto mainPageDto = new MainPageDto(main.getId(),
                         main.getTitle(),
@@ -666,7 +666,7 @@ public class BoardService {
             Category mainCategory = categoryRepository.findAllByCategory(category).orElseThrow(
                     () -> new CustomException(ErrorCode.BOARD_NOT_FOUND)
             );
-            List<Board> mains = boardRepository.findByBoardTypeAndCategoryOrderByLikeCount("information", mainCategory);
+            List<Board> mains = boardRepository.findByBoardTypeAndCategoryOrderByLikeCountDesc("information", mainCategory);
             for (Board main : mains) {
                 MainPageDto mainPageDto = new MainPageDto(main.getId(),
                         main.getTitle(),
@@ -690,7 +690,7 @@ public class BoardService {
         List<MainPageMatchingDto> temp = new ArrayList<>();
         List<MainPageMatchingDto> mainPage = new ArrayList<>();
         if (category.equals("all")) {
-            List<Board> mains = boardRepository.findByBoardTypeOrderByLikeCount("matching");
+            List<Board> mains = boardRepository.findByBoardTypeOrderByLikeCountDesc("matching");
             for (Board main : mains) {
                 MainPageMatchingDto mainPageDto = new MainPageMatchingDto(main.getCategory().getCategory(),
                         main.getId(),
@@ -707,7 +707,7 @@ public class BoardService {
             Category mainCategory = categoryRepository.findAllByCategory(category).orElseThrow(
                     () -> new CustomException(ErrorCode.CATEGORY_NOT_FOUND)
             );
-            List<Board> mains = boardRepository.findByBoardTypeAndCategoryOrderByLikeCount("matching", mainCategory);
+            List<Board> mains = boardRepository.findByBoardTypeAndCategoryOrderByLikeCountDesc("matching", mainCategory);
             for (Board main : mains) {
                 MainPageMatchingDto mainPageDto = new MainPageMatchingDto(main.getCategory().getCategory(),
                         main.getId(),

@@ -525,28 +525,33 @@ public class MemberService {
                     () -> new CustomException(ErrorCode.MEMBER_NOT_FOUND)
             );
             Map<Integer, Long> reviews = new LinkedHashMap<>();
+            List<Integer> reviewNum = new ArrayList<>();
             Map<Integer, Long> sortedReview = new LinkedHashMap<>();
             Long reviewCnt = reviewRepository.countByTo(memberId);
             List<Review> review = reviewRepository.findByTo(memberId);
             for (int i = 0; i < reviewCnt; i++) {
-                Long numCnt = reviewRepository.countByToAndNum(member.getId(), i);
-                 List<Integer> num = review.get(i).getNum();
-                reviews.put(i, numCnt);
+//                Long numCnt = reviewRepository.countByToAndNum(member.getId(), i);
+                 List<Integer> nums = review.get(i).getNum();
+                reviewNum.addAll(nums);
+//                 int cntcnum = review.get(i).getNum().size();
+                System.out.println(reviewNum);
+//                reviews.put(i, numCnt);
             }
-            List<Map.Entry<Integer, Long>> highs =
-                    reviews.entrySet().stream().sorted(Map.Entry.comparingByValue()).collect(Collectors.toList());
-            if (reviewCnt < 6) {
-                for (int i = Math.toIntExact(reviewCnt)-1 ; i >= 0; i--) {
-                    Map.Entry<Integer, Long> high = highs.get(i);
-                    sortedReview.put(high.getKey(), high.getValue());
-                }
-            } else {
-                for (int i = Math.toIntExact(reviewCnt) - 1; i > reviewCnt - 6; i--) {
-                    Map.Entry<Integer, Long> high = highs.get(i);
-                    System.out.println("key" + high.getKey() + "value" + high.getValue());
-                    sortedReview.put(high.getKey(), high.getValue());
-                }
-            }
+
+//            List<Map.Entry<Integer, Long>> highs =
+//                    reviews.entrySet().stream().sorted(Map.Entry.comparingByValue()).collect(Collectors.toList());
+//            if (reviewCnt < 6) {
+//                for (int i = Math.toIntExact(reviewCnt)-1 ; i >= 0; i--) {
+//                    Map.Entry<Integer, Long> high = highs.get(i);
+//                    sortedReview.put(high.getKey(), high.getValue());
+//                }
+//            } else {
+//                for (int i = Math.toIntExact(reviewCnt) - 1; i > reviewCnt - 6; i--) {
+//                    Map.Entry<Integer, Long> high = highs.get(i);
+//                    System.out.println("key" + high.getKey() + "value" + high.getValue());
+//                    sortedReview.put(high.getKey(), high.getValue());
+//                }
+//            }
             return new SimpleReviewResponseDto(sortedReview);
         }
 
