@@ -660,7 +660,8 @@ public class BoardService {
                         main.getContent(),
                         main.getMember().getNickname(),
                         main.getBoardimage(),
-                        main.getLikeCount());
+                        main.getLikeCount(),
+                        main.getCommentCount());
                 temp.add(mainPageDto);
             }
         } else {
@@ -674,7 +675,8 @@ public class BoardService {
                         main.getContent(),
                         main.getMember().getNickname(),
                         main.getBoardimage(),
-                        main.getLikeCount());
+                        main.getLikeCount(),
+                        main.getCommentCount());
                 temp.add(mainPageDto);
             }
         }
@@ -703,7 +705,8 @@ public class BoardService {
                         main.getCurrentEntry(),
                         main.getMaxEntry(),
                         main.getBoardimage(),
-                        main.getLikeCount());
+                        main.getLikeCount(),
+                        main.getCommentCount());
                 temp.add(mainPageDto);
             }
         } else {
@@ -721,7 +724,8 @@ public class BoardService {
                         main.getCurrentEntry(),
                         main.getMaxEntry(),
                         main.getBoardimage(),
-                        main.getLikeCount());
+                        main.getLikeCount(),
+                        main.getCommentCount());
                 temp.add(mainPageDto);
             }
         }
@@ -753,6 +757,8 @@ public class BoardService {
                     entry.getBoard().getCurrentEntry(),
                     entry.isMatching(),
                     entry.getBoard().getBoardimage(),
+                    entry.getBoard().getLikeCount(),
+                    entry.getBoard().getCommentCount(),
                     entry.getCreatedAt().format(DateTimeFormatter.ofPattern("yyyy/MM/dd HH:mm")),
                     entry.getModifiedAt().format(DateTimeFormatter.ofPattern("yyyy/MM/dd HH:mm")));
             temp.add(responseDto);
@@ -766,6 +772,8 @@ public class BoardService {
                     board.getCurrentEntry(),
                     null,
                     board.getBoardimage(),
+                    board.getLikeCount(),
+                    board.getCommentCount(),
                     board.getCreatedAt().format(DateTimeFormatter.ofPattern("yyyy/MM/dd HH:mm")),
                     board.getModifiedAt().format(DateTimeFormatter.ofPattern("yyyy/MM/dd HH:mm")));
             temp.add(responseDto);
