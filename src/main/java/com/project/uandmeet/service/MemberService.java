@@ -521,48 +521,36 @@ public class MemberService {
         }
 
         public SimpleReviewResponseDto simpleReview (Long memberId){
-//            Member member = memberRepository.findById(memberId).orElseThrow(
-//                    () -> new CustomException(ErrorCode.MEMBER_NOT_FOUND)
-//            );
-            Map<Integer, Integer> reviews = new LinkedHashMap<>();
+        // 해당 유저가 없을 시 에러코드르 띄우기 위해 사용
+        Member member = memberRepository.findById(memberId).orElseThrow(
+                ()-> new CustomException(ErrorCode.MEMBER_NOT_FOUND)
+        );
+            Long reviewCnt = reviewRepository.countByTo(member.getId());
+            List<Review> review = reviewRepository.findByTo(member.getId());
             List<Integer> reviewNum = new ArrayList<>();
+            Map<Integer, Integer> reviews = new LinkedHashMap<>();
             Map<Integer, Integer> sortedReview = new LinkedHashMap<>();
-//            Map<Integer, Integer> returnReview = new LinkedHashMap<>();
-            Long reviewCnt = reviewRepository.countByTo(memberId);
-            List<Review> review = reviewRepository.findByTo(memberId);
+
+
             for (int i = 0; i < reviewCnt; i++) {
-//                Long numCnt = reviewRepository.countByToAndNum(member.getId(), i);
                  List<Integer> nums = review.get(i).getNum();
                 reviewNum.addAll(nums);
-//                 int cntcnum = review.get(i).getNum().size();
-                System.out.println(reviewNum);
-//                reviews.put(i, numCnt);
             }
-//            int reviewNumCnt = reviewNum.size();
 
             for (int i = 0; i < 16; i++) {
                 int numCnt = Collections.frequency(reviewNum, i);
                 reviews.put(i, numCnt);
             }
+
             List<Map.Entry<Integer, Integer>> highs =
                     reviews.entrySet().stream().sorted(Collections.reverseOrder(Map.Entry.comparingByValue()))
                             .collect(Collectors.toList());
-            System.out.println(highs);
-//            for (int i = 15; i >= 0; i--) {
-//                Map.Entry<Integer, Integer> high = highs.get(i);
-//                sortedReview.put(high.getKey(), high.getValue());
-//            }
-//            if (reviewNumCnt < 6) {
-//                for (int i = reviewNumCnt - 1 ; i >= 0; i--) {
-//                    Map.Entry<Integer, Integer> high = highs.get(i);
-//                    sortedReview.put(high.getKey(), high.getValue());
-//                }
-//            } else {
+
                 for (int i = 0; i < 6; i++) {
                     Map.Entry<Integer, Integer> high = highs.get(i);
                     sortedReview.put(high.getKey(), high.getValue());
                 }
-//            }
+
             return new SimpleReviewResponseDto(sortedReview);
         }
 

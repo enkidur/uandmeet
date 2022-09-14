@@ -1,16 +1,10 @@
 package com.project.uandmeet.security;
 
-
-
-//import com.project.uandmeet.security.jwt.JwtExceptionFilter;
+import com.project.uandmeet.exception.JwtTokenExceptionFilter;
 import com.project.uandmeet.oauth.CustomOAuth2UserService;
 import com.project.uandmeet.oauth.OAuth2SuccessHandler;
 import com.project.uandmeet.redis.RedisUtil;
-import com.project.uandmeet.security.jwt.JwtAuthenticationFilter;
-import com.project.uandmeet.security.jwt.JwtAuthorizationFilter;
-import com.project.uandmeet.exception.JwtTokenExceptionFilter;
-import com.project.uandmeet.security.jwt.JwtProperties;
-import com.project.uandmeet.security.jwt.JwtTokenProvider;
+import com.project.uandmeet.security.jwt.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.security.servlet.PathRequest;
@@ -23,6 +17,7 @@ import org.springframework.security.config.annotation.web.builders.WebSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.config.http.SessionCreationPolicy;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
@@ -94,10 +89,11 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
                 .anyRequest().permitAll()
                 // 그 외 어떤 요청이든 '인증'
                 .and()
-                .addFilter(new JwtAuthenticationFilter(authenticationManager(),redisUtil, jwtTokenProvider)) // AuthenticatonManager 파라미터 필요
+//                .addFilter(new JwtAuthenticationFilter(authenticationManager(),redisUtil, jwtTokenProvider)) // AuthenticatonManager 파라미터 필요
                 .addFilter(new JwtAuthorizationFilter(authenticationManager(), jwtTokenProvider))// AuthenticatonManager 파라미터 필요
-                .addFilterBefore(new JwtTokenExceptionFilter(), JwtAuthenticationFilter.class);
-//                .addFilterBefore(new JwtAuthenticationFilter(authenticationManager), UsernamePasswordAuthenticationFilter.class)
+                .addFilterBefore(new JwtTokenExceptionFilter(), JwtAuthenticationFilter.class)
+                .addFilterBefore(new JwtAuthenticationFilter(authenticationManager,redisUtil, jwtTokenProvider), UsernamePasswordAuthenticationFilter.class);
+
 
 
         http.oauth2Login()

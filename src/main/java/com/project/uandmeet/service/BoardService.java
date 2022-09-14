@@ -659,7 +659,8 @@ public class BoardService {
                         main.getTitle(),
                         main.getContent(),
                         main.getMember().getNickname(),
-                        main.getBoardimage());
+                        main.getBoardimage(),
+                        main.getLikeCount());
                 temp.add(mainPageDto);
             }
         } else {
@@ -672,7 +673,8 @@ public class BoardService {
                         main.getTitle(),
                         main.getContent(),
                         main.getMember().getNickname(),
-                        main.getBoardimage());
+                        main.getBoardimage(),
+                        main.getLikeCount());
                 temp.add(mainPageDto);
             }
         }
@@ -700,7 +702,8 @@ public class BoardService {
                         main.getEndDateAt(),
                         main.getCurrentEntry(),
                         main.getMaxEntry(),
-                        main.getBoardimage());
+                        main.getBoardimage(),
+                        main.getLikeCount());
                 temp.add(mainPageDto);
             }
         } else {
@@ -717,7 +720,8 @@ public class BoardService {
                         main.getEndDateAt(),
                         main.getCurrentEntry(),
                         main.getMaxEntry(),
-                        main.getBoardimage());
+                        main.getBoardimage(),
+                        main.getLikeCount());
                 temp.add(mainPageDto);
             }
         }
