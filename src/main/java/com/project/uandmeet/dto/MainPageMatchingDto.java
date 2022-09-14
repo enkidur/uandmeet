@@ -14,8 +14,8 @@ public class MainPageMatchingDto {
     private Long maxEntry;
     private String boardimage;
     private Long likeCount;
-
-    public MainPageMatchingDto(String category, Long boardId, String title, String content, String nickname, String endDateAt, Long currentEntry, Long maxEntry, String boardimage, Long likeCount) {
+    private Long commentCount;
+    public MainPageMatchingDto(String category, Long boardId, String title, String content, String nickname, String endDateAt, Long currentEntry, Long maxEntry, String boardimage, Long likeCount, Long commentCount) {
         this.category = category;
         this.boardId = boardId;
         this.title = title;
@@ -26,5 +26,6 @@ public class MainPageMatchingDto {
         this.maxEntry = maxEntry;
         this.boardimage = boardimage;
         this.likeCount = likeCount;
+        this.commentCount = commentCount;
     }
 }

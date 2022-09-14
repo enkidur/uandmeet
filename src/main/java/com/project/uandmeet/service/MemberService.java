@@ -159,6 +159,7 @@ public class MemberService {
 
             List<Entry> entries = entryRepository.findByMember(userDetails.getMember());
             List<Liked> likeds = likedRepository.findByMember(userDetails.getMember());
+            List<Comment> commentList = commentRepository.findByMember(userDetails.getMember());
 
             //매칭 참여 했던 것들 지우기.
             for (Entry entry : entries) {
@@ -166,11 +167,10 @@ public class MemberService {
                         .orElseGet(() -> null);
 
                 if (board != null) {
-                    entryRepository.delete(entry);
                     board.setCurrentEntry(board.getCurrentEntry() - 1);
                     boardRepository.save(board);
                 }
-
+                entryRepository.delete(entry);
             }
 
             //좋아요 참여 했던 것들 지우기.
@@ -179,10 +179,24 @@ public class MemberService {
                         .orElseGet(() -> null);
 
                 if (board != null) {
-                    likedRepository.delete(liked);
                     board.setLikeCount(board.getLikeCount() - 1);
                     boardRepository.save(board);
                 }
+
+                likedRepository.delete(liked);
+            }
+
+            //댓글 지우기
+            for (Comment comment : commentList) {
+                Board board = boardRepository.findById(comment.getBoard().getId())
+                        .orElseGet(() -> null);
+
+                if (board != null) {
+                    board.setCommentCount(board.getCommentCount() - 1);
+                    boardRepository.save(board);
+                }
+
+                commentRepository.delete(comment);
             }
 
             try {
@@ -472,6 +486,7 @@ public class MemberService {
         }
 
         // profile 수정
+        @Transactional
         public ProfileDto profileedit (UserDetailsImpl userDetails, ProfileEditRequestDto requestDto) throws IOException
         {
             Long userId = userDetails.getMember().getId();
@@ -494,6 +509,8 @@ public class MemberService {
                 ImageDto uploadImage = s3Uploader.upload(requestDto.getData(), POST_IMAGE_DIR);
                 member.setProfile(uploadImage.getImageUrl());
                 ProfileDto profileDto = new ProfileDto(nickname, star, uploadImage.getImageUrl());
+                memberRepository.save(member);
+
                 return profileDto;
             } else {
                 ProfileDto profileDto = new ProfileDto(nickname, star);

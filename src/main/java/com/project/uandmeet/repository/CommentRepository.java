@@ -17,11 +17,12 @@ public interface CommentRepository extends JpaRepository<Comment, Long>
     List<Comment> findAllByBoard(Long id);
 
     Optional<Comment> findByIdAndBoard(Long id, Long boardId);
-    List<Comment> findAllByMember(Member member);
     Page<Comment> findAllByMemberAndBoardType(Member member, String boardType,Pageable pageable);
 
     Long countByMemberAndBoardType(Member member, String boardType);
 
     List<Comment> findByBoardOrderByCreatedAtDesc(Board board);
     Optional<Comment> findByIdAndBoard(Long id, Board board);
+
+    List<Comment> findByMember(Member member);
 }

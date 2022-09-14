@@ -19,8 +19,10 @@ public class MainPageEntryDto {
     private String boardimage;
     private String createdAt;
     private String modifiedAt;
+    private Long likeCount;
+    private Long commentCount;
 
-    public MainPageEntryDto(String kind, Long boardId, String title, Long maxEntry, Long currentEntry, Boolean matching, String boardimage, String createdAt, String modifiedAt) {
+    public MainPageEntryDto(String kind, Long boardId, String title, Long maxEntry, Long currentEntry, Boolean matching, String boardimage, Long likeCount,Long commentCount,String createdAt, String modifiedAt) {
         this.kind = kind;
         this.boardId = boardId;
         this.title = title;
@@ -28,6 +30,8 @@ public class MainPageEntryDto {
         this.currentEntry = currentEntry;
         ismathcing = matching;
         this.boardimage = boardimage;
+        this.likeCount = likeCount;
+        this.commentCount = commentCount;
         this.createdAt = createdAt;
         this.modifiedAt = modifiedAt;
     }

@@ -21,11 +21,11 @@ public class ReviewController {
     private final ReviewService reviewService;
 
     // review 작성 페이지
-    @GetMapping("/api/review")
+    @GetMapping("/api/review/{id}")
     public ResponseEntity<ReviewResponseDto> Review(@AuthenticationPrincipal UserDetailsImpl userDetails,
-                                                    @RequestParam(value = "boardId") Long boardId) {
+                                                    @PathVariable("id") Long id) {
 
-        return ResponseEntity.ok(reviewService.review(userDetails, boardId));
+        return ResponseEntity.ok(reviewService.review(userDetails, id));
     }
 
     //review 작성

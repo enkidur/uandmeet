@@ -123,7 +123,7 @@ public class MemberController {
     }
 
     // 회원 탈퇴
-    @DeleteMapping("/api/withdraw")
+    @PostMapping("/api/withdraw")
     public ResponseEntity<String> withdraw(@AuthenticationPrincipal UserDetailsImpl userDetails,
                                            @RequestBody PasswordDto requestDto) {
         return memberService.withdraw(userDetails, requestDto.getPassword());
