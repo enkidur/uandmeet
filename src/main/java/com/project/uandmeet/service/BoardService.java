@@ -21,6 +21,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.io.IOException;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -657,7 +658,8 @@ public class BoardService {
                 MainPageDto mainPageDto = new MainPageDto(main.getId(),
                         main.getTitle(),
                         main.getContent(),
-                        main.getMember().getNickname());
+                        main.getMember().getNickname(),
+                        main.getBoardimage());
                 temp.add(mainPageDto);
             }
         } else {
@@ -669,7 +671,8 @@ public class BoardService {
                 MainPageDto mainPageDto = new MainPageDto(main.getId(),
                         main.getTitle(),
                         main.getContent(),
-                        main.getMember().getNickname());
+                        main.getMember().getNickname(),
+                        main.getBoardimage());
                 temp.add(mainPageDto);
             }
         }
@@ -696,7 +699,8 @@ public class BoardService {
                         main.getMember().getNickname(),
                         main.getEndDateAt(),
                         main.getCurrentEntry(),
-                        main.getMaxEntry());
+                        main.getMaxEntry(),
+                        main.getBoardimage());
                 temp.add(mainPageDto);
             }
         } else {
@@ -712,7 +716,8 @@ public class BoardService {
                         main.getMember().getNickname(),
                         main.getEndDateAt(),
                         main.getCurrentEntry(),
-                        main.getMaxEntry());
+                        main.getMaxEntry(),
+                        main.getBoardimage());
                 temp.add(mainPageDto);
             }
         }
@@ -743,8 +748,9 @@ public class BoardService {
                     entry.getBoard().getMaxEntry(),
                     entry.getBoard().getCurrentEntry(),
                     entry.isMatching(),
-                    entry.getCreatedAt(),
-                    entry.getModifiedAt());
+                    entry.getBoard().getBoardimage(),
+                    entry.getCreatedAt().format(DateTimeFormatter.ofPattern("yyyy/MM/dd HH:mm")),
+                    entry.getModifiedAt().format(DateTimeFormatter.ofPattern("yyyy/MM/dd HH:mm")));
             temp.add(responseDto);
         }
         for (Board board : boards) {
@@ -755,8 +761,9 @@ public class BoardService {
                     board.getMaxEntry(),
                     board.getCurrentEntry(),
                     null,
-                    board.getCreatedAt(),
-                    board.getModifiedAt());
+                    board.getBoardimage(),
+                    board.getCreatedAt().format(DateTimeFormatter.ofPattern("yyyy/MM/dd HH:mm")),
+                    board.getModifiedAt().format(DateTimeFormatter.ofPattern("yyyy/MM/dd HH:mm")));
             temp.add(responseDto);
         }
         Comparator<MainPageEntryDto> comparator = (prod1, prod2) ->

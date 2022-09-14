@@ -8,11 +8,13 @@ public class MainPageDto {
     private String title;
     private String content;
     private String nickname;
+    private String boardimage;
 
-    public MainPageDto(Long boardId, String title, String content, String nickname) {
+    public MainPageDto(Long boardId, String title, String content, String nickname, String boardimage) {
         this.boardId = boardId;
         this.title = title;
         this.content = content;
         this.nickname = nickname;
+        this.boardimage = boardimage;
     }
 }

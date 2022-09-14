@@ -13,5 +13,5 @@ public interface ReviewRepository extends JpaRepository<Review, Long> {
     Long countByTo(Long to);
     Long countByToAndNum(Long to, int i);
     List<Review> findByTo(Long to);
-    boolean existsByToAndAndBoardId(Long to, Long boardId);
+    boolean existsByFromAndBoardId(Long form, Long boardId);
 }

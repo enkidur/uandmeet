@@ -526,9 +526,11 @@ public class MemberService {
             );
             Map<Integer, Long> reviews = new LinkedHashMap<>();
             Map<Integer, Long> sortedReview = new LinkedHashMap<>();
-            Long reviewCnt = reviewRepository.countByTo(member.getId());
+            Long reviewCnt = reviewRepository.countByTo(memberId);
+            List<Review> review = reviewRepository.findByTo(memberId);
             for (int i = 0; i < reviewCnt; i++) {
                 Long numCnt = reviewRepository.countByToAndNum(member.getId(), i);
+                 List<Integer> num = review.get(i).getNum();
                 reviews.put(i, numCnt);
             }
             List<Map.Entry<Integer, Long>> highs =
@@ -579,6 +581,7 @@ public class MemberService {
                         board.getCommentCount(),
                         board.getBoardimage(),
                         board.getCreatedAt().format(DateTimeFormatter.ofPattern("yyyy/MM/dd HH:mm")),
+                        board.getModifiedAt().format(DateTimeFormatter.ofPattern("yyyy/MM/dd HH:mm")),
                         myListMemberResponseDto);
                 boardInfo.add(responseDto);
             }
@@ -621,6 +624,7 @@ public class MemberService {
                         board.getMaxEntry(),
                         board.getCurrentEntry(),
                         board.getCreatedAt().format(DateTimeFormatter.ofPattern("yyyy/MM/dd HH:mm")),
+                        board.getModifiedAt().format(DateTimeFormatter.ofPattern("yyyy/MM/dd HH:mm")),
                         myListMemberResponseDto);
                 boardInfo.add(responseDto);
             }
@@ -663,6 +667,7 @@ public class MemberService {
                         entry.getBoard().getMaxEntry(),
                         entry.getBoard().getCurrentEntry(),
                         entry.getBoard().getCreatedAt().format(DateTimeFormatter.ofPattern("yyyy/MM/dd HH:mm")),
+                        entry.getBoard().getModifiedAt().format(DateTimeFormatter.ofPattern("yyyy/MM/dd HH:mm")),
                         myListMemberResponseDto);
                 boardInfo.add(responseDto);
             }
@@ -692,6 +697,7 @@ public class MemberService {
                         comment.getBoard().getTitle(),
                         comment.getBoard().getId(),
                         comment.getCreatedAt().format(DateTimeFormatter.ofPattern("yyyy/MM/dd HH:mm")),
+                        comment.getModifiedAt().format(DateTimeFormatter.ofPattern("yyyy/MM/dd HH:mm")),
                         comment.getComment(),
                         comment.getBoardType(),
                         myListMemberResponseDto);
@@ -723,6 +729,7 @@ public class MemberService {
                         comment.getBoard().getTitle(),
                         comment.getBoard().getId(),
                         comment.getCreatedAt().format(DateTimeFormatter.ofPattern("yyyy/MM/dd HH:mm")),
+                        comment.getModifiedAt().format(DateTimeFormatter.ofPattern("yyyy/MM/dd HH:mm")),
                         comment.getComment(),
                         comment.getBoardType(),
                         myListMemberResponseDto);

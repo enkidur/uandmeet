@@ -16,16 +16,18 @@ public class MainPageEntryDto {
     private Long maxEntry;
     private Long currentEntry;
     private Boolean ismathcing;
-    private LocalDateTime createdAt;
-    private LocalDateTime modifiedAt;
+    private String boardimage;
+    private String createdAt;
+    private String modifiedAt;
 
-    public MainPageEntryDto(String kind, Long boardId, String title, Long maxEntry, Long currentEntry, Boolean matching, LocalDateTime createdAt, LocalDateTime modifiedAt) {
+    public MainPageEntryDto(String kind, Long boardId, String title, Long maxEntry, Long currentEntry, Boolean matching, String boardimage, String createdAt, String modifiedAt) {
         this.kind = kind;
         this.boardId = boardId;
         this.title = title;
         this.maxEntry = maxEntry;
         this.currentEntry = currentEntry;
         ismathcing = matching;
+        this.boardimage = boardimage;
         this.createdAt = createdAt;
         this.modifiedAt = modifiedAt;
     }

@@ -21,10 +21,11 @@ public class MyListInfoResponseDto {
 
     private String boardimage;
     private String createdAt;
+    private String modifiedAt;
 
     private MyListMemberResponseDto writer;
 
-    public MyListInfoResponseDto(Long boardId, String boardType, String category, String title, String content, Long likeCount, Long viewCount, Long commentCount, String boardimage, String createdAt, MyListMemberResponseDto writer) {
+    public MyListInfoResponseDto(Long boardId, String boardType, String category, String title, String content, Long likeCount, Long viewCount, Long commentCount, String boardimage, String createdAt, String modifiedAt, MyListMemberResponseDto writer) {
         this.boardId = boardId;
         this.boardType = boardType;
         this.category = category;
@@ -35,6 +36,7 @@ public class MyListInfoResponseDto {
         this.commentCount = commentCount;
         this.boardimage = boardimage;
         this.createdAt = createdAt;
+        this.modifiedAt = modifiedAt;
         this.writer = writer;
     }
 }

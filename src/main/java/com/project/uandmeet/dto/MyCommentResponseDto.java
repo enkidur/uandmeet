@@ -10,6 +10,7 @@ public class MyCommentResponseDto {
     private String boardTitle;
     private Long boardId;
     private String createdAt;
+    private String modifiedAt;
 
     //글내용
     private String comment;
@@ -18,11 +19,12 @@ public class MyCommentResponseDto {
     private String boardType;
     MyListMemberResponseDto writer;
 
-    public MyCommentResponseDto(Long id, String boardTitle,Long boardId, String createdAt ,String comment, String boardType, MyListMemberResponseDto writer) {
+    public MyCommentResponseDto(Long id, String boardTitle,Long boardId, String createdAt, String modifiedAt, String comment, String boardType, MyListMemberResponseDto writer) {
         this.id = id;
         this.boardTitle = boardTitle;
         this.boardId = boardId;
         this.createdAt = createdAt;
+        this.modifiedAt = modifiedAt;
         this.comment = comment;
         this.boardType = boardType;
         this.writer = writer;
