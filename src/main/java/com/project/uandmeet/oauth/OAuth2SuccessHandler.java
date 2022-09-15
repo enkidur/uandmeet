@@ -54,7 +54,7 @@ public class OAuth2SuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
     }
 
     private String makeRedirectUrl(String access_Token,String username,String nickname, String profile) {
-        return UriComponentsBuilder.fromUriString("http://localhost:3000/oauth2/redirect")
+        return UriComponentsBuilder.fromUriString("http://uandmeet.shop/oauth2/redirect")
                 .queryParam("access_Token", access_Token)
 //                .queryParam("refresh_Token", refresh_Token)
                 .queryParam("username", username)
