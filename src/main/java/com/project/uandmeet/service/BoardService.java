@@ -423,7 +423,7 @@ public class BoardService {
             commentRepository.save(comment);
 
             //댓글수 넣기
-            board.setLikeCount(board.getCommentCount() + 1);
+            board.setCommentCount(board.getCommentCount() + 1);
             boardRepository.save(board);
 
         } catch (IllegalArgumentException ignored) {
@@ -474,7 +474,12 @@ public class BoardService {
         //본인이 아니면 예외처리
         if (comment.getMember().getUsername().equals(memberTemp.getUsername())) {
             try {
+
                 commentRepository.deleteById(comment.getId());
+
+                //댓글수 넣기
+                board.setCommentCount(board.getCommentCount() - 1);
+                boardRepository.save(board);
 
                 return new CustomException(ErrorCode.COMPLETED_OK);
             } catch (Exception e) {

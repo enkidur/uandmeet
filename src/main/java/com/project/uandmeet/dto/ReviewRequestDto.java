@@ -1,8 +1,9 @@
 package com.project.uandmeet.dto;
 
+import lombok.Data;
 import lombok.Getter;
 
-@Getter
+@Data
 public class ReviewRequestDto {
     private int[] num;
     private String review;

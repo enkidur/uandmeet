@@ -7,6 +7,7 @@ import com.project.uandmeet.model.Liked;
 import lombok.*;
 
 import java.time.format.DateTimeFormatter;
+import java.util.TimeZone;
 
 @Getter
 @Setter
@@ -26,16 +27,17 @@ public class BoardResponseDto {
     private Long commentCount;
     private String city;
     private String gu;
-    private double lat;
-    private double lng;
+    private String lat;
+    private String lng;
     private boolean LikeState;
     public BoardResponseDto(MemberSimpleDto memberSimpleDto ,Board board)
     {
+        TimeZone tzSeoul = TimeZone.getTimeZone("Asia/Seoul");
         this.memberSimpleDto = memberSimpleDto;
         this.city = board.getCity().getCtpKorNmAbbreviation();
         this.gu = board.getGu().getSigKorNm();
         this.id = board.getId();
-        this.createdAt = board.getCreatedAt().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.SSS"));
+        this.createdAt = board.getCreatedAt().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.SSS").withZone(tzSeoul.toZoneId()));
         this.category = board.getCategory().getCategory();
         this.endDateAt = board.getEndDateAt();
         this.content = board.getContent();
@@ -45,12 +47,15 @@ public class BoardResponseDto {
         this.commentCount = board.getCommentCount();
         this.maxEntry = board.getMaxEntry();
         this.currentEntry = board.getCurrentEntry();
+        this.lat = board.getLat();
+        this.lng = board.getLng();
     }
     public BoardResponseDto(Board board,MemberSimpleDto memberSimpleDto)
     {
+        TimeZone tzSeoul = TimeZone.getTimeZone("Asia/Seoul");
         this.memberSimpleDto = memberSimpleDto;
         this.id = board.getId();
-        this.createdAt = board.getCreatedAt().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.SSS"));
+        this.createdAt = board.getCreatedAt().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.SSS").withZone(tzSeoul.toZoneId()));
         this.category = board.getCategory().getCategory();
         this.endDateAt = board.getEndDateAt();
         this.content = board.getContent();
@@ -62,11 +67,12 @@ public class BoardResponseDto {
 
     public BoardResponseDto(MemberSimpleDto memberSimpleDto , Board board, Liked liked)
     {
+        TimeZone tzSeoul = TimeZone.getTimeZone("Asia/Seoul");
         this.memberSimpleDto = memberSimpleDto;
         this.city = board.getCity().getCtpKorNmAbbreviation();
         this.gu = board.getGu().getSigKorNm();
         this.id = board.getId();
-        this.createdAt = board.getCreatedAt().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.SSS"));
+        this.createdAt = board.getCreatedAt().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.SSS").withZone(tzSeoul.toZoneId()));
         this.category = board.getCategory().getCategory();
         this.endDateAt = board.getEndDateAt();
         this.content = board.getContent();
