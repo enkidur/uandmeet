@@ -62,13 +62,6 @@ public class ReviewService {
             throw new CustomException(ErrorCode.INVALID_AUTHORITY);
         }
 
-/*        // 해당 매칭에 참여하지 않았거나 매칭 만료일이 지나지 않을 시
-
-        if (!(entryRepository.existsByMemberAndAndBoard(from, board)) ) {
-            throw new CustomException(ErrorCode.INVALID_AUTHORITY);
-        }
-*/
-
         // 이미 참여한 리뷰일 경우
         if (reviewRepository.existsByFromAndBoardId(from.getId(), board.getId())) {
             throw new CustomException(ErrorCode.DUPLICATE_REVIEW);

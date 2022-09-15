@@ -29,6 +29,7 @@ public class MainPageService {
     private final CategoryRepository categoryRepository;
     private final MemberRepository memberRepository;
     private final EntryRepository entryRepository;
+
     public List<MainPageDto> maininformation(String category) {
         List<MainPageDto> temp = new ArrayList<>();
         List<MainPageDto> mainPage = new ArrayList<>();

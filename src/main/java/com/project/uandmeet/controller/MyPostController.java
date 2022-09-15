@@ -1,5 +1,6 @@
 package com.project.uandmeet.controller;
 
+import com.project.uandmeet.dto.MyPostEntryResponseDto;
 import com.project.uandmeet.dto.MyPostInfoResponseDto;
 import com.project.uandmeet.dto.MypostCommentResponseDto;
 import com.project.uandmeet.dto.MypostResponseDto;
@@ -38,9 +39,9 @@ public class MyPostController {
 
     // 나의 게시글(내가 신청한 글)
     @GetMapping("/api/myentry")
-    public ResponseEntity<MypostResponseDto> myentry(@AuthenticationPrincipal UserDetailsImpl userDetails,
-                                                     @RequestParam int page,
-                                                     @RequestParam int amount) {
+    public ResponseEntity<MyPostEntryResponseDto> myentry(@AuthenticationPrincipal UserDetailsImpl userDetails,
+                                                          @RequestParam int page,
+                                                          @RequestParam int amount) {
         page -= 1;
         return ResponseEntity.ok(myPostService.myentry(userDetails, page, amount));
     }

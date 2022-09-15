@@ -27,6 +27,7 @@ public class MemberInfoService {
     private final ReviewRepository reviewRepository;
     private final S3Uploader s3Uploader;
     private final String POST_IMAGE_DIR = "static";
+
     // 활동 내역 조회
     public MypageDto action(UserDetailsImpl userDetails) {
         Long userId = userDetails.getMember().getId();
@@ -84,7 +85,6 @@ public class MemberInfoService {
         return new MypageDto(nickname, concern, joinCnt);
     }
 
-
     // 활동 페이지 -> 닉네임 수정
     @Transactional
     public MypageDto nicknameedit (UserDetailsImpl userDetails, String nickname){
@@ -140,6 +140,7 @@ public class MemberInfoService {
         );
         String gender = requestDto.getGender();
         member.setGender(gender);
+        memberRepository.save(member);
         Map<String, Long> birth = member.getBirth();
         MyPageInfoDto myPageInfoDto = new MyPageInfoDto(username, gender, birth);
         return myPageInfoDto;
@@ -159,6 +160,7 @@ public class MemberInfoService {
         birth.put("birthMonth", requestDto.getBirthMonth());
         birth.put("birthDay", requestDto.getBirthDay());
         member.setBirth(birth);
+        memberRepository.save(member);
         MyPageInfoDto myPageInfoDto = new MyPageInfoDto(username, gender, birth);
         return myPageInfoDto;
     }
@@ -210,6 +212,7 @@ public class MemberInfoService {
         if (requestDto.getData() != null) {
             ImageDto uploadImage = s3Uploader.upload(requestDto.getData(), POST_IMAGE_DIR);
             member.setProfile(uploadImage.getImageUrl());
+            memberRepository.save(member);
             ProfileDto profileDto = new ProfileDto(nickname, star, uploadImage.getImageUrl());
             return profileDto;
         } else {
@@ -217,6 +220,7 @@ public class MemberInfoService {
             return profileDto;
         }
     }
+
     public SimpleReviewResponseDto simpleReview (Long memberId){
         // 해당 유저가 없을 시 에러코드르 띄우기 위해 사용
         Member member = memberRepository.findById(memberId).orElseThrow(
