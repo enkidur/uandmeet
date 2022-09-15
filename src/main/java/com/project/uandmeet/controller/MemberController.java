@@ -103,8 +103,8 @@ public class MemberController {
     @PostMapping("/api/passChange")
     public ResponseEntity<String> passChange(@AuthenticationPrincipal UserDetailsImpl userDetails,
                                              @RequestBody PasswordChangeDto passwordChangeDto) {
-        memberService.passChange(userDetails, passwordChangeDto);
-        return ResponseEntity.ok("변경 완료");
+
+        return ResponseEntity.ok(memberService.passChange(userDetails, passwordChangeDto));
     }
 
     // password 변경

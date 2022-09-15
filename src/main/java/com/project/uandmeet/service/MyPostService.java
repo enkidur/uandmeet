@@ -15,6 +15,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
@@ -25,9 +26,11 @@ import java.util.List;
 public class MyPostService {
     private final MemberRepository memberRepository;
     private final EntryRepository entryRepository;
+    private final ReviewRepository reviewRepository;
 
     private final BoardRepository boardRepository;
     private final CommentRepository commentRepository;
+
 
     public MyPostInfoResponseDto mypostinformation (UserDetailsImpl userDetails, int page, int amount){
         // page 함수
@@ -63,6 +66,7 @@ public class MyPostService {
         Long informationCount = boardRepository.countByMemberAndAndBoardType(member, "information");
         return new MyPostInfoResponseDto(informationCount, boardInfo);
     }
+
 
 
     public MypostResponseDto mypostmatching (UserDetailsImpl userDetails, int page, int amount){
@@ -107,7 +111,8 @@ public class MyPostService {
         return new MypostResponseDto(matchingCount, boardInfo);
     }
 
-    public MypostResponseDto myentry (UserDetailsImpl userDetails,int page, int amount){
+
+    public MyPostEntryResponseDto myentry (UserDetailsImpl userDetails,int page, int amount){
         // page 함수
         Sort.Direction direction = Sort.Direction.DESC;
         String sortby = "createdAt";
@@ -117,14 +122,15 @@ public class MyPostService {
         Member member = memberRepository.findById(userDetails.getMember().getId()).orElseThrow(
                 () -> new CustomException(ErrorCode.MEMBER_NOT_FOUND)
         );
-//        List<Entry> entries = entryRepository.findByMember(member);
+
         Page<Entry> entries = entryRepository.findByMember(member, pageable);
-        List<MyListResponseDto> boardInfo = new ArrayList<>();
+        List<MyListEntryResponseDto> boardInfo = new ArrayList<>();
         for (Entry entry : entries) {
+            boolean reviewEntry = reviewRepository.existsByFromAndBoardId(member.getId(), entry.getBoard().getId());
             MyListMemberResponseDto myListMemberResponseDto = new MyListMemberResponseDto(entry.getBoard().getMember().getUsername(),
                     entry.getBoard().getMember().getNickname(),
                     entry.getBoard().getMember().getProfile());
-            MyListResponseDto responseDto = new MyListResponseDto(
+            MyListEntryResponseDto responseDto = new MyListEntryResponseDto(
                     entry.getBoard().getId(),
                     entry.getBoard().getBoardType(),
                     entry.getBoard().getCategory().getCategory(),
@@ -143,12 +149,14 @@ public class MyPostService {
                     entry.getBoard().getCurrentEntry(),
                     entry.getBoard().getCreatedAt().format(DateTimeFormatter.ofPattern("yyyy/MM/dd HH:mm")),
                     entry.getBoard().getModifiedAt().format(DateTimeFormatter.ofPattern("yyyy/MM/dd HH:mm")),
+                    reviewEntry,
                     myListMemberResponseDto);
             boardInfo.add(responseDto);
         }
         Long totalCount = entryRepository.countByMember(member);
-        return new MypostResponseDto(totalCount, boardInfo);
+        return new MyPostEntryResponseDto(totalCount, boardInfo);
     }
+
 
     public MypostCommentResponseDto mycommentinformation (UserDetailsImpl userDetails,int page, int amount){
         // page 함수
