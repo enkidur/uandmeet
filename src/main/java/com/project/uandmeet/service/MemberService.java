@@ -266,9 +266,9 @@ public class MemberService {
 
         redisUtil.setDataExpire("passAuth" + username, makeRandomNumber(), 60 * 3L);
         redisUtil.setDataExpire("passCnt" + username, String.valueOf(emailCnt), 60 * 60L);
-        if (Integer.parseInt(redisUtil.getData("Cnt" + username)) < 4) {
-            redisUtil.setDataExpire("Cnt" + username, String.valueOf(emailCnt + 1), 60 * 60L);
-            int restCnt = 3 - Integer.parseInt(redisUtil.getData("Cnt" + username));
+        if (Integer.parseInt(redisUtil.getData("passCnt" + username)) < 4) {
+            redisUtil.setDataExpire("passCnt" + username, String.valueOf(emailCnt + 1), 60 * 60L);
+            int restCnt = 3 - Integer.parseInt(redisUtil.getData("passCnt" + username));
 
 
             //인증메일 보내기
@@ -309,9 +309,8 @@ public class MemberService {
 
     // 비밀번호 변경
     @Transactional
-    public String passChange(UserDetailsImpl userDetails, PasswordChangeDto passwordChangeDto) {
-        Long userId = userDetails.getMember().getId();
-        Member member = memberRepository.findById(userId).orElseThrow(
+    public String passChange(PasswordChangeDto passwordChangeDto) {
+        Member member = memberRepository.findByUsername(passwordChangeDto.getUsername()).orElseThrow(
                 () -> new CustomException(ErrorCode.MEMBER_NOT_FOUND)
         );
         if (!passwordChangeDto.getNewPassword().equals(passwordChangeDto.getNewPasswordCheck())) {
@@ -326,8 +325,7 @@ public class MemberService {
     // password 변경
     @Transactional
     public String changepass(UserDetailsImpl userDetails, PasswordChangeDto passwordChangeDto) {
-        Long userId = userDetails.getMember().getId();
-        Member member = memberRepository.findById(userId).orElseThrow(
+        Member member = memberRepository.findByUsername(userDetails.getMember().getUsername()).orElseThrow(
                 () -> new CustomException(ErrorCode.MEMBER_NOT_FOUND)
         );
         if (!passwordEncoder.matches(passwordChangeDto.getPasswordCheck(), userDetails.getPassword()) && !passwordChangeDto.getNewPassword().equals(passwordChangeDto.getNewPasswordCheck())) {

@@ -87,24 +87,20 @@ public class MemberController {
     //  password 찾기 1. password 찾기 -> 인증번호 발송
     @PostMapping("/api/findPassword")
     public ResponseEntity<String> findpassword(@RequestBody EmailDto requestDto) {
-        memberService.findpassword(requestDto.getUsername());
-        return ResponseEntity.ok("인증번호");
+        return ResponseEntity.ok(memberService.findpassword(requestDto.getUsername()));
     }
     // 인증 번호로 인증 받고 차후 비밀번호 변경
 
     // password 찾기 2. password 인증번호 확인
     @PostMapping("/api/findCheck")
     public ResponseEntity<String> findCheck(@RequestBody AuthNumDto requestDto) {
-        memberService.findCheck(requestDto.getAuthNum(), requestDto.getUsername());
-        return ResponseEntity.ok("인증 완료");
+        return ResponseEntity.ok(memberService.findCheck(requestDto.getAuthNum(), requestDto.getUsername()));
     }
 
     //  password 찾기 3. password 변경
     @PostMapping("/api/passChange")
-    public ResponseEntity<String> passChange(@AuthenticationPrincipal UserDetailsImpl userDetails,
-                                             @RequestBody PasswordChangeDto passwordChangeDto) {
-
-        return ResponseEntity.ok(memberService.passChange(userDetails, passwordChangeDto));
+    public ResponseEntity<String> passChange(@RequestBody PasswordChangeDto passwordChangeDto) {
+        return ResponseEntity.ok(memberService.passChange(passwordChangeDto));
     }
 
     // password 변경
