@@ -54,12 +54,8 @@ public class ReviewService {
         Long dateLong = date.getTime();//Date-->Long
         long now = Timestamp.valueOf(LocalDateTime.now()).getTime(); // 현재
 
-//        // 해당 매칭에 참여하지 않았거나 매칭 만료일이 지나지 않을 시
-//        if (!(entryRepository.existsByMemberAndAndBoard(from, board)) || (dateLong > now)) {
-//            throw new CustomException(ErrorCode.INVALID_AUTHORITY);
-//        }
         // 해당 매칭에 참여하지 않았거나 매칭 만료일이 지나지 않을 시
-        if (!(entryRepository.existsByMemberAndAndBoard(from, board)) ) {
+        if (!(entryRepository.existsByMemberAndAndBoard(from, board)) || (dateLong > now)) {
             throw new CustomException(ErrorCode.INVALID_AUTHORITY);
         }
 

@@ -1,5 +1,7 @@
 package com.project.uandmeet.service;
 
+import com.project.uandmeet.exception.CustomException;
+import com.project.uandmeet.exception.ErrorCode;
 import com.project.uandmeet.model.Member;
 import com.project.uandmeet.redis.RedisUtil;
 import com.project.uandmeet.repository.MemberRepository;
@@ -39,6 +41,9 @@ public class EmailService {
 
     //이메일 보낼 양식
     public String joinEmail(String email) { // 컨트롤러에서 아이디가 넘어오면서 붙을 스트링값
+        Member member = memberRepository.findByUsername(email).orElseThrow(
+                () -> new CustomException(ErrorCode.MEMBER_NOT_FOUND)
+        );
         redisUtil.setDataExpire("Auth" + email, makeRandomNumber(),60 * 3L);
         redisUtil.setDataExpire("Cnt" + email, String.valueOf(emailCnt),60 * 60L);
         if (Integer.parseInt(redisUtil.getData("Cnt" + email)) < 4) {
@@ -46,7 +51,7 @@ public class EmailService {
             int restCnt = 3 - Integer.parseInt(redisUtil.getData("Cnt" + email));
             //인증메일 보내기
             String setFrom = "wkraudcka@naver.com"; // email-config에 설정한 자신의 이메일 주소를 입력
-            String toMail = email;
+            String toMail = member.getUsername();
             String title = "회원 가입 인증 이메일 입니다."; // 이메일 제목
             String content =
                     " <div" 																																																	+

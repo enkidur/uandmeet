@@ -91,7 +91,7 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
                 .and()
 //                .addFilter(new JwtAuthenticationFilter(authenticationManager(),redisUtil, jwtTokenProvider)) // AuthenticatonManager 파라미터 필요
                 .addFilter(new JwtAuthorizationFilter(authenticationManager(), jwtTokenProvider))// AuthenticatonManager 파라미터 필요
-                .addFilterBefore(new JwtTokenExceptionFilter(), JwtAuthenticationFilter.class)
+//                .addFilterBefore(new JwtTokenExceptionFilter(), JwtAuthenticationFilter.class)
                 .addFilterBefore(new JwtAuthenticationFilter(authenticationManager,redisUtil, jwtTokenProvider), UsernamePasswordAuthenticationFilter.class);
 
 
