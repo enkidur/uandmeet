@@ -109,6 +109,7 @@ public class MemberService {
         return "password check 완료";
     }
 
+    @Transactional
     public String signup(MemberRequestDto requestDto) {
         String username = requestDto.getUsername();
         String[] emailadress = username.split("@");
@@ -151,7 +152,7 @@ public class MemberService {
     public ResponseEntity<String> withdraw(UserDetailsImpl userDetails, String password) {
         ResponseEntity<String> responseEntity = null;
 
-        if (passwordEncoder.matches(password,userDetails.getPassword())) {
+        if (passwordEncoder.matches(password, userDetails.getPassword())) {
             String username = userDetails.getUsername();
 
             List<Entry> entries = entryRepository.findByMember(userDetails.getMember());
@@ -199,19 +200,18 @@ public class MemberService {
             try {
                 memberRepository.deleteByUsername(username);
                 responseEntity = ResponseEntity.ok("회원 탈퇴 완료.");
-            }catch (Exception e)
-            {
+            } catch (Exception e) {
                 System.out.println(e);
                 responseEntity = ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(String.valueOf(e));
             }
-        }
-        else
+        } else
             responseEntity = ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("잘못된 비밀번호입니다.");
 
         return responseEntity;
     }
 
 
+    @Transactional
     public String refresh(HttpServletRequest request, HttpServletResponse response) throws JsonProcessingException {
 
         //AccessToken
@@ -256,15 +256,16 @@ public class MemberService {
         return "재발급 성공";
     }
 
+    @Transactional
     public String findpassword(String username) {
         Member member = memberRepository.findByUsername(username).orElseThrow(
                 () -> new CustomException(ErrorCode.MEMBER_NOT_FOUND)
         );
 
-        redisUtil.setDataExpire("passAuth" + username, makeRandomNumber(),60 * 3L);
-        redisUtil.setDataExpire("passCnt" + username, String.valueOf(emailCnt),60 * 60L);
+        redisUtil.setDataExpire("passAuth" + username, makeRandomNumber(), 60 * 3L);
+        redisUtil.setDataExpire("passCnt" + username, String.valueOf(emailCnt), 60 * 60L);
         if (Integer.parseInt(redisUtil.getData("Cnt" + username)) < 4) {
-            redisUtil.setDataExpire("Cnt" + username, String.valueOf(emailCnt + 1),60 * 60L);
+            redisUtil.setDataExpire("Cnt" + username, String.valueOf(emailCnt + 1), 60 * 60L);
             int restCnt = 3 - Integer.parseInt(redisUtil.getData("Cnt" + username));
 
 
@@ -305,6 +306,7 @@ public class MemberService {
     }
 
     // 비밀번호 변경
+    @Transactional
     public String passChange(UserDetailsImpl userDetails, PasswordChangeDto passwordChangeDto) {
         Long userId = userDetails.getMember().getId();
         Member member = memberRepository.findById(userId).orElseThrow(
@@ -314,37 +316,41 @@ public class MemberService {
             throw new CustomException(ErrorCode.PASSWORD_PASSWORDCHECK);
         } else {
             member.setPassword(passwordEncoder.encode(passwordChangeDto.getNewPassword()));
+            memberRepository.save(member);
         }
         return "비밀번호 변경 완료";
     }
 
-        // password 변경
-        public String changepass (UserDetailsImpl userDetails, PasswordChangeDto passwordChangeDto){
-            Long userId = userDetails.getMember().getId();
-            Member member = memberRepository.findById(userId).orElseThrow(
-                    () -> new CustomException(ErrorCode.MEMBER_NOT_FOUND)
-            );
-            if (!passwordEncoder.matches(passwordChangeDto.getPasswordCheck(),userDetails.getPassword()) && !passwordChangeDto.getNewPassword().equals(passwordChangeDto.getNewPasswordCheck())) {
-                throw new CustomException(ErrorCode.PASSWORD_PASSWORDCHECK);
-            } else {
-                member.setPassword(passwordEncoder.encode(passwordChangeDto.getNewPassword()));
-            }
-            return "비밀번호 변경 완료";
-        }
-
-        public void join (MemberRequestDto requestDto){
-            Member member = new Member(requestDto.getUsername(), passwordEncoder.encode(requestDto.getPassword()));
+    // password 변경
+    @Transactional
+    public String changepass(UserDetailsImpl userDetails, PasswordChangeDto passwordChangeDto) {
+        Long userId = userDetails.getMember().getId();
+        Member member = memberRepository.findById(userId).orElseThrow(
+                () -> new CustomException(ErrorCode.MEMBER_NOT_FOUND)
+        );
+        if (!passwordEncoder.matches(passwordChangeDto.getPasswordCheck(), userDetails.getPassword()) && !passwordChangeDto.getNewPassword().equals(passwordChangeDto.getNewPasswordCheck())) {
+            throw new CustomException(ErrorCode.PASSWORD_PASSWORDCHECK);
+        } else {
+            member.setPassword(passwordEncoder.encode(passwordChangeDto.getNewPassword()));
             memberRepository.save(member);
         }
-
-        // 유저의 닉네임으로 유저 조회
-        public Member getMember (String nickname){
-            return memberRepository.findByNickname(nickname).orElseThrow(
-                    () -> new CustomException(ErrorCode.MEMBER_NOT_FOUND)
-            );
-        }
-
-        public void logout (UserDetailsImpl userDetails){
-            redisUtil.deleteData(userDetails.getUsername() + JwtProperties.HEADER_REFRESH);
-        }
+        return "비밀번호 변경 완료";
     }
+
+    public void join(MemberRequestDto requestDto) {
+        Member member = new Member(requestDto.getUsername(), passwordEncoder.encode(requestDto.getPassword()));
+        memberRepository.save(member);
+    }
+
+    // 유저의 닉네임으로 유저 조회
+    public Member getMember(String nickname) {
+        return memberRepository.findByNickname(nickname).orElseThrow(
+                () -> new CustomException(ErrorCode.MEMBER_NOT_FOUND)
+        );
+    }
+
+    @Transactional
+    public void logout(UserDetailsImpl userDetails) {
+        redisUtil.deleteData(userDetails.getUsername() + JwtProperties.HEADER_REFRESH);
+    }
+}

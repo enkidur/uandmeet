@@ -13,6 +13,7 @@ import com.project.uandmeet.security.UserDetailsImpl;
 import com.project.uandmeet.service.S3.S3Uploader;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.io.IOException;
 import java.util.*;
@@ -26,6 +27,7 @@ public class MemberInfoService {
     private final ReviewRepository reviewRepository;
     private final S3Uploader s3Uploader;
     private final String POST_IMAGE_DIR = "static";
+
     // 활동 내역 조회
     public MypageDto action(UserDetailsImpl userDetails) {
         Long userId = userDetails.getMember().getId();
@@ -51,6 +53,7 @@ public class MemberInfoService {
 
 
     // 활동내역 -> 관심사 수정
+    @Transactional
     public MypageDto concernedit (UserDetailsImpl userDetails, String[]concerns){
         Long userId = userDetails.getMember().getId();
         Member member = memberRepository.findById(userId).orElseThrow(
@@ -69,6 +72,7 @@ public class MemberInfoService {
             idx++;
         }
         member.setConcern(concern);
+        memberRepository.save(member);
         Map<String, Long> joinCnt = new HashMap<>();
         if (cnt == 0) {
             return new MypageDto(nickname, concern);
@@ -81,8 +85,8 @@ public class MemberInfoService {
         return new MypageDto(nickname, concern, joinCnt);
     }
 
-
     // 활동 페이지 -> 닉네임 수정
+    @Transactional
     public MypageDto nicknameedit (UserDetailsImpl userDetails, String nickname){
         Long userId = userDetails.getMember().getId();
         Member member = memberRepository.findById(userId).orElseThrow(
@@ -105,6 +109,7 @@ public class MemberInfoService {
         Member usingnickname = memberRepository.findByNickname(nickname).orElse(null);
         if (usingnickname == null) {
             member.setNickname(nickname);
+            memberRepository.save(member);
         } else {
             throw new CustomException(ErrorCode.DUPLICATE_NICKNAME);
         }
@@ -126,6 +131,7 @@ public class MemberInfoService {
     }
 
     // info -> gender 수정
+    @Transactional
     public MyPageInfoDto genderedit (UserDetailsImpl userDetails, InfogenderDto requestDto){
         String username = userDetails.getUsername();
         Long userId = userDetails.getMember().getId();
@@ -134,12 +140,14 @@ public class MemberInfoService {
         );
         String gender = requestDto.getGender();
         member.setGender(gender);
+        memberRepository.save(member);
         Map<String, Long> birth = member.getBirth();
         MyPageInfoDto myPageInfoDto = new MyPageInfoDto(username, gender, birth);
         return myPageInfoDto;
     }
 
     // info -> birth 수정
+    @Transactional
     public MyPageInfoDto birthedit (UserDetailsImpl userDetails, InfoeditRequestDto requestDto){
         String username = userDetails.getUsername();
         Long userId = userDetails.getMember().getId();
@@ -152,6 +160,7 @@ public class MemberInfoService {
         birth.put("birthMonth", requestDto.getBirthMonth());
         birth.put("birthDay", requestDto.getBirthDay());
         member.setBirth(birth);
+        memberRepository.save(member);
         MyPageInfoDto myPageInfoDto = new MyPageInfoDto(username, gender, birth);
         return myPageInfoDto;
     }
@@ -181,6 +190,7 @@ public class MemberInfoService {
     }
 
     // profile 수정
+    @Transactional
     public ProfileDto profileedit (UserDetailsImpl userDetails, ProfileEditRequestDto requestDto) throws IOException
     {
         Long userId = userDetails.getMember().getId();
@@ -202,6 +212,7 @@ public class MemberInfoService {
         if (requestDto.getData() != null) {
             ImageDto uploadImage = s3Uploader.upload(requestDto.getData(), POST_IMAGE_DIR);
             member.setProfile(uploadImage.getImageUrl());
+            memberRepository.save(member);
             ProfileDto profileDto = new ProfileDto(nickname, star, uploadImage.getImageUrl());
             return profileDto;
         } else {
@@ -209,6 +220,7 @@ public class MemberInfoService {
             return profileDto;
         }
     }
+
     public SimpleReviewResponseDto simpleReview (Long memberId){
         // 해당 유저가 없을 시 에러코드르 띄우기 위해 사용
         Member member = memberRepository.findById(memberId).orElseThrow(

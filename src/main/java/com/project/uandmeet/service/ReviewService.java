@@ -13,6 +13,7 @@ import com.project.uandmeet.security.UserDetailsImpl;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.sql.Timestamp;
 import java.text.ParseException;
@@ -44,6 +45,7 @@ public class ReviewService {
     }
 
 
+    @Transactional
     public ReviewDto createReview(UserDetailsImpl userDetails, ReviewRequestDto requestDto) throws ParseException {
         Member from = userDetails.getMember();
         Board board = boardRepository.findByBoardTypeAndId("matching", requestDto.getBoardId()).orElseThrow(

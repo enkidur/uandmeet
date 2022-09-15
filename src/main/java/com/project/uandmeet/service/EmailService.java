@@ -10,6 +10,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.mail.javamail.JavaMailSenderImpl;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
 import javax.mail.*;
 import javax.mail.internet.MimeMessage;
 import java.io.IOException;
@@ -40,6 +42,7 @@ public class EmailService {
 
 
     //이메일 보낼 양식
+    @Transactional
     public String joinEmail(String email) { // 컨트롤러에서 아이디가 넘어오면서 붙을 스트링값
         Member member = memberRepository.findByUsername(email).orElseThrow(
                 () -> new CustomException(ErrorCode.MEMBER_NOT_FOUND)

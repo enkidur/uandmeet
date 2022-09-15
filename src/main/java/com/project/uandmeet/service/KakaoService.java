@@ -50,6 +50,7 @@ public class KakaoService {
     }
 
 
+    @Transactional
     private String getKakoToken(String code) throws JsonProcessingException {
         // HTTP Header 생성
         HttpHeaders headers = new HttpHeaders();
@@ -61,7 +62,8 @@ public class KakaoService {
         // rest Api key
         body.add("client_id", "e789d33a46a6c7fd347b5f73e7669177");
 //        body.add("redirect_uri", "http://localhost:8080/user/kakao/callback");
-        body.add("redirect_uri", "http://localhost:3000/user/kakao/callback");
+//        body.add("redirect_uri", "http://localhost:3000/user/kakao/callback");
+        body.add("redirect_uri", "http://uandmeet.shop/user/kakao/callback");
         body.add("code", code);
 
         // HTTP 요청 보내기
@@ -115,6 +117,7 @@ public class KakaoService {
     }
 
 
+    @Transactional
     private Map<String, String> registerKakaoIfNeeded(KakaoUserInfoDto kakaoUserInfo) {
         // DB 에 중복된 Kakao Id 가 있는지 확인
 //        String id = kakaoUserInfo.getId();
@@ -145,6 +148,7 @@ public class KakaoService {
         }
     }
 
+    @Transactional
     private Map<String, String> createToken(Member member) {
 
         String accessToken = jwtTokenProvider.createToken(member.getUsername(), member.getId());
