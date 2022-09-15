@@ -201,23 +201,4 @@ public class BoardController {
         return searchResponseDto;
 
     }
-
-    // mainpage -> information
-    @GetMapping("/api/mainboards/information/{category}")
-    public ResponseEntity<List<MainPageDto>> maininformation(@PathVariable String category) {
-        return ResponseEntity.ok(boardService.maininformation(category));
-    }
-
-    // mainpage -> matching
-    @GetMapping("/api/mainboards/matching/{category}")
-    public ResponseEntity<List<MainPageMatchingDto>> mainmatching(@PathVariable String category) {
-        return ResponseEntity.ok(boardService.mainmatching(category));
-    }
-
-    //     나의 게시글(신청글, 참여글)
-    @GetMapping("/api/mainboards/myentry")
-    public ResponseEntity<List<MainPageEntryDto>> mainmyentry(@AuthenticationPrincipal UserDetailsImpl userDetails) {
-        return ResponseEntity.ok(boardService.mainmyentry(userDetails));
-    }
-
 }

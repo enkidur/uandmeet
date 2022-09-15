@@ -30,84 +30,25 @@ public class MemberController {
     private final EmailService emailService;
 
 
-    // 회원가입 1. emali check
+    // 회원가입 1. emali check + 인증번호 발송
     @PostMapping("/api/checkemail")
     public ResponseEntity<String> checkemail(@RequestBody EmailDto requestDto) {
-//        // 헤더에 전달
-//        HttpHeaders headers = new HttpHeaders();
-//        headers.set("level","1");
-//        ResponseEntity<String> res = ResponseEntity.ok()
-//                                     .headers(headers)
-//                                     .body(memberService.checkemail(username));
-//        log.info(String.valueOf(res.getHeaders()));
-//         redis 에 저장
         memberService.checkemail(requestDto.getUsername());
-        ResponseEntity<String> res = ResponseEntity.ok(emailService.joinEmail(requestDto.getUsername()));
-//        redisUtil.setDataExpire(username + "level", "1", 300L);
-        // 해당 정보를 client 에서 처리하게 좋을지 서버에서 처리하는게 좋을지
-        // client 에 저장하면 이동 시 노출위험 -> 암호화 필수 but 서버 부담 감소
-// stateless 구조 설계 권장
-        return res;
+        return ResponseEntity.ok(emailService.joinEmail(requestDto.getUsername()));
     }
 
-    // 회원가입 2. Email 인증
-//    @PostMapping("/api/mailcheck")
-//    public @ResponseBody ResponseEntity<String> mailCheck(@RequestBody EmailDto emailDto) throws IOException {
-//        // 헤더에 전달
-////        int level = Integer.parseInt(String.valueOf(headers.get("level")));
-////        if (level < 1) {
-////            ResponseEntity<String> res = ResponseEntity.ok()
-////                    .headers(headers)
-////                    .body(emailService.joinEmail(username));
-//
-//        //  redis 에 저장
-//        String level = redisUtil.getData(emailDto.getUsername() + "level");
-//        ResponseEntity<String> res = ResponseEntity.ok(emailService.joinEmail(emailDto.getUsername()));
-//        redisUtil.setDataExpire(emailDto.getUsername() + "level", "2", 300L);
-//        return res;
-////        }
-////        return null;
-//    }
-
-    // 회원가입 3. Email 인증번호 확인
+    // 회원가입 2. Email 인증번호 확인
     @PostMapping("/api/checkAuthNum")
     public @ResponseBody ResponseEntity<String> checkAuthNum(@RequestBody AuthNumDto requestDto) {
-//        String level = redisUtil.getData(username + "level");
-        ResponseEntity<String> res = ResponseEntity.ok(emailService.checkAuthNum(requestDto.getAuthNum(), requestDto.getUsername()));
-//        int val = Integer.parseInt(level);
-//        if (val < 2) {
-//            return ResponseEntity.ok("잘못된 접근입니다.");
-//        }
-//        redisUtil.setDataExpire(username + "level", "3", 300L);
-        return res;
+        return ResponseEntity.ok(emailService.checkAuthNum(requestDto.getAuthNum(), requestDto.getUsername()));
     }
 
-    // 회원가입 4. password check
+    // 회원가입 3. password check + 회원가입
     @PostMapping("/api/checkpassword")
     public ResponseEntity<String> checkPassword(@RequestBody MemberRequestDto requestDto) {
-//        String level = redisUtil.getData(username + "level");
         memberService.checkPassword(requestDto.getPassword(), requestDto.getPasswordCheck());
-        ResponseEntity<String> res = ResponseEntity.ok(memberService.signup(requestDto));
-//        int val = Integer.parseInt(level);
-//        if (val < 3) {
-//            return ResponseEntity.ok("잘못된 접근입니다.");
-//        }
-//        redisUtil.setDataExpire(username + "level", "4", 300L);
-        return res;
+        return ResponseEntity.ok(memberService.signup(requestDto));
     }
-
-    // 회원가입 5. 가입완료
-//    @PostMapping("/api/signup")
-//    public ResponseEntity<String> signup(@RequestBody MemberRequestDto requestDto) throws IOException {
-//        String level = redisUtil.getData(requestDto.getUsername() + "level");
-//        ResponseEntity<String> res = ResponseEntity.ok(memberService.signup(requestDto));
-//        int val = Integer.parseInt(level);
-//        if (val < 4) {
-//            return ResponseEntity.ok("잘못된 접근입니다.");
-//        }
-//        redisUtil.deleteData(requestDto.getUsername() + "level");
-//        return res;
-//    }
 
     // 회원가입 test
     @PostMapping("/api/join")
@@ -166,74 +107,6 @@ public class MemberController {
         return ResponseEntity.ok("변경 완료");
     }
 
-    // 활동페이지 조회
-    @GetMapping("/api/mypage/action")
-    public ResponseEntity<MypageDto> action(@AuthenticationPrincipal UserDetailsImpl userDetails) {
-        return ResponseEntity.ok(memberService.action(userDetails));
-    }
-
-    // 활동페이지 -> nickname 수정
-    @PutMapping("/api/mypage/actionedit/nickname")
-    public ResponseEntity<MypageDto> nicknameedit(@AuthenticationPrincipal UserDetailsImpl userDetails,
-                                                  @RequestBody NicknameDto requestDto) {
-        log.info(userDetails.getUsername());
-        return ResponseEntity.ok(memberService.nicknameedit(userDetails, requestDto.getNickname()));
-    }
-
-    // 활동페이지 -> concern 수정
-    @PutMapping("/api/mypage/actionedit/concern")
-    public ResponseEntity<MypageDto> concernedit(@AuthenticationPrincipal UserDetailsImpl userDetails,
-                                                 @RequestBody ConcernDto requestDto) {
-        return ResponseEntity.ok(memberService.concernedit(userDetails,
-                requestDto.getConcerns()));
-    }
-
-    //myInfo 페이지
-    @GetMapping("/api/mypage/info")
-    public ResponseEntity<MyPageInfoDto> myinfo(@AuthenticationPrincipal UserDetailsImpl userDetails) {
-        log.info(userDetails.getUsername());
-        return ResponseEntity.ok(memberService.myinfo(userDetails));
-    }
-
-    // myinfo -> gender 수정
-    @PutMapping("/api/mypage/infoedit/gender")
-    public ResponseEntity<MyPageInfoDto> genderedit(@AuthenticationPrincipal UserDetailsImpl userDetails,
-                                                    @RequestBody InfogenderDto requestDto) {
-        return ResponseEntity.ok(memberService.genderedit(userDetails, requestDto));
-    }
-
-    // myinfo -> birth 수정
-    @PutMapping("/api/mypage/infoedit/birth")
-    public ResponseEntity<MyPageInfoDto> birthedit(@AuthenticationPrincipal UserDetailsImpl userDetails,
-                                                   @RequestBody InfoeditRequestDto requestDto) {
-        return ResponseEntity.ok(memberService.birthedit(userDetails, requestDto));
-    }
-
-    // profile 조회
-    @GetMapping("/api/mypage/profile")
-    public ResponseEntity<ProfileDto> profile(@AuthenticationPrincipal UserDetailsImpl userDetails) {
-        return ResponseEntity.ok(memberService.profile(userDetails));
-    }
-
-    // profile 수정
-    @PutMapping("/api/mypage/profile")
-    public ResponseEntity<ProfileDto> profileedit(@AuthenticationPrincipal UserDetailsImpl userDetails,
-                                                  @ModelAttribute ProfileEditRequestDto requestDto) throws IOException {
-        return ResponseEntity.ok(memberService.profileedit(userDetails, requestDto));
-    }
-
-    // 매칭 간단평가
-    @GetMapping("/api/userinfo/simplereview")
-    public ResponseEntity<SimpleReviewResponseDto> simpleReview(@RequestBody MemberIdRequestDto requestDto) {
-        return ResponseEntity.ok(memberService.simpleReview(requestDto.getMemberId()));
-    }
-
-    // 매칭 후기
-    @GetMapping("/api/userinfo/review")
-    public ResponseEntity<List<Review>> Review(@RequestBody MemberIdRequestDto requestDto) {
-        return ResponseEntity.ok(memberService.Review(requestDto.getMemberId()));
-    }
-
     // password 변경
     @PostMapping("/api/changepass")
     public ResponseEntity<String> changepass(@AuthenticationPrincipal UserDetailsImpl userDetails,
@@ -246,59 +119,5 @@ public class MemberController {
     public ResponseEntity<Map<String, String>> kakaoLogin(@RequestParam String code) throws JsonProcessingException {
         // authorizedCode: 카카오 서버로부터 받은 인가 코드
         return ResponseEntity.ok(kakaoService.kakaoLogin(code));
-    }
-
-    // OAuth 로그인을 해도 UserDetailsImpl
-    // 일반 로그인을 해도 UserDetailsImpl
-    @GetMapping("/user")
-    public @ResponseBody String loginTest(@AuthenticationPrincipal UserDetailsImpl userDetails) {
-        System.out.println("유저디테일" + userDetails);
-        System.out.println("principalDetails: " + userDetails.getMember());
-        return "user";
-    }
-
-    // 나의 게시글 -> 정보게시글
-    @GetMapping("/api/mypost/information")
-    public ResponseEntity<MyPostInfoResponseDto> mypostinformation(@AuthenticationPrincipal UserDetailsImpl userDetails,
-                                                                   @RequestParam int page,
-                                                                   @RequestParam int amount) {
-        page -= 1;
-        return ResponseEntity.ok(memberService.mypostinformation(userDetails, page, amount));
-    }
-
-    // 나의 게시글 -> 매칭게시글
-    @GetMapping("/api/mypost/matching")
-    public ResponseEntity<MypostResponseDto> mypostmatching(@AuthenticationPrincipal UserDetailsImpl userDetails,
-                                                            @RequestParam int page,
-                                                            @RequestParam int amount) {
-        page -= 1;
-        return ResponseEntity.ok(memberService.mypostmatching(userDetails, page, amount));
-    }
-
-    // 나의 게시글(내가 신청한 글)
-    @GetMapping("/api/myentry")
-    public ResponseEntity<MypostResponseDto> myentry(@AuthenticationPrincipal UserDetailsImpl userDetails,
-                                                     @RequestParam int page,
-                                                     @RequestParam int amount) {
-        page -= 1;
-        return ResponseEntity.ok(memberService.myentry(userDetails, page, amount));
-    }
-
-    // 나의 댓글 -> information
-    @GetMapping("/api/mycomment/information")
-    public ResponseEntity<MypostCommentResponseDto> mycommentinformation(@AuthenticationPrincipal UserDetailsImpl userDetails,
-                                                              @RequestParam int page,
-                                                              @RequestParam int amount) {
-        page -= 1;
-        return ResponseEntity.ok(memberService.mycommentinformation(userDetails, page, amount));
-    }
-
-    // 나의 댓글 -> matching
-    @GetMapping("/api/mycomment/matching")
-    public ResponseEntity<MypostCommentResponseDto> mycommentmatching(@AuthenticationPrincipal UserDetailsImpl userDetails,
-                                                              @RequestParam int page,
-                                                              @RequestParam int amount) {
-        page -= 1;
-        return ResponseEntity.ok(memberService.mycommentmatching(userDetails, page, amount));
     }
 }

@@ -47,13 +47,6 @@ public class KakaoService {
 
         // 필요 시 회원가입
         return registerKakaoIfNeeded(kakaoUserInfo);
-
-        // 4. 강제 로그인 처리
-//        froceLogin(member);
-
-        // 4. accessToken, refreshToken 발급
-//        createToken(member);
-
     }
 
 
@@ -68,7 +61,7 @@ public class KakaoService {
         // rest Api key
         body.add("client_id", "e789d33a46a6c7fd347b5f73e7669177");
 //        body.add("redirect_uri", "http://localhost:8080/user/kakao/callback");
-        body.add("redirect_uri", "http://localhost:3000/user/kakao/callback");
+        body.add("redirect_uri", "http://uandmeet.shop/user/kakao/callback");
         body.add("code", code);
 
         // HTTP 요청 보내기
@@ -157,22 +150,6 @@ public class KakaoService {
         String accessToken = jwtTokenProvider.createToken(member.getUsername(), member.getId());
         String refreshToken = jwtTokenProvider.createRefreshToken(member.getUsername());
 
-//        String accessToken = JWT.create()
-//                .withSubject(member.getUsername())
-//                .withExpiresAt(new Date(System.currentTimeMillis() + JwtProperties.ACCESS_EXPIRATION_TIME))
-//                .withClaim("id", member.getId())
-////                .withClaim("email", member.getUsername())
-//                .withIssuedAt(new Date(System.currentTimeMillis()))
-//                .sign(Algorithm.HMAC512(JwtProperties.SECRET));
-//
-//        String refreshToken = JWT.create()
-//                .withSubject(member.getUsername())
-//                .withExpiresAt(new Date(System.currentTimeMillis() + JwtProperties.REFRESH_EXPIRATION_TIME))
-//                .withIssuedAt(new Date(System.currentTimeMillis()))
-//                .sign(Algorithm.HMAC512(JwtProperties.SECRET2));
-
-        // Refresh Token DB에 저장
-//        memberService.updateRefreshToken(member.getUsername(), refreshToken);
         // redis 에 token 저장
         redisUtil.setDataExpire(member.getUsername()+JwtProperties.HEADER_ACCESS, JwtProperties.TOKEN_PREFIX + accessToken, JwtProperties.ACCESS_EXPIRATION_TIME);
         redisUtil.setDataExpire(member.getUsername()+JwtProperties.HEADER_REFRESH, JwtProperties.TOKEN_PREFIX + refreshToken, JwtProperties.REFRESH_EXPIRATION_TIME);
@@ -194,12 +171,5 @@ public class KakaoService {
         headers.set("loginto", member.getLoginto());
 
         return userInfo;
-//        headers.set(JwtProperties.HEADER_REFRESH, JwtProperties.TOKEN_PREFIX + refreshToken);
     }
-
-//    private void froceLogin(Member member) {
-//        UserDetailsImpl userDetails = new UserDetailsImpl(member);
-//        Authentication authentication = new UsernamePasswordAuthenticationToken(userDetails, null,userDetails.getAuthorities());
-//        SecurityContextHolder.getContext().setAuthentication(authentication);
-//    }
 }
