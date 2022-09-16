@@ -14,6 +14,8 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
 import java.util.UUID;
 
 @RequiredArgsConstructor
@@ -53,12 +55,13 @@ public class OAuth2SuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
         getRedirectStrategy().sendRedirect(request, response, url);
     }
 
-    private String makeRedirectUrl(String access_Token,String username,String nickname, String profile) {
+    private String makeRedirectUrl(String access_Token,String username,String nickname, String profile) throws UnsupportedEncodingException {
+        String encodednickname = URLEncoder.encode(nickname,"utf-8");
         return UriComponentsBuilder.fromUriString("http://uandmeet.shop/oauth2/redirect")
                 .queryParam("access_Token", access_Token)
 //                .queryParam("refresh_Token", refresh_Token)
                 .queryParam("username", username)
-                .queryParam("nickname", nickname)
+                .queryParam("nickname", encodednickname)
                 .queryParam("profile", profile)
                 .build().toUriString();
 
