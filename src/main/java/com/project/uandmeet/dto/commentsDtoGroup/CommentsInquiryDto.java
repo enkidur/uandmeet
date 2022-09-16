@@ -22,6 +22,8 @@ public class CommentsInquiryDto {
         this.writer = memberSimpleDto;
         this.id = comment.getId();
         this.comment = comment.getComment();
-        this.createdAt = comment.getCreatedAt().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:SS:ss.SSS"));
+        this.createdAt = comment.getCreatedAt().format(DateTimeFormatter.ofPattern("yyyy/MM/dd HH:mm:ss.SSS"));
+        System.out.println(createdAt);
+        System.out.println(comment.getCreatedAt());
     }
 }

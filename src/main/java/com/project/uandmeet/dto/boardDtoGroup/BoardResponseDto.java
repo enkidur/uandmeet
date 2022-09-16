@@ -32,12 +32,11 @@ public class BoardResponseDto {
     private boolean LikeState;
     public BoardResponseDto(MemberSimpleDto memberSimpleDto ,Board board)
     {
-        TimeZone tzSeoul = TimeZone.getTimeZone("Asia/Seoul");
         this.memberSimpleDto = memberSimpleDto;
         this.city = board.getCity().getCtpKorNmAbbreviation();
         this.gu = board.getGu().getSigKorNm();
         this.id = board.getId();
-        this.createdAt = board.getCreatedAt().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.SSS").withZone(tzSeoul.toZoneId()));
+        this.createdAt = board.getCreatedAt().format(DateTimeFormatter.ofPattern("yyyy/MM/dd HH:mm:ss"));
         this.category = board.getCategory().getCategory();
         this.endDateAt = board.getEndDateAt();
         this.content = board.getContent();
@@ -52,10 +51,9 @@ public class BoardResponseDto {
     }
     public BoardResponseDto(Board board,MemberSimpleDto memberSimpleDto)
     {
-        TimeZone tzSeoul = TimeZone.getTimeZone("Asia/Seoul");
         this.memberSimpleDto = memberSimpleDto;
         this.id = board.getId();
-        this.createdAt = board.getCreatedAt().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.SSS").withZone(tzSeoul.toZoneId()));
+        this.createdAt = board.getCreatedAt().format(DateTimeFormatter.ofPattern("yyyy/MM/dd HH:mm:ss"));
         this.category = board.getCategory().getCategory();
         this.endDateAt = board.getEndDateAt();
         this.content = board.getContent();
@@ -67,12 +65,11 @@ public class BoardResponseDto {
 
     public BoardResponseDto(MemberSimpleDto memberSimpleDto , Board board, Liked liked)
     {
-        TimeZone tzSeoul = TimeZone.getTimeZone("Asia/Seoul");
         this.memberSimpleDto = memberSimpleDto;
         this.city = board.getCity().getCtpKorNmAbbreviation();
         this.gu = board.getGu().getSigKorNm();
         this.id = board.getId();
-        this.createdAt = board.getCreatedAt().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.SSS").withZone(tzSeoul.toZoneId()));
+        this.createdAt = board.getCreatedAt().format(DateTimeFormatter.ofPattern("yyyy/MM/dd HH:mm:ss"));
         this.category = board.getCategory().getCategory();
         this.endDateAt = board.getEndDateAt();
         this.content = board.getContent();

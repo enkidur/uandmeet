@@ -12,10 +12,7 @@ public class MemberRequestDto {
     private String username;
     private String password;
     private String passwordCheck;
-
-    //홍산의 추가
-    private String nickname;
-    private String profileImgUrl;
+//    private MultipartFile userProfileImage;
 
     public Member register() {
         return new Member(username, password);

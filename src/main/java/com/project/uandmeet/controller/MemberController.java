@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.*;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import java.util.List;
 import java.util.Map;
 
@@ -112,7 +113,7 @@ public class MemberController {
 
     // kakao login
     @GetMapping("/user/kakao/callback")
-    public ResponseEntity<Map<String, String>> kakaoLogin(@RequestParam String code) throws JsonProcessingException {
+    public ResponseEntity<Map<String, String>> kakaoLogin(@RequestParam String code) throws JsonProcessingException, UnsupportedEncodingException {
         // authorizedCode: 카카오 서버로부터 받은 인가 코드
         return ResponseEntity.ok(kakaoService.kakaoLogin(code));
     }

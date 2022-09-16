@@ -1,5 +1,6 @@
 package com.project.uandmeet.model;
 
+import com.project.uandmeet.dto.boardDtoGroup.EntryDto;
 import lombok.*;
 
 import javax.persistence.*;
@@ -31,10 +32,10 @@ public class Entry extends BaseTime{
     @Column
     private boolean isMatching;
 
-    public Entry(Board board, Member member) {
+    public Entry(Board board, Member member, EntryDto.request request) {
         this.member = member;
         this.board = board;
         this.category = board.getCategory();
-        this.isMatching = isMatching();
+        this.isMatching = request.getIsMatching();
     }
 }
