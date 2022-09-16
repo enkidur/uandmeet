@@ -23,7 +23,7 @@ public  interface BoardRepository extends JpaRepository<Board, Long>, QuerydslPr
     Page<Board> findAllByBoardTypeAndCity(String boardType, Pageable pageable,Siarea City);
     Page<Board> findAllByBoardTypeAndCityAndGu(String boardType, Pageable pageable,Siarea City, Guarea Gu);
 
-    List<Board> findByMemberAndBoardTypeOrderByCreatedAtDesc(Member member, String boardType);
+    List<Board> findByMemberAndBoardType(Member member, String boardType);
     Page<Board> findByMemberAndBoardType(Member member,  String boardType, Pageable pageable);
     Long countByMemberAndAndBoardType(Member member, String boardType);
     List<Board> findByBoardTypeOrderByLikeCountDesc(String boardType);

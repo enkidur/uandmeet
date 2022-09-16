@@ -18,9 +18,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.List;
+import java.util.*;
 
 @Service
 @RequiredArgsConstructor //생성자 미리 생성.
@@ -126,7 +124,7 @@ public class MainPageService {
                 () -> new CustomException(ErrorCode.MEMBER_NOT_FOUND)
         );
         List<Entry> entries = entryRepository.findByMember(member);
-        List<Board> boards = boardRepository.findByMemberAndBoardTypeOrderByCreatedAtAsc(member, "matching");
+        List<Board> boards = boardRepository.findByMemberAndBoardType(member, "matching");
         List<MainPageEntryDto> temp = new ArrayList<>();
         List<MainPageEntryDto> boardInfo = new ArrayList<>();
         for (Entry entry : entries) {
@@ -160,7 +158,8 @@ public class MainPageService {
             temp.add(responseDto);
         }
         Comparator<MainPageEntryDto> comparator = Comparator.comparing(prod -> String.valueOf(prod.getCreatedAt()));
-        temp.sort(comparator);
+//        temp.sort(comparator);
+        temp.sort(comparator.reversed());
         if (temp.size() < 5) {
             boardInfo.addAll(temp);
         } else {
