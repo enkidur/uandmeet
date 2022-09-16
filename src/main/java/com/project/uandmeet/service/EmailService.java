@@ -24,7 +24,6 @@ public class EmailService {
     @Autowired
     private JavaMailSenderImpl mailSender; //Application 에서 빈 등록했기 때문에 주입받을 수 있다.
 
-    private final MemberRepository memberRepository;
     @Autowired
     private RedisUtil redisUtil;
     //    private String authNumber; // 난수 번호

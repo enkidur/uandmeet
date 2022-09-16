@@ -23,6 +23,8 @@ import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestTemplate;
 
 import javax.servlet.http.HttpServletResponse;
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
@@ -38,7 +40,7 @@ public class KakaoService {
     private final RedisUtil redisUtil;
 
 
-    public Map<String, String> kakaoLogin(String code) throws JsonProcessingException {
+    public Map<String, String> kakaoLogin(String code) throws JsonProcessingException, UnsupportedEncodingException {
         // 1. "인가 코드"로 "액세스 토큰" 요청
         String kakaoToken = getKakoToken(code);
 
@@ -115,7 +117,7 @@ public class KakaoService {
     }
 
 
-    private Map<String, String> registerKakaoIfNeeded(KakaoUserInfoDto kakaoUserInfo) {
+    private Map<String, String> registerKakaoIfNeeded(KakaoUserInfoDto kakaoUserInfo) throws UnsupportedEncodingException {
         // DB 에 중복된 Kakao Id 가 있는지 확인
 //        String id = kakaoUserInfo.getId();
 //        System.out.println(id);
@@ -145,7 +147,7 @@ public class KakaoService {
         }
     }
 
-    private Map<String, String> createToken(Member member) {
+    private Map<String, String> createToken(Member member) throws UnsupportedEncodingException {
 
         String accessToken = jwtTokenProvider.createToken(member.getUsername(), member.getId());
         String refreshToken = jwtTokenProvider.createRefreshToken(member.getUsername());
@@ -159,9 +161,10 @@ public class KakaoService {
         // 재발급떼문에 set 사용
         HttpHeaders headers = new HttpHeaders();
         Map<String, String> userInfo = new HashMap<>();
+        String nickname = URLEncoder.encode(member.getNickname(),"utf-8");
         headers.set(JwtProperties.HEADER_ACCESS, JwtProperties.TOKEN_PREFIX + accessToken);
         userInfo.put("username", member.getUsername());
-        userInfo.put("nickname", member.getNickname());
+        userInfo.put("nickname", nickname);
         userInfo.put("profile", member.getProfile());
         userInfo.put("loginto", member.getLoginto());
         // 헤더에 보이지 않음
