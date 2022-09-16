@@ -88,8 +88,12 @@
 <img src="https://img.shields.io/badge/google login-4285F4?style=for-the-badge&logo=google&logoColor=white">
 </div>
 
-## 사용한 기술스택
-# 프론트엔드
-- React, Axios, Redux
-# 백엔드
-- Spring, JPA, MYSQL, GRADLE, GitHub, AWS, Spring Security
+## 트러블 슈팅
+- 공공 API 통신
+공공데이터 포털 API에서 [시/도/군]>[구]>[동]순으로 받아와야하는 문제점 -> Back-end를 통하지않고 속도가 불안정한 타 서버에서 계속 받아서 사용
+해결 👉 Back-end에서 지역명을 2주 1회 업데이트 주기로 받아온다. Back-end에서 공공데이터포털 API를 통해 필요한 지역명들을 모두 받아와서 DB에 저장 후에 
+원하는 데이터로 가공하여 Front-end로 전송
+
+- ID의 통일
+소셜 로그인중 하나인 kakao는 ID를 email형식으로만 넘겨주기에 기존 회원가입과 통일하는 과정에서 혼란을 야기
+👉 타 사이트에서 많이 사용되는 kakaoLogin을 없애기 보단, 다른 소셜로그인과 폼로그인에서도 ID를 Email형식으로  
