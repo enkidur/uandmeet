@@ -17,6 +17,7 @@ public class UandmeetApplication {
 //    @Bean
 //    public JavaMailSenderImpl mailSender() { return new JavaMailSenderImpl(); }
 
+
     public static void main(String[] args) {
         SpringApplication.run(UandmeetApplication.class, args);
     }
