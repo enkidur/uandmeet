@@ -214,7 +214,7 @@ public class MemberService {
 
 
     @Transactional
-    public String refresh(HttpServletRequest request, HttpServletResponse response) throws JsonProcessingException {
+    public String refresh(HttpServletRequest request, HttpServletResponse response) throws IOException {
 
         //AccessToken
         String expiredAccessTokenHeader = request.getHeader(JwtProperties.HEADER_ACCESS);

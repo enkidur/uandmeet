@@ -126,7 +126,7 @@ public class MainPageService {
                 () -> new CustomException(ErrorCode.MEMBER_NOT_FOUND)
         );
         List<Entry> entries = entryRepository.findByMember(member);
-        List<Board> boards = boardRepository.findByMemberAndBoardType(member, "matching");
+        List<Board> boards = boardRepository.findByMemberAndBoardTypeOrderByCreatedAtDesc(member, "matching");
         List<MainPageEntryDto> temp = new ArrayList<>();
         List<MainPageEntryDto> boardInfo = new ArrayList<>();
         for (Entry entry : entries) {

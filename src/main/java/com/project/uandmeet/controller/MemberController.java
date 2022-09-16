@@ -80,7 +80,7 @@ public class MemberController {
     // 8. 클라이언트는 새롭게 받은 Access Token 을 기존의 Access Token 에 덮어쓰게 된다.
     @GetMapping("/api/refresh")
     public ResponseEntity<String> refresh(HttpServletRequest request,
-                                                       HttpServletResponse response) throws JsonProcessingException {
+                                                       HttpServletResponse response) throws IOException {
         return ResponseEntity.ok(memberService.refresh(request, response));
     }
 
@@ -115,5 +115,9 @@ public class MemberController {
     public ResponseEntity<Map<String, String>> kakaoLogin(@RequestParam String code) throws JsonProcessingException {
         // authorizedCode: 카카오 서버로부터 받은 인가 코드
         return ResponseEntity.ok(kakaoService.kakaoLogin(code));
+    }
+    @GetMapping("/api/test")
+    public String test() {
+        return "성공";
     }
 }
