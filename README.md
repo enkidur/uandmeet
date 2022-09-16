@@ -1,6 +1,6 @@
+![image](https://user-images.githubusercontent.com/58943830/190537888-a808062d-fe3a-41a1-bf2e-d407627c329f.png)
 ## 👉 UandMeet 소개
 맟춤 운동 매칭 , 정보 공유 사이트 입니다.!
-[KakaoTalk_20220915_224646384](https://user-images.githubusercontent.com/58943830/190537888-a808062d-fe3a-41a1-bf2e-d407627c329f.png)
 
 <br>
 ## 프로젝트 개요
