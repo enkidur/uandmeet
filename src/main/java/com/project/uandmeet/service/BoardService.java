@@ -342,7 +342,7 @@ public class BoardService {
         {
             if(entryDto.getIsMatching()) {
                 if (!entryRepository.findByMemberAndBoard(member, board).isPresent()) {
-                    entry = new Entry(board, member);
+                    entry = new Entry(board, member, entryDto);
                     try {
                         entryRepository.save(entry);
                         board.setCurrentEntry(board.getCurrentEntry() + 1);
@@ -652,9 +652,9 @@ public class BoardService {
                     .orElseGet(()-> null);
 
         if(liked != null)
-            likeState =liked.getIsLike();
+            likeState = true;
         if(entry != null)
-            matchingState = entry.isMatching();
+            matchingState = true;
 
         stateCheckDto = new StateCheckDto(board.getBoardType(),matchingState,likeState);
         return ResponseEntity.ok(stateCheckDto);
