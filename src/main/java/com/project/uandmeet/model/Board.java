@@ -2,6 +2,7 @@ package com.project.uandmeet.model;
 
 import com.project.uandmeet.dto.boardDtoGroup.BoardRequestDto;
 import lombok.*;
+import org.hibernate.annotations.BatchSize;
 
 import javax.persistence.*;
 import java.util.ArrayList;
@@ -12,6 +13,7 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
+@Table(indexes = @Index(name = "idx_title_content", columnList = "title,content"))
 public class Board extends BaseTime{
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -22,6 +24,8 @@ public class Board extends BaseTime{
     private String title;
     private String content;
     private String endDateAt;
+
+    private String idx_title_content;
 
     //좋아요 수
     @Column(nullable = false)
@@ -64,13 +68,17 @@ public class Board extends BaseTime{
     @JoinColumn(name = "member_id")
     private Member member;
 
+
     @OneToMany(fetch = FetchType.LAZY,mappedBy = "board",cascade = CascadeType.ALL)
+    @BatchSize(size = 1000)
     private List<Entry> entryList = new ArrayList<>();
 
     @OneToMany(fetch = FetchType.LAZY,mappedBy = "board",cascade = CascadeType.ALL)
+    @BatchSize(size = 1000)
     private List<Liked> likeList = new ArrayList<>();
 
     @OneToMany(fetch = FetchType.LAZY,mappedBy = "board",cascade = CascadeType.ALL)
+    @BatchSize(size = 1000)
     private List<Comment> commentList = new ArrayList<>();
 
     public Board(Member member, Category category, Siarea siarea, Guarea gu, BoardRequestDto.createAndCheck boardRequestDto, String uploadImage)
