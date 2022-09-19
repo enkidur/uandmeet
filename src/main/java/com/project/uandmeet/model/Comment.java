@@ -14,6 +14,8 @@ import javax.persistence.*;
 @AllArgsConstructor
 public class Comment extends BaseTime{
 
+
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
