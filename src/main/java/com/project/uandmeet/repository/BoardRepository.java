@@ -5,7 +5,9 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.querydsl.QuerydslPredicateExecutor;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
@@ -29,6 +31,12 @@ public  interface BoardRepository extends JpaRepository<Board, Long>, QuerydslPr
     List<Board> findByBoardTypeOrderByLikeCountDesc(String boardType);
     List<Board> findByBoardTypeAndCategoryOrderByLikeCountDesc(String boardtype, Category category);
     Optional<Board> findByBoardTypeAndId(String boardType, Long boardId);
+
+    @Query(value = "select p from Board p where p.boardType = 'matching' and (p.title like %:keyword% or p.content like %:keyword% )")
+    Page<Board> findAllByMatchingKeywordSearch(@Param("keyword") String keyword, Pageable pageable);
+
+    @Query(value = "select p from Board p where p.boardType = 'information' and (p.title like %:keyword% or p.content like %:keyword% )")
+    Page<Board> findAllByInformationKeywordSearch(@Param("keyword") String keyword, Pageable pageable);
 
 
 

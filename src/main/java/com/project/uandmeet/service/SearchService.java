@@ -123,46 +123,59 @@ public class SearchService {
 
             Pageable pageable = PageRequest.of(page, size, Sort.by("id").descending());
 
-            QBoard qBoard = QBoard.board;
+//            QBoard qBoard = QBoard.board;
+//
+//            BooleanBuilder builder = new BooleanBuilder();
+//
+//            BooleanExpression exTitle = qBoard.title.contains(keyword);
+//
+//            BooleanExpression exContent = qBoard.content.contains(keyword);
+//////
+////            BooleanExpression exTc = qBoard.idx_title_content.contains(keyword);
+//
+//            BooleanExpression exType = qBoard.boardType.contains(boardType);
+//
+//            BooleanExpression exAll = exTitle.or(exContent);
+//
+//            builder.and(exAll);
+//
+//            builder.and(exType);
+//
+//            Page<Board> result = boardRepository.findAll(builder, pageable);
 
-            BooleanBuilder builder = new BooleanBuilder();
-
-            BooleanExpression exTitle = qBoard.title.contains(keyword);
-
-            BooleanExpression exContent = qBoard.content.contains(keyword);
-
-            BooleanExpression exType = qBoard.boardType.contains(boardType);
-
-            BooleanExpression exAll = exTitle.or(exContent);
-
-            builder.and(exAll);
-
-            builder.and(exType);
-
-            Page<Board> result = boardRepository.findAll(builder, pageable);
+            Page<Board> result = boardRepository.findAllByInformationKeywordSearch(keyword, pageable);
 
             List<SearchResponseDto> boardList = new ArrayList<>();
 
             result.stream().forEach(board -> {
 
+                Long id = board.getId();
+                String bt = "information";
+                Board board1 = boardRepository.findById(id).orElseThrow(() -> new NullPointerException("보드가 없습니다"));
+
+                SearchResponseDto responseDto = new SearchResponseDto(board1,bt);
+
+                boardList.add(responseDto);
+
+
                 // 정보 공유일때
-                if(board.getBoardType().equals("information")){
-
-                    Long id = board.getId();
-                    String bt = "information";
-                    Board board1 = boardRepository.findById(id).orElseThrow(() -> new NullPointerException("보드가 없습니다"));
-
-                    SearchResponseDto responseDto = new SearchResponseDto(board1,bt);
-
-                    boardList.add(responseDto);
-                }
-
-                // 매칭 게시판일때
-                else{
-
-                    matching_Service(city,gu,boardList,board);
-
-                }
+//                if(board.getBoardType().equals("information")){
+//
+//                    Long id = board.getId();
+//                    String bt = "information";
+//                    Board board1 = boardRepository.findById(id).orElseThrow(() -> new NullPointerException("보드가 없습니다"));
+//
+//                    SearchResponseDto responseDto = new SearchResponseDto(board1,bt);
+//
+//                    boardList.add(responseDto);
+//                }
+//
+//                // 매칭 게시판일때
+//                else{
+//
+//                    matching_Service(city,gu,boardList,board);
+//
+//                }
             });
 
             return boardList;
