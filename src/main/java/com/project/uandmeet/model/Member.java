@@ -1,6 +1,7 @@
 package com.project.uandmeet.model;
 
 import lombok.*;
+import net.bytebuddy.implementation.bind.annotation.Default;
 
 import javax.persistence.*;
 import java.util.ArrayList;
@@ -59,7 +60,7 @@ public class Member {
 
     @Column
     @Enumerated(value = EnumType.STRING) // Enum type을 STring 으로 변화하여 저장
-    private MemberRoleEnum role;
+    private MemberRoleEnum role = MemberRoleEnum.USER;
 
 //    @OneToMany(fetch = FetchType.LAZY)
 //    private List<Review> review;
